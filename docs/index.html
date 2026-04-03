@@ -1764,10 +1764,29 @@
             }
         }
 
+        function isUsingDefaultWeights() {
+            return (
+                Math.abs(currentWeights.economic - 0.25) < 0.01 &&
+                Math.abs(currentWeights.stability - 0.15) < 0.01 &&
+                Math.abs(currentWeights.supply - 0.15) < 0.01 &&
+                Math.abs(currentWeights.pricing - 0.15) < 0.01 &&
+                Math.abs(currentWeights.valuation - 0.20) < 0.01 &&
+                Math.abs(currentWeights.capital - 0.10) < 0.01
+            );
+        }
+
+        function getCurrentDisplayScore(msa) {
+            return isUsingDefaultWeights() ? (msa.Investment_Score || 0) : (msa.customScore || 0);
+        }
+
+        function getSortedMSAsByCurrentScore() {
+            return [...allMSAs].sort((a, b) => getCurrentDisplayScore(b) - getCurrentDisplayScore(a));
+        }
+
         function renderDistributionChart() {
-            // Sort MSAs by Investment Score (highest to lowest)
-            const sorted = [...allMSAs].sort((a, b) => (b.Investment_Score || 0) - (a.Investment_Score || 0));
-            const scores = sorted.map(m => m.Investment_Score || 0);
+            // Use current scoring mode so Overview always matches Index Scoring weights
+            const sorted = getSortedMSAsByCurrentScore();
+            const scores = sorted.map(m => getCurrentDisplayScore(m));
 
             const ctx = document.getElementById('distributionChart');
             if (currentChart) currentChart.destroy();
@@ -1807,16 +1826,17 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            // Sort MSAs by Investment Score (highest to lowest)
-            const sorted = [...allMSAs].sort((a, b) => (b.Investment_Score || 0) - (a.Investment_Score || 0));
+            // Use current scoring mode so Top 20 reflects custom weights in real-time
+            const sorted = getSortedMSAsByCurrentScore();
 
             sorted.slice(0, 20).forEach((msa, index) => {
+                const displayScore = getCurrentDisplayScore(msa);
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td><strong>${msa.msa_name}</strong></td>
                     <td>${formatNumber(msa.Total_Population)}</td>
-                    <td><strong style="color: #667eea;">${(msa.Investment_Score || 0).toFixed(2)}</strong></td>
+                    <td><strong style="color: #667eea;">${displayScore.toFixed(2)}</strong></td>
                     <td>
                         <button onclick="showMSADetail(${msa.msa_code})">View</button>
                         <button onclick="openRezoningReportForMSA(${msa.msa_code})">Rezoning Intel</button>
@@ -1889,6 +1909,7 @@
             
             calculateScores();
             renderScoringTable();
+            renderOverviewView();
         }
 
         function calculateScores() {
@@ -1917,19 +1938,9 @@
             const tbody = document.getElementById('scoringTableBody');
             tbody.innerHTML = '';
 
-            const isDefaultWeights = 
-                Math.abs(currentWeights.economic - 0.25) < 0.01 &&
-                Math.abs(currentWeights.stability - 0.15) < 0.01 &&
-                Math.abs(currentWeights.supply - 0.15) < 0.01 &&
-                Math.abs(currentWeights.pricing - 0.15) < 0.01 &&
-                Math.abs(currentWeights.valuation - 0.20) < 0.01 &&
-                Math.abs(currentWeights.capital - 0.10) < 0.01;
+            const isDefaultWeights = isUsingDefaultWeights();
 
-            const sorted = [...allMSAs].sort((a, b) => {
-                const scoreA = isDefaultWeights ? (a.Investment_Score || 0) : (a.customScore || 0);
-                const scoreB = isDefaultWeights ? (b.Investment_Score || 0) : (b.customScore || 0);
-                return scoreB - scoreA;
-            });
+            const sorted = getSortedMSAsByCurrentScore();
             
             sorted.slice(0, 10).forEach((msa, index) => {
                 const displayScore = isDefaultWeights ? (msa.Investment_Score || 0) : (msa.customScore || 0);
@@ -1962,13 +1973,7 @@
             const sortBy = document.getElementById('rawDataSort').value;
 
             // Use the same sorting as Index Scoring page (considering custom weights)
-            const isDefaultWeights = 
-                Math.abs(currentWeights.economic - 0.25) < 0.01 &&
-                Math.abs(currentWeights.stability - 0.15) < 0.01 &&
-                Math.abs(currentWeights.supply - 0.15) < 0.01 &&
-                Math.abs(currentWeights.pricing - 0.15) < 0.01 &&
-                Math.abs(currentWeights.valuation - 0.20) < 0.01 &&
-                Math.abs(currentWeights.capital - 0.10) < 0.01;
+            const isDefaultWeights = isUsingDefaultWeights();
 
             let filteredMSAs = [...allMSAs];
 
@@ -1995,9 +2000,7 @@
                 case 'score':
                 default:
                     sorted = filteredMSAs.sort((a, b) => {
-                        const scoreA = isDefaultWeights ? (a.Investment_Score || 0) : (a.customScore || 0);
-                        const scoreB = isDefaultWeights ? (b.Investment_Score || 0) : (b.customScore || 0);
-                        return scoreB - scoreA;
+                        return getCurrentDisplayScore(b) - getCurrentDisplayScore(a);
                     });
                     break;
             }
@@ -2059,13 +2062,7 @@
             const sortBy = document.getElementById('rawDataSort').value;
 
             // Use the same sorting as Index Scoring page (considering custom weights)
-            const isDefaultWeights = 
-                Math.abs(currentWeights.economic - 0.25) < 0.01 &&
-                Math.abs(currentWeights.stability - 0.15) < 0.01 &&
-                Math.abs(currentWeights.supply - 0.15) < 0.01 &&
-                Math.abs(currentWeights.pricing - 0.15) < 0.01 &&
-                Math.abs(currentWeights.valuation - 0.20) < 0.01 &&
-                Math.abs(currentWeights.capital - 0.10) < 0.01;
+            const isDefaultWeights = isUsingDefaultWeights();
 
             let filteredMSAs = [...allMSAs];
 
@@ -2092,9 +2089,7 @@
                 case 'score':
                 default:
                     sorted = filteredMSAs.sort((a, b) => {
-                        const scoreA = isDefaultWeights ? (a.Investment_Score || 0) : (a.customScore || 0);
-                        const scoreB = isDefaultWeights ? (b.Investment_Score || 0) : (b.customScore || 0);
-                        return scoreB - scoreA;
+                        return getCurrentDisplayScore(b) - getCurrentDisplayScore(a);
                     });
                     break;
             }
