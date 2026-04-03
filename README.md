@@ -4,19 +4,18 @@ This is a cleaned, upload-ready version of the original workspace.
 
 ## Structure
 
-- `app/`: Web app files (HTML/CSS/JS + sample data)
+- `docs/`: Web app files (HTML/CSS/JS + sample data) and project documentation
 - `notebooks/`: Analysis notebooks
 - `scripts/`: Python scripts for data generation and updates
 - `assets/spreadsheets/`: Supporting Excel models and assumptions
-- `docs/`: Supporting project documentation
 - `README.original.md`: Original top-level README copied from source
 
 ## Run App Locally
 
-Open `app/index.html` directly in a browser, or serve with a simple HTTP server:
+Open `docs/index.html` directly in a browser, or serve with a simple HTTP server:
 
 ```bash
-cd app
+cd docs
 python3 -m http.server 8000
 ```
 
