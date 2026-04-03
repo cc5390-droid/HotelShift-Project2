@@ -1676,6 +1676,9 @@
             allMSAs = data.msas;
             console.log('✅ Loaded ' + allMSAs.length + ' MSAs (inline)');
             loadStats(data);
+            // Precompute and render default-weight ranking so scoring panel is never empty on first load
+            calculateScores();
+            renderScoringTable();
             renderOverviewView();
             renderTop10View();
             if (typeof renderComparisonView === 'function') renderComparisonView();
