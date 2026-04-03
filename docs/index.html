@@ -1092,8 +1092,8 @@
                 </div>
             </div>
             <div class="filter-buttons">
-                <button onclick="setView('scoring')">Index Scoring</button>
-                <button class="btn-active" onclick="setView('overview')">Overview</button>
+                <button class="btn-active" onclick="setView('scoring')">Index Scoring</button>
+                <button onclick="setView('overview')">Overview</button>
                 <button onclick="setView('detailed')">Detailed Analysis</button>
                 <button onclick="setView('generator')">Rezoning Intel</button>
                 <button onclick="setView('rawdata')">Raw Data</button>
@@ -1121,7 +1121,7 @@
         </section>
 
         <!-- Overview Section -->
-        <section id="overviewView" class="view-section active">
+        <section id="overviewView" class="view-section">
             <h2>Investment Score Distribution</h2>
             <div class="chart-container">
                 <canvas id="distributionChart" height="80"></canvas>
@@ -1147,7 +1147,7 @@
         </section>
 
         <!-- Index Scoring Section -->
-        <section id="scoringView" class="view-section">
+        <section id="scoringView" class="view-section active">
             <h2>Investment Score: Interactive Weighting System</h2>
             <p class="section-subtitle">Adjust the weights below to recalculate investment scores in real-time</p>
             
@@ -1644,14 +1644,10 @@
 
         async function launchApp() {
             console.log('🚀 Starting launchApp()...');
-            
-            document.querySelectorAll('.view-section').forEach(view => {
-                view.classList.remove('active');
-            });
-            document.getElementById('overviewView').classList.add('active');
-            
+
             await loadData();
             setupEventListeners();
+            setView('scoring');
             
             console.log('✅ launchApp() complete');
         }
