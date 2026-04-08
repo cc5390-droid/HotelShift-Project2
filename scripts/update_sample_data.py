@@ -129,19 +129,19 @@ def build_payload() -> dict:
     ].unique()
     msa_features = msa_features[msa_features["msa_code"].isin(eligible_codes)].copy()
 
-    df_tax = pd.read_excel(PROJECT_ROOT / "State Property Tax Comparison_ Hotels vs. Multifamily_New.xlsx", sheet_name="Tax new")
+    df_tax = pd.read_excel(PROJECT_ROOT / "assets" / "spreadsheets" / "State Property Tax Comparison_ Hotels vs. Multifamily_New.xlsx", sheet_name="Tax new")
     df_tax["Diff_Effective_Rate"] = (
         pd.to_numeric(df_tax["Hotel Effective Rate"], errors="coerce")
         - pd.to_numeric(df_tax["Multifamily Effective Rate"], errors="coerce")
     )
 
-    df_cap = pd.read_excel(PROJECT_ROOT / "Cap Rate Arbitrage Model Update.xlsx")
+    df_cap = pd.read_excel(PROJECT_ROOT / "assets" / "spreadsheets" / "Cap Rate Arbitrage Model Update.xlsx")
     df_cap["Hotel Cap"] = pd.to_numeric(df_cap["Hotel Cap Rate"], errors="coerce")
     df_cap["Multifamily Cap"] = pd.to_numeric(df_cap["Apt Cap Rate"], errors="coerce")
-    df_cap["Cap Spread"] = df_cap["Hotel Cap"] - df_cap["Multifamily Cap"]
+
 
     df_cap_tax = pd.merge(
-        df_cap[["State Code", "State", "Hotel Cap", "Multifamily Cap", "Cap Spread"]],
+        df_cap[["State Code", "State", "Hotel Cap", "Multifamily Cap"]],
         df_tax[["State", "Hotel Effective Rate", "Multifamily Effective Rate", "Diff_Effective_Rate"]],
         on="State",
         how="left",
@@ -155,7 +155,6 @@ def build_payload() -> dict:
                 "State Code",
                 "Hotel Cap",
                 "Multifamily Cap",
-                "Cap Spread",
                 "Hotel Effective Rate",
                 "Multifamily Effective Rate",
                 "Diff_Effective_Rate",
@@ -165,7 +164,7 @@ def build_payload() -> dict:
         how="left",
     )
 
-    df_oer = pd.read_excel(PROJECT_ROOT / "State OPEX Assumptions for Housing.xlsx")
+    df_oer = pd.read_excel(PROJECT_ROOT / "assets" / "spreadsheets" / "State OPEX Assumptions for Housing.xlsx")
     df_oer = df_oer.rename(columns={"Default OPEX %": "OPEX%"})
     df_oer["State Code"] = df_oer["State Code"].astype(str)
     df_oer["OPEX%"] = pd.to_numeric(df_oer["OPEX%"], errors="coerce")
@@ -198,7 +197,6 @@ def build_payload() -> dict:
 
     # ── 3. construct Supply Pressure factors ─────────────────────────────────────
     factor_df['New_Multi_Units'] = factor_df.groupby(['msa_code'])['Total_Multi_Units'].diff().clip(lower=0)
-
 
     # ── 4. construct Pricing Power factors ─────────────────────────────────────
     factor_df['Rent_Growth'] = factor_df.groupby(['msa_code'])['Median_Gross_Rent'].pct_change()
@@ -237,6 +235,11 @@ def build_payload() -> dict:
             "Median_Gross_Rent",
             "Median_Household_Income",
             "Median_House_Value",
+            "OPEX%",
+            "Hotel Cap",
+            "Multifamily Cap",
+            "Hotel Effective Rate",
+            "Multifamily Effective Rate"
         ]
         + factor_cols
     ].dropna()
@@ -314,6 +317,15 @@ def build_payload() -> dict:
             "msa_code": int(msa_code),
             "msa_name": row["msa_name"],
             "year": latest_year,
+            "Total_Population": int(round(float(row["Total_Population"]))),
+            "Median_Rent": int(round(float(row["Median_Gross_Rent"]))),
+            "Median_Income": int(round(float(row["Median_Household_Income"]))),
+            "Median_Home_Value": int(round(float(row["Median_House_Value"]))),
+            "Operating_Expense_Ratio": float(row["OPEX%"]),
+            "Hotel_Cap_Rate": float(row["Hotel Cap"]),
+            "Multifamily_Cap_Rate": float(row["Multifamily Cap"]),
+            "Hotel_Effective_Tax_Rate": float(row["Hotel Effective Rate"]),
+            "Multifamily_Effective_Tax_Rate": float(row["Multifamily Effective Rate"]),
             "Employment_Rate": float(row["Employment_Rate"]),
             "Employment_Growth": float(row["Employment_Growth"]),
             "Pop_Growth": float(row["Pop_Growth"]),
@@ -332,11 +344,8 @@ def build_payload() -> dict:
             "Pricing_Index": float(row["Pricing_Index"]),
             "Valuation_Index": float(row["Valuation_Index"]),
             "Capital_Index": float(row["Capital_Index"]),
-            "Investment_Score": float(row["Investment_Score"]),
-            "Total_Population": int(round(float(row["Total_Population"]))),
-            "Median_Rent": int(round(float(row["Median_Gross_Rent"]))),
-            "Median_Income": int(round(float(row["Median_Household_Income"]))),
-            "Median_Home_Value": int(round(float(row["Median_House_Value"]))),
+            "Investment_Score": float(row["Investment_Score"])
+            
         }
 
         for key, value in list(record.items()):
