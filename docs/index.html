@@ -8,6 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
     
     <style>
         /* =====================
@@ -21,9 +24,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background: #1a1a1a;
-            color: #e0e0e0;
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(212, 175, 55, 0.13), transparent 36%),
+                radial-gradient(circle at 90% 100%, rgba(50, 181, 118, 0.12), transparent 32%),
+                #121416;
+            color: #e8edf2;
             line-height: 1.5;
             min-height: 100vh;
         }
@@ -39,13 +45,14 @@
            ===================== */
 
         .header {
-            background: #2a2a2a;
+            background: linear-gradient(145deg, #1a1d21, #161a1e);
             padding: 35px 40px;
             border-radius: 0;
             margin-bottom: 40px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
             text-align: left;
             border-bottom: 2px solid #D4AF37;
+            border: 1px solid #38414a;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -56,11 +63,12 @@
         }
 
         .header h1 {
+            font-family: 'Noto Serif TC', 'Noto Sans TC', serif;
             font-size: 2.2em;
-            font-weight: 600;
+            font-weight: 700;
             color: #FFD700;
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0.01em;
         }
 
         .header p {
@@ -74,7 +82,7 @@
            ===================== */
 
         .controls {
-            background: #2a2a2a;
+            background: #20252b;
             padding: 20px 40px;
             border-radius: 0;
             margin-bottom: 40px;
@@ -84,6 +92,7 @@
             gap: 20px;
             align-items: center;
             border-left: none;
+            border: 1px solid #38414a;
         }
 
         .search-box {
@@ -96,7 +105,7 @@
         }
 
         .search-note {
-            color: #b0b0b0;
+            color: #96a2af;
             font-size: 0.8em;
             line-height: 1.4;
         }
@@ -110,24 +119,24 @@
         .search-box input {
             flex: 1;
             padding: 10px 14px;
-            border: 1px solid #444;
+            border: 1px solid #38414a;
             border-radius: 0;
             font-size: 0.95em;
-            background: #333333;
-            color: #e0e0e0;
+            background: #1b1f23;
+            color: #e8edf2;
             transition: all 0.2s;
             position: relative;
             z-index: 10;
         }
 
         .search-box input::placeholder {
-            color: #666;
+            color: #8893a0;
         }
 
         .search-box input:focus {
             outline: none;
             border-color: #D4AF37;
-            background: #3a3a3a;
+            background: #20252b;
         }
 
         .suggestions-list {
@@ -135,8 +144,8 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: #333333;
-            border: 1px solid #444;
+            background: #1b1f23;
+            border: 1px solid #38414a;
             border-top: none;
             list-style: none;
             margin: 0;
@@ -149,9 +158,9 @@
 
         .suggestions-list li {
             padding: 10px 14px;
-            color: #e0e0e0;
+            color: #e8edf2;
             cursor: pointer;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #38414a;
             transition: background-color 0.15s;
             font-size: 0.9em;
         }
@@ -161,7 +170,7 @@
         }
 
         .suggestions-list li:hover {
-            background-color: #444;
+            background-color: #20252b;
             color: #D4AF37;
             font-weight: 500;
         }
@@ -169,19 +178,19 @@
         .search-box button,
         .filter-buttons button {
             padding: 10px 16px;
-            background: #D4AF37;
-            color: #ffffff;
-            border: none;
+            background: linear-gradient(180deg, #d8b541, #b99628);
+            color: #1f1a08;
+            border: 1px solid #8e7630;
             border-radius: 0;
             cursor: pointer;
             font-size: 0.95em;
-            font-weight: 500;
+            font-weight: 700;
             transition: all 0.2s;
         }
 
         .search-box button:hover,
         .filter-buttons button:hover {
-            background: #FFD700;
+            background: linear-gradient(180deg, #e4c357, #c29e2e);
             transform: none;
             box-shadow: none;
         }
@@ -198,7 +207,7 @@
         }
 
         .filter-buttons button.btn-active {
-            background: #FFD700;
+            background: linear-gradient(180deg, #f0cd65, #c7a233);
             color: #1a1a1a;
         }
 
@@ -214,12 +223,15 @@
         }
 
         .stat-card {
-            background: #2a2a2a;
+            background: #20252b;
             padding: 20px;
             border-radius: 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
             text-align: left;
             border-left: 3px solid #D4AF37;
+            border-top: 1px solid #38414a;
+            border-right: 1px solid #38414a;
+            border-bottom: 1px solid #38414a;
             transition: box-shadow 0.2s;
         }
 
@@ -249,7 +261,7 @@
            ===================== */
 
         .view-section {
-            background: #2a2a2a;
+            background: #20252b;
             padding: 35px;
             border-radius: 0;
             margin-bottom: 40px;
@@ -257,6 +269,9 @@
             display: none;
             border-left: none;
             border-bottom: 2px solid #D4AF37;
+            border-top: 1px solid #38414a;
+            border-right: 1px solid #38414a;
+            border-left: 1px solid #38414a;
         }
 
         .view-section.active {
@@ -264,17 +279,18 @@
         }
 
         .view-section h2 {
+            font-family: 'Noto Serif TC', 'Noto Sans TC', serif;
             color: #FFD700;
             margin-bottom: 25px;
             font-size: 1.6em;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #38414a;
             padding-bottom: 15px;
             text-shadow: none;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .section-subtitle {
-            color: #b0b0b0;
+            color: #96a2af;
             font-size: 0.95em;
             margin-bottom: 25px;
             font-style: normal;
@@ -289,10 +305,10 @@
             position: relative;
             height: 400px;
             margin-bottom: 30px;
-            background: #333333;
+            background: #1b1f23;
             padding: 20px;
             border-radius: 0;
-            border: 1px solid #444;
+            border: 1px solid #38414a;
         }
 
         .usa-heatmap-container {
