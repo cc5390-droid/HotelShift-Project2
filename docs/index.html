@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
@@ -1073,6 +1074,17 @@
         .rzi-show { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: .68rem; font-weight: 600; color: #D4AF37; cursor: pointer; background: none; border: none; padding: 3px 6px; }
         .rzi-hint { font-size: .68rem; color: #666; margin-top: 4px; line-height: 1.5; }
         .rzi-hint a { color: #D4AF37; text-decoration: none; }
+        .rzi-model-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; }
+        @media(max-width:900px){ .rzi-model-grid { grid-template-columns:1fr; } }
+        .rzi-model-card { border:1px solid #444; background:#303030; padding:12px; cursor:pointer; transition:all .16s; }
+        .rzi-model-card:hover { border-color:#666; background:#363636; }
+        .rzi-model-card.active { border-color:#D4AF37; box-shadow: inset 0 0 0 1px rgba(212,175,55,.35); }
+        .rzi-model-chip { display:inline-block; font-size:.55rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px; border:1px solid #444; color:#888; margin-bottom:6px; }
+        .rzi-model-name { font-size:1.8rem; font-weight:700; color:#f0f0f0; line-height:1; margin-bottom:3px; }
+        .rzi-model-sub { font-size:.78rem; font-weight:700; color:#e0e0e0; margin-bottom:4px; }
+        .rzi-model-desc { font-size:.72rem; color:#777; line-height:1.45; }
+        .rzi-model-card.active .rzi-model-chip { border-color:#D4AF37; color:#D4AF37; }
+        .rzi-model-card.active .rzi-model-name { color:#FFD700; }
 
         /* Search + MSA list */
         .rzi-search-row { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -1228,8 +1240,18 @@
         .rzi-news-src  { font-size:.61rem;color:#555;margin-top:3px; }
         .rzi-news-src::before { content:'↳ '; }
         .rzi-ai-note { background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.18);padding:9px 12px;font-size:.71rem;color:#888;line-height:1.6;margin-top:10px; }
-        .rzi-reset-btn { margin:18px auto;display:block;padding:8px 20px;background:transparent;color:#D4AF37;border:1px solid #D4AF37;font-size:.78rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .18s; }
+        .rzi-rent-status { margin-top:12px; }
+        .rzi-rent-badge { display:inline-block; padding:6px 12px; border:1px solid rgba(244,63,94,.28); background:rgba(244,63,94,.14); color:#fb7185; font-size:.6rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+        .rzi-rent-badge.exempt { border-color: rgba(52,211,153,.28); background: rgba(52,211,153,.14); color:#34d399; }
+        .rzi-rent-title { margin-top:10px; margin-bottom:4px; font-size:1.05rem; color:#e0e0e0; font-weight:700; }
+        .rzi-rent-coverage { color:#8d8d8d; font-size:.74rem; line-height:1.6; margin-bottom:10px; }
+        .rzi-rent-detail { color:#c0c0c0; font-size:.78rem; line-height:1.75; margin-bottom:12px; }
+        .rzi-rent-impact { background:rgba(212,175,55,.1); border-left:3px solid #D4AF37; padding:10px 12px; font-size:.78rem; color:#b7b7b7; line-height:1.65; }
+        .rzi-report-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        .rzi-reset-btn { margin:0;display:block;padding:8px 20px;background:transparent;color:#D4AF37;border:1px solid #D4AF37;font-size:.78rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .18s; }
         .rzi-reset-btn:hover { background:rgba(212,175,55,.1); }
+        .rzi-download-btn { padding:8px 20px;background:#D4AF37;color:#1a1a1a;border:1px solid #D4AF37;font-size:.78rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .18s; }
+        .rzi-download-btn:hover { background:#FFD700;border-color:#FFD700; }
     </style>
 </head>
 <body>
@@ -1715,7 +1737,30 @@
                         <input type="password" class="rzi-input" id="rzi-api" placeholder="AIza••••••••••••••••••••••••••••••••••••">
                         <button class="rzi-show" onclick="rziToggleApi()">Show</button>
                       </div>
-                      <p class="rzi-hint">Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Create API Key. Uses <strong>gemini-2.5-flash</strong>.</p>
+                                            <p class="rzi-hint">Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Create API Key. One key works for all models below.</p>
+                                        </div>
+                                        <div class="rzi-field">
+                                            <label class="rzi-label">Select Model</label>
+                                            <div class="rzi-model-grid" id="rzi-model-grid">
+                                                <div class="rzi-model-card active" data-model="family-2.5" onclick="rziSelectModel('family-2.5')">
+                                                    <div class="rzi-model-chip" style="color:#34d399;border-color:rgba(52,211,153,.4)">Recommended</div>
+                                                    <div class="rzi-model-name">2.5</div>
+                                                    <div class="rzi-model-sub">Stable</div>
+                                                    <div class="rzi-model-desc">Fast and reliable. Best for most reports.</div>
+                                                </div>
+                                                <div class="rzi-model-card" data-model="family-3" onclick="rziSelectModel('family-3')">
+                                                    <div class="rzi-model-chip" style="color:#fbbf24;border-color:rgba(251,191,36,.4)">Newer</div>
+                                                    <div class="rzi-model-name">3</div>
+                                                    <div class="rzi-model-sub">Balanced</div>
+                                                    <div class="rzi-model-desc">Higher quality than 2.5 but may be slower.</div>
+                                                </div>
+                                                <div class="rzi-model-card" data-model="family-3.1" onclick="rziSelectModel('family-3.1')">
+                                                    <div class="rzi-model-chip" style="color:#c4b5fd;border-color:rgba(196,181,253,.4)">Most Powerful</div>
+                                                    <div class="rzi-model-name">3.1</div>
+                                                    <div class="rzi-model-sub">Advanced</div>
+                                                    <div class="rzi-model-desc">Strongest reasoning, and usually the slowest.</div>
+                                                </div>
+                                            </div>
                     </div>
                     <div class="rzi-field" style="margin-bottom:0">
                       <label class="rzi-label" for="rzi-focus">Report Focus / Topic</label>
@@ -1838,7 +1883,10 @@
                 </div>
                 <div class="rzi-city-panel" id="rzi-city-panel"></div>
               </div>
-              <button class="rzi-reset-btn" onclick="rziReset()">← New Report</button>
+                            <div class="rzi-report-actions">
+                                <button class="rzi-reset-btn" onclick="rziReset()">← New Report</button>
+                                <button class="rzi-download-btn" onclick="rziDownloadPdf()">⬇ Download PDF</button>
+                            </div>
             </div>
           </div>
 
@@ -3134,6 +3182,7 @@
         let RZI_CITIES    = [];
         let RZI_selected  = new Set();
         let RZI_sorted    = [];
+        let RZI_model     = 'family-2.5';
 
         // ── Build MSA list (called each time ReZone Intel tab opens) ──
         function rziBuildList() {
@@ -3224,6 +3273,13 @@
             btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
         }
 
+        function rziSelectModel(modelName) {
+            RZI_model = modelName;
+            document.querySelectorAll('#rzi-model-grid .rzi-model-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.model === modelName);
+            });
+        }
+
         function rziShowErr(msg) {
             const e = document.getElementById('rzi-error');
             if (e) { e.textContent = '⚠ ' + msg; e.style.display = 'block'; }
@@ -3235,6 +3291,47 @@
             document.getElementById('rzi-setup').style.display   = 'block';
             document.getElementById('rzi-gen-btn').disabled = false;
             RZI_CITIES = [];
+        }
+
+        async function rziDownloadPdf() {
+            const reportEl = document.getElementById('rzi-report');
+            if (!reportEl || reportEl.style.display === 'none') {
+                rziShowErr('Please generate a report before downloading PDF.');
+                return;
+            }
+
+            if (typeof window.html2pdf === 'undefined') {
+                rziShowErr('PDF tool failed to load. Please refresh and try again.');
+                return;
+            }
+
+            const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+            const fileName = 'rezone-intel-report-' + ts + '.pdf';
+
+            const downloadBtn = document.querySelector('.rzi-download-btn');
+            const oldText = downloadBtn ? downloadBtn.textContent : '';
+            if (downloadBtn) {
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = 'Generating PDF...';
+            }
+
+            try {
+                await window.html2pdf().set({
+                    margin: 8,
+                    filename: fileName,
+                    pagebreak: { mode: ['css', 'legacy'] },
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#121416' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                }).from(reportEl).save();
+            } catch (err) {
+                rziShowErr('Failed to export PDF: ' + (err?.message || 'unknown error'));
+            } finally {
+                if (downloadBtn) {
+                    downloadBtn.disabled = false;
+                    downloadBtn.textContent = oldText || '⬇ Download PDF';
+                }
+            }
         }
 
         // ── Start generation ──
@@ -3309,23 +3406,47 @@
         async function rziCallGemini(apiKey, cities, tick) {
             const focus = (document.getElementById('rzi-focus').value || '').trim() || 'hotel-to-apartment conversion potential';
             const scOpts = '"cg" (green=booming), "cb" (blue=active), "co" (orange=surging), "cr" (red=emerging), "cp" (purple=building)';
-            const prompt = `You are a commercial real estate intelligence analyst. Generate a detailed ${focus} report for: ${cities.join(', ')}.
+                        const prompt = `You are a commercial real estate intelligence analyst. Generate a detailed ${focus} report for: ${cities.join(', ')}.
 
 Return ONLY valid JSON — no markdown, no explanation:
 
-{"cities":[{"name":"Full City Name, ST","state":"ST","region":"Northeast|South|Midwest|West|Mid-Atlantic|West Coast|Southwest","pipeline":"X,XXX+","pipeNum":5200,"vacancy":"XX.X%","yoy":"+XX% or Growing","statusLabel":"Booming|Active|Surging|Building|Emerging","sc":${scOpts},"color":"#hexcolor","catalyst":"2-3 sentence description.","profile":"2-3 sentence description.","stats":[{"val":"X,XXX","lbl":"Pipeline Units","color":"#hex"},{"val":"XX%","lbl":"Office Vacancy","color":"#f87171"},{"val":"$XXM","lbl":"Notable Incentive","color":"#fbbf24"},{"val":"XX","lbl":"Active Projects","color":"#60a5fa"}],"projects":[{"name":"Building Name","addr":"Address, City","units":"XXX","invest":"$XXM or N/A","program":"Financing program","status":"Under Construction|Completed|Approved|Planned","sc":"cg|cb|co|cr|cp"}],"timeline":[{"date":"Month Year","title":"Policy Name","desc":"1-2 sentence description."}],"finance":[{"amount":"Dollar or term","label":"Program Name","desc":"2-3 sentence description.","color":"#hex"}],"news":[{"type":"Policy|Deal|Pipeline|Finance|Reform|Market|Milestone|Risk","cls":"cg|cb|co|cr|cp|ci","text":"1-2 sentences.","src":"Source, Date"}]}]}
+{"cities":[{"name":"Full City Name, ST","state":"ST","region":"Northeast|South|Midwest|West|Mid-Atlantic|West Coast|Southwest","pipeline":"X,XXX+","pipeNum":5200,"vacancy":"XX.X%","yoy":"+XX% or Growing","statusLabel":"Booming|Active|Surging|Building|Emerging","sc":${scOpts},"color":"#hexcolor","catalyst":"2-3 sentence description.","profile":"2-3 sentence description.","stats":[{"val":"X,XXX","lbl":"Pipeline Units","color":"#hex"},{"val":"XX%","lbl":"Office Vacancy","color":"#f87171"},{"val":"$XXM","lbl":"Notable Incentive","color":"#fbbf24"},{"val":"XX","lbl":"Active Projects","color":"#60a5fa"}],"projects":[{"name":"Building Name","addr":"Address, City","units":"XXX","invest":"$XXM or N/A","program":"Financing program","status":"Under Construction|Completed|Approved|Planned","sc":"cg|cb|co|cr|cp"}],"timeline":[{"date":"Month Year","title":"Policy Name","desc":"1-2 sentence description."}],"finance":[{"amount":"Dollar or term","label":"Program Name","desc":"2-3 sentence description.","color":"#hex"}],"news":[{"type":"Policy|Deal|Pipeline|Finance|Reform|Market|Milestone|Risk","cls":"cg|cb|co|cr|cp|ci","text":"1-2 sentences.","src":"Source, Date"}],"rentControl":{"status":"ACTIVE|EXEMPT|LIMITED","title":"Policy name","coverage":"1 sentence coverage summary.","details":"2-3 sentence explanation of rent control mechanics and exemptions.","impact":"1-2 sentence hotel-to-apartment conversion impact."}}]}
 
-Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per city. Use real names and figures. Unique hex per city. Return ONLY JSON.`;
+Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per city. Include rentControl for every city. Use real names and figures. Unique hex per city. Return ONLY JSON.`;
 
-            const res = await fetch(
-                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey,
-                { method:'POST', headers:{'Content-Type':'application/json'},
-                  body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.6,maxOutputTokens:65536} }) }
-            );
+            const payload = { contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.6,maxOutputTokens:65536} };
+            const modelFamilies = {
+                'family-2.5': ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
+                'family-3': ['gemini-3.0-flash', 'gemini-3-flash', 'gemini-3.0-pro', 'gemini-3-pro'],
+                'family-3.1': ['gemini-3.1-pro', 'gemini-3.1-flash', 'gemini-3-1-pro', 'gemini-3-1-flash']
+            };
+            const selected = RZI_model || 'family-2.5';
+            const requestedModels = modelFamilies[selected] || [selected, 'gemini-2.5-flash'];
+            const modelsToTry = [...new Set([...requestedModels, 'gemini-2.5-flash'])];
+
+            let res = null;
+            let lastStatus = 0;
+            const attemptedModels = [];
+
+            for (const modelName of modelsToTry) {
+                attemptedModels.push(modelName);
+                res = await fetch(
+                    'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(modelName) + ':generateContent?key=' + apiKey,
+                    { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }
+                );
+
+                if (res.ok) break;
+                lastStatus = res.status;
+
+                if (lastStatus !== 400 && lastStatus !== 404) {
+                    break;
+                }
+            }
             clearInterval(tick);
             if (!res.ok) {
                 const e = await res.json().catch(() => ({}));
-                throw new Error(e?.error?.message || 'HTTP ' + res.status);
+                const detail = e?.error?.message || ('HTTP ' + (res?.status || lastStatus));
+                throw new Error(detail + ' (Tried models: ' + attemptedModels.join(', ') + ')');
             }
             const data = await res.json();
             const raw  = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -3434,6 +3555,14 @@ Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per c
                 '<div><div class="rzi-news-body">' + (n.text||'') + '</div><div class="rzi-news-src">' + (n.src||'') + '</div></div></div>'
             ).join('');
 
+            const rent = c.rentControl || {};
+            const rentStatus = String(rent.status || 'LIMITED').toUpperCase();
+            const rentClass = rentStatus === 'EXEMPT' ? 'exempt' : '';
+            const rentTitle = rent.title || (c.name ? (c.name.split(',')[0] + ' Rent Regulation Framework') : 'Rent Regulation Framework');
+            const rentCoverage = rent.coverage || 'Coverage varies by property type, building age, and local ordinance carve-outs.';
+            const rentDetails = rent.details || 'Local rent regulation may cap annual rent adjustments for covered units while exempting newer construction or smaller owner-occupied buildings. Always verify ordinance language and update frequency before underwriting.';
+            const rentImpact = rent.impact || 'Hotel-to-apartment pro-forma assumptions can compress under stricter caps. Validate exemptions and stabilization timelines before acquisition.';
+
             document.getElementById('rzi-city-panel').innerHTML =
                 '<div class="rzi-city-hdr">' +
                 '<div class="rzi-ch-rank">Rank #' + (idx+1) + ' of ' + RZI_CITIES.length + ' · ' + (c.state||'') + ' · ' + (c.region||'') + '</div>' +
@@ -3473,6 +3602,14 @@ Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per c
                 '<div class="rzi-ct" style="margin-bottom:8px">News, Policy & Deal Events</div>' +
                 '<div class="rzi-news-list">' + (news||'<div style="color:#666;font-size:.78rem">No items.</div>') + '</div>' +
                 '<div class="rzi-ai-note">⚡ Generated by Gemini AI. Sources are suggested references — verify independently before investment decisions.</div>' +
+                '<div class="rzi-rent-status">' +
+                '<span class="rzi-ey">Rent Control Status</span>' +
+                '<div class="rzi-rent-badge ' + rentClass + '">' + rentStatus + '</div>' +
+                '<div class="rzi-rent-title">' + rentTitle + '</div>' +
+                '<div class="rzi-rent-coverage"><strong style="color:#a8a8a8">Coverage:</strong> ' + rentCoverage + '</div>' +
+                '<div class="rzi-rent-detail">' + rentDetails + '</div>' +
+                '<div class="rzi-rent-impact"><strong style="color:#D4AF37">Hotel-to-Apartment Impact:</strong> ' + rentImpact + '</div>' +
+                '</div>' +
                 '</div>';
         }
 
