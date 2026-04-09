@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3293,20 +3294,196 @@
             RZI_CITIES = [];
         }
 
+        function rziPdfSafeText(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function rziPdfTrim(value, maxLen = 220) {
+            const text = String(value ?? '').replace(/\s+/g, ' ').trim();
+            if (text.length <= maxLen) return text;
+            return text.slice(0, Math.max(0, maxLen - 3)).trim() + '...';
+        }
+
+        function rziBuildFormalPdfWithJsPdf() {
+            const JsPdfCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+            if (!JsPdfCtor) {
+                throw new Error('jsPDF is unavailable in this browser session.');
+            }
+
+            const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 12;
+            const right = pageWidth - margin;
+            const nowText = new Date().toLocaleString();
+
+            const line = (text, x, y, opts = {}) => {
+                const size = opts.size || 10;
+                const style = opts.style || 'normal';
+                const color = opts.color || [20, 20, 20];
+                doc.setFont('helvetica', style);
+                doc.setFontSize(size);
+                doc.setTextColor(color[0], color[1], color[2]);
+                const payload = Array.isArray(text) ? text : String(text);
+                doc.text(payload, x, y, { align: opts.align || 'left', lineHeightFactor: 1.35 });
+            };
+
+            const block = (label, value, x, y, width, labelSize = 9, bodySize = 9) => {
+                line(label, x, y, { size: labelSize, style: 'bold', color: [55, 55, 55] });
+                const textLines = doc.splitTextToSize(rziPdfTrim(value, 320), width);
+                line(textLines, x, y + 4.5, { size: bodySize, style: 'normal', color: [20, 20, 20] });
+                return y + 4.5 + (textLines.length * 3.8);
+            };
+
+            RZI_CITIES.forEach((c, idx) => {
+                if (idx > 0) doc.addPage();
+
+                const projects = (Array.isArray(c.projects) ? c.projects : []).slice(0, 4);
+                const timeline = (Array.isArray(c.timeline) ? c.timeline : []).slice(0, 4);
+                const finance = (Array.isArray(c.finance) ? c.finance : []).slice(0, 3);
+                const news = (Array.isArray(c.news) ? c.news : []).slice(0, 4);
+                const rent = c.rentControl || {};
+
+                doc.setDrawColor(30, 30, 30);
+                doc.setLineWidth(0.5);
+                doc.line(margin, 18, right, 18);
+
+                line('ReZone Intelligence Report', margin, 12, { size: 9, style: 'normal', color: [90, 90, 90] });
+                line('City ' + (idx + 1) + ' of ' + RZI_CITIES.length, right, 12, { size: 9, align: 'right', color: [90, 90, 90] });
+                line(nowText, right, 16, { size: 8, align: 'right', color: [120, 120, 120] });
+
+                line(c.name || 'City', margin, 25, { size: 17, style: 'bold', color: [15, 15, 15] });
+                line((c.region || '') + (c.state ? ' | ' + c.state : ''), margin, 30, { size: 9, color: [100, 100, 100] });
+
+                doc.setDrawColor(190, 190, 190);
+                const kpiY = 35;
+                const kpiW = (right - margin - 6) / 4;
+                const kpiH = 14;
+                const kpis = [
+                    { k: 'Status', v: c.statusLabel || 'N/A' },
+                    { k: 'Pipeline', v: c.pipeline || 'N/A' },
+                    { k: 'Vacancy', v: c.vacancy || 'N/A' },
+                    { k: 'YoY', v: c.yoy || 'N/A' }
+                ];
+                kpis.forEach((item, i) => {
+                    const x = margin + i * (kpiW + 2);
+                    doc.rect(x, kpiY, kpiW, kpiH);
+                    line(item.k, x + 2, kpiY + 4, { size: 8, color: [95, 95, 95] });
+                    line(item.v, x + 2, kpiY + 9.5, { size: 10, style: 'bold' });
+                });
+
+                let y = 54;
+                y = block('Primary Catalyst', c.catalyst || 'N/A', margin, y, right - margin);
+                y += 1.5;
+                y = block('Building Stock Profile', c.profile || 'N/A', margin, y, right - margin);
+                y += 2;
+
+                line('Active & Pipeline Projects', margin, y, { size: 10, style: 'bold' });
+                y += 3.5;
+                if (projects.length) {
+                    projects.forEach((p, i) => {
+                        const pText = (i + 1) + '. ' + (p.name || 'Project') + ' | Units: ' + (p.units || 'N/A') + ' | Investment: ' + (p.invest || 'N/A') + ' | Status: ' + (p.status || 'N/A');
+                        const pAddr = '   ' + (p.addr || '');
+                        const pl1 = doc.splitTextToSize(rziPdfTrim(pText, 190), right - margin);
+                        const pl2 = doc.splitTextToSize(rziPdfTrim(pAddr, 190), right - margin);
+                        line(pl1, margin, y, { size: 8.7 });
+                        y += pl1.length * 3.6;
+                        line(pl2, margin, y, { size: 8, color: [90, 90, 90] });
+                        y += pl2.length * 3.4 + 1;
+                    });
+                } else {
+                    line('No project data.', margin, y, { size: 8.5, color: [110, 110, 110] });
+                    y += 5;
+                }
+
+                const colGap = 8;
+                const colW = (right - margin - colGap) / 2;
+                let leftY = Math.max(y, 110);
+                let rightY = leftY;
+
+                line('Policy Timeline', margin, leftY, { size: 10, style: 'bold' });
+                leftY += 4;
+                if (timeline.length) {
+                    timeline.forEach((t, i) => {
+                        const row = (i + 1) + '. ' + (t.date || 'N/A') + ' - ' + (t.title || 'Event') + ': ' + (t.desc || 'N/A');
+                        const lines = doc.splitTextToSize(rziPdfTrim(row, 145), colW);
+                        line(lines, margin, leftY, { size: 8.2 });
+                        leftY += lines.length * 3.2 + 0.7;
+                    });
+                } else {
+                    line('No timeline data.', margin, leftY, { size: 8.3, color: [110, 110, 110] });
+                    leftY += 4;
+                }
+
+                line('Financial Mechanisms', margin, leftY + 1.5, { size: 10, style: 'bold' });
+                leftY += 5.5;
+                if (finance.length) {
+                    finance.forEach((f, i) => {
+                        const row = (i + 1) + '. ' + (f.amount || '') + ' ' + (f.label || '') + ': ' + (f.desc || 'N/A');
+                        const lines = doc.splitTextToSize(rziPdfTrim(row, 145), colW);
+                        line(lines, margin, leftY, { size: 8.2 });
+                        leftY += lines.length * 3.2 + 0.7;
+                    });
+                } else {
+                    line('No finance data.', margin, leftY, { size: 8.3, color: [110, 110, 110] });
+                    leftY += 4;
+                }
+
+                const rightX = margin + colW + colGap;
+                line('Intelligence Feed', rightX, rightY, { size: 10, style: 'bold' });
+                rightY += 4;
+                if (news.length) {
+                    news.forEach((n, i) => {
+                        const row = (i + 1) + '. ' + (n.type || 'Update') + ': ' + (n.text || '') + (n.src ? ' (' + n.src + ')' : '');
+                        const lines = doc.splitTextToSize(rziPdfTrim(row, 160), colW);
+                        line(lines, rightX, rightY, { size: 8.2 });
+                        rightY += lines.length * 3.2 + 0.7;
+                    });
+                } else {
+                    line('No intelligence items.', rightX, rightY, { size: 8.3, color: [110, 110, 110] });
+                    rightY += 4;
+                }
+
+                rightY += 1.5;
+                line('Rent Control Status', rightX, rightY, { size: 10, style: 'bold' });
+                rightY += 4;
+                const rentRows = [
+                    'Status: ' + (rent.status || 'LIMITED'),
+                    'Policy: ' + (rent.title || 'Rent Regulation Framework'),
+                    'Coverage: ' + (rent.coverage || 'Coverage varies by property type and ordinance.'),
+                    'Details: ' + (rent.details || 'No additional details provided.'),
+                    'Impact: ' + (rent.impact || 'Evaluate local exemptions before underwriting.')
+                ];
+                rentRows.forEach(r => {
+                    const lines = doc.splitTextToSize(rziPdfTrim(r, 160), colW);
+                    line(lines, rightX, rightY, { size: 8.2 });
+                    rightY += lines.length * 3.2 + 0.6;
+                });
+
+                const footY = pageHeight - 8;
+                doc.setDrawColor(220, 220, 220);
+                doc.line(margin, footY - 3, right, footY - 3);
+                line('Generated by Gemini AI. Validate figures, regulations, and references before investment decisions.', margin, footY, { size: 7.5, color: [120, 120, 120] });
+            });
+
+            return doc;
+        }
+
         async function rziDownloadPdf() {
-            const reportEl = document.getElementById('rzi-report');
-            if (!reportEl || reportEl.style.display === 'none') {
+            if (!Array.isArray(RZI_CITIES) || !RZI_CITIES.length) {
                 rziShowErr('Please generate a report before downloading PDF.');
                 return;
             }
 
-            if (typeof window.html2pdf === 'undefined') {
+            if (!((window.jspdf && window.jspdf.jsPDF) || window.jsPDF)) {
                 rziShowErr('PDF tool failed to load. Please refresh and try again.');
                 return;
             }
-
-            const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-            const fileName = 'rezone-intel-report-' + ts + '.pdf';
 
             const downloadBtn = document.querySelector('.rzi-download-btn');
             const oldText = downloadBtn ? downloadBtn.textContent : '';
@@ -3316,16 +3493,14 @@
             }
 
             try {
-                await window.html2pdf().set({
-                    margin: 8,
-                    filename: fileName,
-                    pagebreak: { mode: ['css', 'legacy'] },
-                    image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#121416' },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                }).from(reportEl).save();
+                const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+                const doc = rziBuildFormalPdfWithJsPdf();
+                doc.save('rezone-intel-report-' + ts + '.pdf');
             } catch (err) {
-                rziShowErr('Failed to export PDF: ' + (err?.message || 'unknown error'));
+                const msg = 'Failed to export PDF: ' + (err?.message || 'unknown error');
+                console.error('[RZI PDF]', err);
+                rziShowErr(msg);
+                window.alert(msg);
             } finally {
                 if (downloadBtn) {
                     downloadBtn.disabled = false;
