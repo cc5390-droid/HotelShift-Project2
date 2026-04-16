@@ -26,6 +26,61 @@ VARIABLES_ACS1 = {
     "20_or_more_units": "DP04_0013E",
 }
 
+US_STATE_NAME_TO_ABBR = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "District of Columbia": "DC",
+    "D.C.": "DC",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+}
+
 
 def base_url(year: int, code: str) -> str:
     if code.startswith("S"):
@@ -98,9 +153,37 @@ def load_existing_hers_map() -> dict[str, int]:
     with open(existing_file, "r", encoding="utf-8") as file:
         current = json.load(file)
 
+    hers_map: dict[str, int] = {}
+    for msa in current.get("msas", []):
+        msa_code = str(msa.get("msa_code", "")).strip()
+        if not msa_code:
+            continue
+
+        hers_value = msa.get("Average_HERS_Index_Score", msa.get("Average HERS Index Score", 0))
+        try:
+            hers_map[msa_code] = int(round(float(hers_value)))
+        except (TypeError, ValueError):
+            hers_map[msa_code] = 0
+
+    return hers_map
+
+
+def load_hers_state_map_for_year(year: int) -> dict[str, int]:
+    hers_file = PROJECT_ROOT / "assets" / "spreadsheets" / f"{year}-HERS-Activity-by-State.xlsx"
+    if not hers_file.exists():
+        print(f"WARN: HERS file not found for {year}: {hers_file}")
+        return {}
+
+    hers_df = pd.read_excel(hers_file, skiprows=1, usecols=[0, 2])
+    hers_df = hers_df.rename(columns={"Average HERS Index Score": "Average_HERS_Index_Score"})
+    hers_df["State"] = hers_df["State"].astype(str).str.strip()
+    hers_df["State Code"] = hers_df["State"].map(US_STATE_NAME_TO_ABBR)
+    hers_df["Average_HERS_Index_Score"] = pd.to_numeric(hers_df["Average_HERS_Index_Score"], errors="coerce")
+    hers_df = hers_df.dropna(subset=["State Code", "Average_HERS_Index_Score"]) 
+
     return {
-        str(msa["msa_code"]): int(round(float(msa.get("Average HERS Index Score", 0))))
-        for msa in current.get("msas", [])
+        str(row["State Code"]): int(round(float(row["Average_HERS_Index_Score"])))
+        for _, row in hers_df.iterrows()
     }
 
 
@@ -121,6 +204,8 @@ def build_payload() -> dict:
     )
 
     latest_year = int(msa_features["year"].max())
+    hers_by_state = load_hers_state_map_for_year(latest_year)
+
     eligible_codes = msa_features.loc[
         (msa_features["year"] == latest_year)
         & (msa_features["Total_Population"] >= 300000)
@@ -134,27 +219,30 @@ def build_payload() -> dict:
         pd.to_numeric(df_tax["Hotel Effective Rate"], errors="coerce")
         - pd.to_numeric(df_tax["Multifamily Effective Rate"], errors="coerce")
     )
+    cap_file = PROJECT_ROOT / "assets" / "spreadsheets" / "Hotel_vs_MF_Cap_Rate_Spread_Analysis.xlsx"
+    OPEX_file = PROJECT_ROOT / "assets" / "spreadsheets" / "State OPEX Assumptions for Housing.xlsx"
 
-    df_cap = pd.read_excel(PROJECT_ROOT / "assets" / "spreadsheets" / "Cap Rate Arbitrage Model Update.xlsx")
-    df_cap["Hotel Cap"] = pd.to_numeric(df_cap["Hotel Cap Rate"], errors="coerce")
-    df_cap["Multifamily Cap"] = pd.to_numeric(df_cap["Apt Cap Rate"], errors="coerce")
+    df_cap = pd.read_excel(cap_file, sheet_name="Cap Rate Spread Analysis", usecols="A:H", header=3, nrows=50)
+    
 
 
     df_cap_tax = pd.merge(
-        df_cap[["State Code", "State", "Hotel Cap", "Multifamily Cap"]],
-        df_tax[["State", "Hotel Effective Rate", "Multifamily Effective Rate", "Diff_Effective_Rate"]],
+        df_cap[["State", "Hotel Cap Rate", "MF Cap Rate"]],
+        df_tax[["State Code", "State", "Hotel Effective Rate", "Multifamily Effective Rate", "Diff_Effective_Rate"]],
         on="State",
         how="left",
     )
 
     msa_features["State Code"] = msa_features["msa_name"].apply(extract_state)
+    msa_features["Average_HERS_Index_Score"] = msa_features["State Code"].map(hers_by_state)
     msa_features = pd.merge(
         msa_features,
         df_cap_tax[
             [
+                "State",
                 "State Code",
-                "Hotel Cap",
-                "Multifamily Cap",
+                "Hotel Cap Rate",
+                "MF Cap Rate",
                 "Hotel Effective Rate",
                 "Multifamily Effective Rate",
                 "Diff_Effective_Rate",
@@ -164,68 +252,124 @@ def build_payload() -> dict:
         how="left",
     )
 
-    df_oer = pd.read_excel(PROJECT_ROOT / "assets" / "spreadsheets" / "State OPEX Assumptions for Housing.xlsx")
-    df_oer = df_oer.rename(columns={"Default OPEX %": "OPEX%"})
-    df_oer["State Code"] = df_oer["State Code"].astype(str)
-    df_oer["OPEX%"] = pd.to_numeric(df_oer["OPEX%"], errors="coerce")
-    msa_features = pd.merge(msa_features, df_oer[["State Code", "OPEX%"]], on="State Code", how="left")
+    df_OER = pd.read_excel(OPEX_file)
+    df_OER = df_OER.rename(columns={"Default OPEX %": "OPEX%"})
+    df_OER["State Code"] = df_OER["State Code"].astype(str)
+    df_OER["OPEX%"] = pd.to_numeric(df_OER["OPEX%"], errors="coerce")
+    msa_features = pd.merge(msa_features, df_OER[["State Code", "OPEX%"]], on="State Code", how="left")
+
+
+    df_Conversion_Category = pd.read_excel(cap_file, sheet_name="Regulatory Environment", usecols="A:C", header=3, nrows=50)
+    # define a mapping from Conversion Category to a numerical score representing Hotel_Conversion_Relevance
+    rating_to_score = {
+    'A+': 1.00,
+    'A': 0.90,
+    'B+': 0.78,
+    'B': 0.66,
+    'C': 0.52,
+    'C-': 0.40,
+    'D': 0.25,
+    'D-': 0.12,
+    'F': 0.00
+    }
+
+    # map Conversion Category to Hotel_Conversion_Relevance
+    df_Conversion_Category['Hotel_Conversion_Relevance'] = df_Conversion_Category['Conversion Category'].map(rating_to_score)
+    msa_features=pd.merge(msa_features,
+        df_Conversion_Category[['State', 'Hotel_Conversion_Relevance']], on='State', how='left')
+
+
 
     msa_features = msa_features.dropna().copy().sort_values(["msa_code", "year"]).reset_index(drop=True)
 
     factor_df = msa_features.copy()
-    # factor_df["Employment_Rate"] = factor_df["Employed"] / factor_df["Laborforce_Population"]
-    # factor_df["Employment_Growth"] = factor_df.groupby("msa_code")["Employed"].pct_change()
-    # factor_df["Pop_Growth"] = factor_df.groupby("msa_code")["Total_Population"].pct_change()
-    # factor_df["Income_Growth"] = factor_df.groupby("msa_code")["Median_Household_Income"].pct_change()
-    # factor_df["Rent_to_Income_Ratio"] = factor_df["Median_Gross_Rent"] / factor_df["Median_Household_Income"]
-    # factor_df["Vacancy_Rate"] = factor_df["House_Vacant"] / factor_df["Total_Housing_Units"]
-    # factor_df["New_Multi_Units"] = factor_df.groupby("msa_code")["Total_Multi_Units"].diff().clip(lower=0)
-    # factor_df["Rent_Growth"] = factor_df.groupby("msa_code")["Median_Gross_Rent"].pct_change()
-    # factor_df["Implied_Value"] = (
-    #     factor_df["Median_Gross_Rent"] * 12 * (1 - factor_df["OPEX%"])
-    # ) / factor_df["Multifamily Cap"]
+ 
 
+    # # ── 1. construct Economic factors ─────────────────────────────────────────────────
+    # factor_df['Employment_Rate'] = factor_df['Employed'] / factor_df['Laborforce_Population'].clip(lower=0, upper=1)   
+    # factor_df['Employment_Growth'] = factor_df.groupby(['msa_code'])['Employed'].pct_change()
+    # factor_df['Pop_Growth'] = factor_df.groupby(['msa_code'])['Total_Population'].pct_change()
+    # factor_df['Income_Growth'] = factor_df.groupby(['msa_code'])['Median_Household_Income'].pct_change()
+
+    # # ── 2. construct Housing Affordability factors ─────────────────────────────────────
+    # factor_df['Rent_to_Income_Ratio'] = np.where(factor_df['Median_Household_Income'] > 0, 12*factor_df['Median_Gross_Rent'] / factor_df['Median_Household_Income'], np.nan)
+    # factor_df['Vacancy_Rate'] = np.where(factor_df['Total_Housing_Units'] > 0,factor_df['House_Vacant'] / (factor_df['House_Vacant'] + factor_df['House_Occupied']), np.nan)
+
+    # # ── 3. construct Supply Pressure factors ─────────────────────────────────────
+    # factor_df['New_Multi_Units'] = factor_df.groupby(['msa_code'])['Total_Multi_Units'].diff().clip(lower=0)
+
+    # # ── 4. construct Pricing Power factors ─────────────────────────────────────
+    # factor_df['Rent_Growth'] = factor_df.groupby(['msa_code'])['Median_Gross_Rent'].pct_change()
+
+    # # ── 5. construct valuation factors ─────────────────────────────────────
+    # factor_df['Value_Creation'] = (12*factor_df['Median_Gross_Rent']*(1-factor_df['OPEX%']))*(1/factor_df['Multifamily Cap'] - 1/factor_df['Hotel Cap'])
+
+
+    # # ── 6. construct Regulatory Environment factors ─────────────────────────────────────
+    # ≈['Hotel_Conversion_Relevance'] = factor_df['Hotel_Conversion_Relevance']
+
+
+    # fixed data version: see if the ranking system will perform better
     # ── 1. construct Economic factors ─────────────────────────────────────────────────
-    factor_df['Employment_Rate'] = factor_df['Employed'] / factor_df['Laborforce_Population']
-    factor_df['Employment_Growth'] = factor_df.groupby(['msa_code'])['Employed'].pct_change()
-    factor_df['Pop_Growth'] = factor_df.groupby(['msa_code'])['Total_Population'].pct_change()
-    factor_df['Income_Growth'] = factor_df.groupby(['msa_code'])['Median_Household_Income'].pct_change()
+    factor_df['Employment_Rate'] = (factor_df['Employed'] / factor_df['Laborforce_Population']).clip(lower=0, upper=1)   # BUG FIX: negatives & >1 are Census data errors
+    factor_df['Employment_Growth'] = (factor_df.groupby('msa_code')['Employed'].pct_change())
+    factor_df['Pop_Growth'] = (factor_df.groupby('msa_code')['Total_Population'].pct_change())
+    factor_df['Income_Growth'] = (factor_df.groupby('msa_code')['Median_Household_Income'].pct_change())
 
-    # ── 2. construct Housing Affordability factors ─────────────────────────────────────
-    factor_df['Rent_to_Income_Ratio'] = 12*factor_df['Median_Gross_Rent'] / factor_df['Median_Household_Income']
-    factor_df['Vacancy_Rate'] = factor_df['House_Vacant'] / (factor_df['House_Vacant'] + factor_df['House_Occupied'])
+
+    # ── 2.construct Housing Affordability factors ─────────────────────────────────────
+
+    # Rent-to-Income Ratio: guard zero denominator
+    factor_df['Rent_to_Income_Ratio'] = np.where(factor_df['Median_Household_Income'] > 0,12*factor_df['Median_Gross_Rent'] / factor_df['Median_Household_Income'],np.nan)
+    # Vacancy Rate (Formula from Factor_Description: Vacant / Total_Housing_Units)
+    factor_df['Vacancy_Rate'] = np.where(factor_df['Total_Housing_Units'] > 0,factor_df['House_Vacant'] / factor_df['Total_Housing_Units'],np.nan)
+
 
     # ── 3. construct Supply Pressure factors ─────────────────────────────────────
-    factor_df['New_Multi_Units'] = factor_df.groupby(['msa_code'])['Total_Multi_Units'].diff().clip(lower=0)
+    # New Multi Units: clip negatives to 0 (MSA rezoning artefact)
+    factor_df['New_Multi_Units'] = (factor_df.groupby('msa_code')['Total_Multi_Units'].diff().clip(lower=0))  # BUG FIX: was 15-20% negative
+
 
     # ── 4. construct Pricing Power factors ─────────────────────────────────────
-    factor_df['Rent_Growth'] = factor_df.groupby(['msa_code'])['Median_Gross_Rent'].pct_change()
+    factor_df['Rent_Growth'] = (factor_df.groupby('msa_code')['Median_Gross_Rent'].pct_change())
 
-    # ── 5. construct valuation factors ─────────────────────────────────────
-    factor_df['Implied_Value'] = (factor_df['Median_Gross_Rent']*12*(1-factor_df['OPEX%'])) / factor_df['Multifamily Cap']
-
-
-    # ── 6. construct Market factors (already created before) ─────────────────────────────────────
-    factor_df['Effective Tax Spread'] = factor_df['Diff_Effective_Rate']
-    factor_df['Value Creation'] = 1e6*(1/factor_df['Multifamily Cap'] - 1/factor_df['Hotel Cap'])
+    # ── 5. construct Valuation factors ─────────────────────────────────────
+    # Value_Creation:Annual Rent * (1 - OPEX%) / Multifamily Cap Rate - Annual Rent * (1 - OPEX%) / Hotel Cap Rate
+    factor_df['Value_Creation'] =  np.where( (factor_df['Multifamily Effective Rate'] > 0) & (factor_df['Hotel Cap Rate'] > 0),(12*factor_df['Median_Gross_Rent']*(1-factor_df['OPEX%']))*(1/factor_df['MF Cap Rate'] - 1/factor_df['Hotel Cap Rate']), np.nan)
 
 
-    factor_cols = [
-        "Employment_Rate",
-        "Employment_Growth",
-        "Pop_Growth",
-        "Income_Growth",
-        "Rent_to_Income_Ratio",
-        "Vacancy_Rate",
-        "New_Multi_Units",
-        "Rent_Growth",
-        "Implied_Value",
-        "Effective Tax Spread",
-        "Value Creation",
-    ]
+    # ── 6. construct Regulatory Environment factors ─────────────────────────────────────
+    # Value Potential (legacy, kept for backward compatibility) --- IGNORE ---
+    factor_df['Hotel_Conversion_Relevance'] = np.where(factor_df['Hotel_Conversion_Relevance'] >= 0, factor_df['Hotel_Conversion_Relevance'], np.nan)
+
+    factor_cols = ['Employment_Rate', 
+             'Employment_Growth', 
+             'Pop_Growth', 
+             'Income_Growth',
+             'Rent_to_Income_Ratio', 
+             'Vacancy_Rate', 
+             'New_Multi_Units', 
+             'Rent_Growth',  
+             'Value_Creation',
+             'Hotel_Conversion_Relevance']
 
     earliest_year = int(factor_df["year"].min())
     factor_df = factor_df[factor_df["year"] > earliest_year].copy()
+    required_non_hers_cols = [
+        "msa_code",
+        "msa_name",
+        "year",
+        "Total_Population",
+        "Median_Gross_Rent",
+        "Median_Household_Income",
+        "Median_House_Value",
+        "OPEX%",
+        "Hotel Cap Rate",
+        "MF Cap Rate",
+        "Hotel Effective Rate",
+        "Multifamily Effective Rate",
+    ] + factor_cols
+
     factor_df = factor_df[
         [
             "msa_code",
@@ -236,13 +380,14 @@ def build_payload() -> dict:
             "Median_Household_Income",
             "Median_House_Value",
             "OPEX%",
-            "Hotel Cap",
-            "Multifamily Cap",
+            "Hotel Cap Rate",
+            "MF Cap Rate",
             "Hotel Effective Rate",
-            "Multifamily Effective Rate"
+            "Multifamily Effective Rate",
+            "Average_HERS_Index_Score",
         ]
         + factor_cols
-    ].dropna()
+    ].dropna(subset=required_non_hers_cols)
 
     latest_year = int(factor_df["year"].max())
     raw_latest = factor_df[factor_df["year"] == latest_year].copy()
@@ -253,23 +398,22 @@ def build_payload() -> dict:
         scored[col] = 0.0 if std == 0 or pd.isna(std) else (scored[col] - scored[col].mean()) / std
 
     scored["Vacancy_Rate"] = -scored["Vacancy_Rate"]
-    scored["Rent_to_Income_Ratio"] = -scored["Rent_to_Income_Ratio"]
     scored["New_Multi_Units"] = -scored["New_Multi_Units"]
 
     scored["Economic_Index"] = scored[["Employment_Rate", "Employment_Growth", "Pop_Growth", "Income_Growth"]].mean(axis=1)
     scored["Stability_Index"] = scored[["Rent_to_Income_Ratio", "Vacancy_Rate"]].mean(axis=1)
     scored["Supply_Index"] = scored["New_Multi_Units"]
     scored["Pricing_Index"] = scored["Rent_Growth"]
-    scored["Valuation_Index"] = scored["Implied_Value"]
-    scored["Capital_Index"] = scored[["Effective Tax Spread", "Value Creation"]].mean(axis=1)
+    scored["Valuation_Index"] = scored["Value_Creation"]
+    scored["Regulatory_Index"] = scored[["Hotel_Conversion_Relevance"]].mean(axis=1)
 
     scored["Index_Score_Raw"] = (
-        0.25 * scored["Economic_Index"]
+        0.20 * scored["Economic_Index"]
         + 0.15 * scored["Stability_Index"]
         + 0.15 * scored["Supply_Index"]
         + 0.15 * scored["Pricing_Index"]
-        + 0.20 * scored["Valuation_Index"]
-        + 0.10 * scored["Capital_Index"]
+        + 0.15 * scored["Valuation_Index"]
+        + 0.20 * scored["Regulatory_Index"]
     )
 
     # Linear transformation: z-score (-3 to 3) → score (0 to 100)
@@ -284,7 +428,7 @@ def build_payload() -> dict:
         "Supply_Index",
         "Pricing_Index",
         "Valuation_Index",
-        "Capital_Index",
+        "Regulatory_Index",
     ]:
         scored[col] = minmax01(scored[col])
 
@@ -299,7 +443,7 @@ def build_payload() -> dict:
                 "Supply_Index",
                 "Pricing_Index",
                 "Valuation_Index",
-                "Capital_Index",
+                "Regulatory_Index",
                 "Investment_Score",
             ]
         ],
@@ -311,7 +455,7 @@ def build_payload() -> dict:
     for _, row in merged.iterrows():
         msa_code = str(row["msa_code"])
         vacancy_rate = float(row["Vacancy_Rate"])
-        implied_value = float(row["Implied_Value"])
+        
 
         record = {
             "msa_code": int(msa_code),
@@ -322,8 +466,8 @@ def build_payload() -> dict:
             "Median_Income": int(round(float(row["Median_Household_Income"]))),
             "Median_Home_Value": int(round(float(row["Median_House_Value"]))),
             "Operating_Expense_Ratio": float(row["OPEX%"]),
-            "Hotel_Cap_Rate": float(row["Hotel Cap"]),
-            "Multifamily_Cap_Rate": float(row["Multifamily Cap"]),
+            "Hotel_Cap_Rate": float(row["Hotel Cap Rate"]),
+            "Multifamily_Cap_Rate": float(row["MF Cap Rate"]),
             "Hotel_Effective_Tax_Rate": float(row["Hotel Effective Rate"]),
             "Multifamily_Effective_Tax_Rate": float(row["Multifamily Effective Rate"]),
             "Employment_Rate": float(row["Employment_Rate"]),
@@ -334,16 +478,17 @@ def build_payload() -> dict:
             "Vacancy_Rate": float(row["Vacancy_Rate"]),
             "New_Multi_Units": int(round(float(row["New_Multi_Units"]))),
             "Rent_Growth": float(row["Rent_Growth"]),
-            "Implied_Value": implied_value,
-            "Effective Tax Spread": float(row["Effective Tax Spread"]),
-            "Value Creation": float(row["Value Creation"]),
-            "Average HERS Index Score": hers_map.get(msa_code, 0),
-            "Economic_Index": float(row["Economic_Index"]),
-            "Stability_Index": float(row["Stability_Index"]),
-            "Supply_Index": float(row["Supply_Index"]),
-            "Pricing_Index": float(row["Pricing_Index"]),
-            "Valuation_Index": float(row["Valuation_Index"]),
-            "Capital_Index": float(row["Capital_Index"]),
+            "Value_Creation": float(row["Value_Creation"]),
+            "Hotel_Conversion_Relevance": float(row["Hotel_Conversion_Relevance"]),
+            "Average_HERS_Index_Score": int(round(float(row["Average_HERS_Index_Score"])))
+            if pd.notna(row.get("Average_HERS_Index_Score", np.nan))
+            else hers_map.get(msa_code, 0),
+            # "Economic_Index": float(row["Economic_Index"]),
+            # "Stability_Index": float(row["Stability_Index"]),
+            # "Supply_Index": float(row["Supply_Index"]),
+            # "Pricing_Index": float(row["Pricing_Index"]),
+            # "Valuation_Index": float(row["Valuation_Index"]),
+            # "Regulatory_Index": float(row["Regulatory_Index"]),
             "Investment_Score": float(row["Investment_Score"])
             
         }
@@ -360,7 +505,7 @@ def build_payload() -> dict:
         "stats": {
             "year": latest_year,
             "total_msa_count": len(records),
-            "scoring_system": "6-Dimensional Index (Economic, Stability, Supply, Pricing, Valuation, Capital)",
+            "scoring_system": "6-Dimensional Index (Economic, Stability, Supply, Pricing, Valuation, Regulatory) with z-score normalization and weighted average",
         },
         "msas": records,
     }

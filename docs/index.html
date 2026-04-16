@@ -461,10 +461,12 @@
            ===================== */
 
         .table-container {
+            overflow-y: auto;
             overflow-x: auto;
             border-radius: 0;
             border: 1px solid #444;
             margin-bottom: 20px;
+            max-height: 70vh;
         }
 
         .ranking-table {
@@ -478,6 +480,9 @@
             background: #333333;
             color: #FFD700;
             border-bottom: 2px solid #D4AF37;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .ranking-table th {
@@ -752,6 +757,125 @@
             cursor: pointer;
             border: 1px solid #FFD700;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+       
+        .sub-factors {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #3a3a3a;
+        }
+        .sub-factors-title {
+            font-size: 0.72em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 7px;
+        }
+        .sub-factor-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        .sub-factor-label {
+            font-size: 0.76em;
+            color: #b0b0b0;
+            min-width: 155px;
+            flex-shrink: 0;
+        }
+        .sub-factor-slider {
+            flex: 1;
+            height: 4px;
+            border-radius: 0;
+            background: linear-gradient(to right, #32B576, #444);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .sub-factor-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 0;
+            background: #32B576;
+            cursor: pointer;
+            border: 1px solid #44dd88;
+        }
+        .sub-factor-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 0;
+            background: #32B576;
+            cursor: pointer;
+            border: 1px solid #44dd88;
+        }
+        .sub-factor-value {
+            min-width: 35px;
+            font-size: 0.76em;
+            color: #32B576;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .factor-total-wrap {
+            margin-top: 8px;
+        }
+
+        .factor-total-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.74em;
+            color: #d0d0d0;
+            margin-bottom: 4px;
+        }
+
+        .factor-total-bar {
+            width: 100%;
+            height: 6px;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+        }
+
+        .factor-total-fill {
+            height: 100%;
+            width: 100%;
+            background: #32B576;
+            transition: width 0.15s ease, background 0.15s ease;
+        }
+
+        .factor-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .factor-update-btn {
+            padding: 5px 10px;
+            font-size: 0.72em;
+            font-weight: 600;
+            color: #ffffff;
+            background: #2f7de1;
+            border: 1px solid #4e95ef;
+            cursor: pointer;
+        }
+
+        .factor-update-status {
+            font-size: 0.74em;
+            color: #32B576;
+            font-weight: 600;
+            min-height: 1em;
+        }
+
+        .weight-warning {
+            margin-top: 6px;
+            font-size: 0.75em;
+            color: #ffb84d;
+            font-weight: 600;
+            display: none;
         }
 
         .weight-value {
@@ -1350,11 +1474,10 @@
             <p class="section-subtitle">Adjust the weights below to recalculate investment scores in real-time</p>
             
             <div class="info-box">
-                <strong>ℹ️ How it works:</strong> Each MSA is scored across 6 dimensions (Economic, Stability, Supply, Pricing, Valuation, Capital), 
-                each normalized to a 0-1 scale. Adjust the weights below to customize your investment priorities. 
-                The final score ranges from 0-100 and shows <strong>how rankings change</strong> based on your weighting strategy.
-                <br><strong>Scoring Formula:</strong> Investment Score = (Economic × 25% + Stability × 15% + Supply × 15% + Pricing × 15% + Valuation × 20% + Capital × 10%) × 100
-                <br><strong>Current range:</strong> Scores typically fall between 20-75 depending on the weights applied.
+                <strong>ℹ️ Two-level weighting system:</strong>
+                <strong>Step 1 (sub-factors):</strong> For indices with multiple factors (Economic, Stability), use the sub-factor sliders to control how each raw field is weighted within its index. Values are min-max normalized across all MSAs before weighting (<strong>↓</strong> = lower raw value is better; <strong>↑</strong> = higher is better).
+                <br><strong>Step 2 (index-level):</strong> Adjust the six index weights below to set your cross-index investment priorities. Weights are automatically normalized to sum to 100%.
+                <br><strong>Formula:</strong> raw sub-factor → min-max [0,1] → sub-factor weighted sum → index value → index weighted sum → min-max scaled to 0–100.
             </div>
             
             <div class="scoring-container">
@@ -1365,7 +1488,44 @@
                             <label>📈 Economic Index (Employment, Population & Income Growth)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightEconomic" min="0" max="100" value="25" class="weight-slider" oninput="updateWeights()">
-                                <span id="valueEconomic" class="weight-value">25%</span>
+                                <span id="valueEconomic" class="weight-value">20%</span>
+                            </div>
+                            <div class="sub-factors">
+                                <div class="sub-factors-title">⚙ Sub-Factor Weights (auto-normalized within index)</div>
+                                <div class="sub-factor-row">
+                                    <span class="sub-factor-label">Employment Rate ↑</span>
+                                    <input type="range" id="intraEmpRate" min="0" max="100" step="1" value="25" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraEmpRateVal" class="sub-factor-value">25%</span>
+                                </div>
+                                <div class="sub-factor-row">
+                                    <span class="sub-factor-label">Employment Growth ↑</span>
+                                    <input type="range" id="intraEmpGrowth" min="0" max="100" step="1" value="25" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraEmpGrowthVal" class="sub-factor-value">25%</span>
+                                </div>
+                                <div class="sub-factor-row">
+                                    <span class="sub-factor-label">Population Growth ↑</span>
+                                    <input type="range" id="intraPopGrowth" min="0" max="100" step="1" value="25" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraPopGrowthVal" class="sub-factor-value">25%</span>
+                                </div>
+                                <div class="sub-factor-row">
+                                    <span class="sub-factor-label">Income Growth ↑</span>
+                                    <input type="range" id="intraIncGrowth" min="0" max="100" step="1" value="25" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraIncGrowthVal" class="sub-factor-value">25%</span>
+                                </div>
+                                <div class="factor-total-wrap">
+                                    <div class="factor-total-head">
+                                        <span>Factor Total Weight</span>
+                                        <span id="econTotalValue">100%</span>
+                                    </div>
+                                    <div class="factor-total-bar">
+                                        <div id="econTotalFill" class="factor-total-fill"></div>
+                                    </div>
+                                </div>
+                                <div class="factor-actions">
+                                    <button class="factor-update-btn" onclick="applyEconomicSubFactors()">Update Economic Index</button>
+                                    <span id="econUpdateStatus" class="factor-update-status"></span>
+                                </div>
+                                <div id="econWeightWarning" class="weight-warning">Please ensure factor weights sum to 100%.</div>
                             </div>
                         </div>
                         
@@ -1374,6 +1534,33 @@
                             <div class="weight-input-group">
                                 <input type="range" id="weightStability" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
                                 <span id="valueStability" class="weight-value">15%</span>
+                            </div>
+                            <div class="sub-factors">
+                                <div class="sub-factors-title">⚙ Sub-Factor Weights (auto-normalized within index)</div>
+                                <div class="sub-factor-row">
+                                    <span class="sub-factor-label">Rent-to-Income Ratio ↑</span>
+                                    <input type="range" id="intraRentIncome" min="0" max="100" step="1" value="50" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraRentIncomeVal" class="sub-factor-value">50%</span>
+                                </div>
+                                <div class="sub-factor-row">
+                                    <span class="sub-factor-label">Vacancy Rate ↓</span>
+                                    <input type="range" id="intraVacancy" min="0" max="100" step="1" value="50" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraVacancyVal" class="sub-factor-value">50%</span>
+                                </div>
+                                <div class="factor-total-wrap">
+                                    <div class="factor-total-head">
+                                        <span>Factor Total Weight</span>
+                                        <span id="stabilityTotalValue">100%</span>
+                                    </div>
+                                    <div class="factor-total-bar">
+                                        <div id="stabilityTotalFill" class="factor-total-fill"></div>
+                                    </div>
+                                </div>
+                                <div class="factor-actions">
+                                    <button class="factor-update-btn" onclick="applyStabilitySubFactors()">Update Stability Index</button>
+                                    <span id="stabilityUpdateStatus" class="factor-update-status"></span>
+                                </div>
+                                <div id="stabilityWeightWarning" class="weight-warning">Please ensure factor weights sum to 100%.</div>
                             </div>
                         </div>
                         
@@ -1394,18 +1581,18 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>📊 Valuation Index (Implied Property Value)</label>
+                            <label>📊 Valuation Index (Value Creation)</label>
                             <div class="weight-input-group">
-                                <input type="range" id="weightValuation" min="0" max="100" value="20" class="weight-slider" oninput="updateWeights()">
-                                <span id="valueValuation" class="weight-value">20%</span>
+                                <input type="range" id="weightValuation" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
+                                <span id="valueValuation" class="weight-value">15%</span>
                             </div>
                         </div>
                         
                         <div class="weight-item">
-                            <label>🏦 Capital Index (Effective Tax Spread & Value Creation)</label>
+                            <label>🏛️ Regulatory Index (Hotel Conversion Relevance)</label>
                             <div class="weight-input-group">
-                                <input type="range" id="weightCapital" min="0" max="100" value="10" class="weight-slider" oninput="updateWeights()">
-                                <span id="valueCapital" class="weight-value">10%</span>
+                                <input type="range" id="weightRegulatory" min="0" max="100" value="20" class="weight-slider" oninput="updateWeights()">
+                                <span id="valueRegulatory" class="weight-value">20%</span>
                             </div>
                         </div>
                         
@@ -1413,6 +1600,7 @@
                             <strong>Total Weight:</strong>
                             <span id="totalWeight" class="total-value">100%</span>
                         </div>
+                        <div id="overallWeightWarning" class="weight-warning">Please ensure index weights sum to 100%.</div>
                         <button class="reset-button" onclick="resetWeights()">↻ Reset to Default Weights</button>
                     </div>
                 </div>
@@ -1520,31 +1708,44 @@
                 <!-- Valuation Index -->
                 <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
                     <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">📊 Valuation Index</h4>
-                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Estimates stabilized asset value supported by rental income.</p>
+                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Measures conversion-related value uplift by comparing multifamily and hotel valuation implied by the same NOI stream.</p>
                     <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
-                        <strong style="color: #FFD700; font-size: 0.9em;">Implied Value</strong>
+                        <strong style="color: #FFD700; font-size: 0.9em;">Value Creation</strong>
                         <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
-                            \[ \text{Implied Value} = \frac{\text{Annual Rent} \times (1 - \text{OER})}{\text{Cap Rate}} \]
+                            \[ \text{Value Creation} =  \text{Annual Rent} \times (1 - \text{Operating Expenditure Ratio}) \times \left(\frac{1}{\text{MF Cap Rate}} - \frac{1}{\text{Hotel Cap Rate}}\right) \]
                         </div>
                     </div>
                 </div>
                 
-                <!-- Capital Market Index -->
+                <!-- Regulatory Market Index -->
                 <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏦 Capital Market Index</h4>
-                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates financial and regulatory factors for conversion.</p>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-                        <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
-                            <strong style="color: #FFD700; font-size: 0.9em;">Effective Tax Spread</strong>
-                            <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
-                                \[ \text{Effective Tax Spread} = \text{Tax Rate}_{\text{hotel}} - \text{Tax Rate}_{\text{MF}} \]
-                            </div>
-                        </div>
-                        <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
-                            <strong style="color: #FFD700; font-size: 0.9em;">Value Creation</strong>
-                            <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
-                                \[ \text{Value Creation} = \left(\frac{1}{\text{Cap Rate}_{\text{MF}}} - \frac{1}{\text{Cap Rate}_{\text{hotel}}}\right) \times \$1{,}000{,}000 \]
-                            </div>
+                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏦 Regulatory Market Index</h4>
+                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Captures policy and execution feasibility for hotel-to-multifamily conversion at the state level.</p>
+                    <div style="background: #2a2a2a; padding: 14px; border-left: 2px solid #D4AF37;">
+                        <strong style="color: #FFD700; font-size: 0.9em;">Hotel Conversion Relevance</strong>
+                        <p style="color: #e0e0e0; font-size: 0.92em; line-height: 1.6; margin-top: 10px; margin-bottom: 14px;">
+                            We convert state letter ratings into a monotonic [0,1] score to preserve rank order while allowing non-linear spacing between tiers. The mapping is intentionally non-equidistant: lower tiers (F, D-, D) receive steeper penalties to reflect higher execution and policy risk, while top tiers (A, A+) receive an additional premium for stronger conversion feasibility.
+                        </p>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.9em; color: #e0e0e0; background: #262626; border: 1px solid #4a4a4a;">
+                                <thead>
+                                    <tr style="background: #1f1f1f;">
+                                        <th style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #4a4a4a; color: #FFD700;">State Rating</th>
+                                        <th style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #4a4a4a; color: #FFD700;">Hotel Conversion Relevance Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">A+</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">1.00</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">A</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.90</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">B+</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.78</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">B</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.66</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">C</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.52</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">C-</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.40</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">D</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.25</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">D-</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.12</td></tr>
+                                    <tr><td style="padding: 8px 12px;">F</td><td style="padding: 8px 12px;">0.00</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -1561,7 +1762,7 @@
         <!-- Raw Data Section -->
         <section id="rawdataView" class="view-section">
             <h2>Raw Data: All Factors & Metrics</h2>
-            <p class="section-subtitle">Complete dataset showing MSA raw data (population, housing, employment, etc.) and 11 investment factors organized by 6 key dimensions</p>
+            <p class="section-subtitle">Complete dataset showing MSA raw data (population, housing, employment, etc.) and 10 investment factors organized by 6 key dimensions</p>
             
             <div class="rawdata-controls">
                 <input type="text" id="rawDataSearch" placeholder="Search by MSA name..." style="padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 6px;">
@@ -1610,15 +1811,14 @@
                 <div class="legend-group">
                     <h4>💰 Valuation Factors</h4>
                     <ul>
-                        <li><strong>Implied Value</strong> - (Annual Rent × (1 - OPEX%)) / Cap Rate ($)</li>
+                        <li><strong>Implied Value</strong> - (Annual Rent × (1 - OPEX%))*(1 / MF Cap Rate - 1 / Hotel Cap Rate) ($)</li>
                     </ul>
                 </div>
                 
                 <div class="legend-group">
-                    <h4>🏛️ Capital Market Factors</h4>
+                    <h4>🏛️ Regulatory Market Factors</h4>
                     <ul>
-                        <li><strong>Effective Tax Spread</strong> - Hotel tax rate - Multifamily tax rate (%)</li>
-                        <li><strong>Value Creation</strong> - (1/Multifamily Cap - 1/Hotel Cap) × $1M ($)</li>
+                        <li><strong>Hotel Conversion Relevance</strong> - Mapped score from Conversion Category</li>
                     </ul>
                 </div>
             </div>
@@ -1911,13 +2111,21 @@
         let usCityLookupByState = null;
         let heatMapZoomBehavior = null;
         let currentWeights = {
-            economic: 0.25,
+            economic: 0.20,
             stability: 0.15,
             supply: 0.15,
             pricing: 0.15,
-            valuation: 0.20,
-            capital: 0.10
+            valuation: 0.15,
+            regulatory: 0.20
         };
+
+        // Sub-factor (intra-index) raw slider values (0-100); normalized before use
+        let intraWeights = {
+                // Economic Index
+                empRate: 25, empGrowth: 25, popGrowth: 25, incGrowth: 25,
+                // Stability Index
+                rentIncome: 50, vacancy: 50
+            };
 
         const US_STATE_ABBR_TO_FIPS = {
             AL: '01', AZ: '04', AR: '05', CA: '06', CO: '08', CT: '09', DE: '10', FL: '12',
@@ -2031,26 +2239,51 @@
         // ── Data embedded inline — no fetch needed ──
         const _INLINE_DATA = {"stats":{"year":2024,"total_msa_count":181,"scoring_system":"6-Dimensional Index (Economic, Stability, Supply, Pricing, Valuation, Capital)"},"msas":[{"msa_code":45940,"msa_name":"Trenton-Princeton, NJ Metro Area","year":2024,"Employment_Rate":0.935864,"Employment_Growth":0.06649,"Pop_Growth":0.027424,"Income_Growth":0.08316,"Rent_to_Income_Ratio":0.200945,"Vacancy_Rate":0.026901,"New_Multi_Units":0,"Rent_Growth":0.189632,"Implied_Value":170912.0,"Effective Tax Spread":0.0,"Value Creation":4901960.784314,"Average HERS Index Score":52,"Economic_Index":0.754059,"Stability_Index":0.892377,"Supply_Index":1.0,"Pricing_Index":1.0,"Valuation_Index":0.311577,"Capital_Index":0.339153,"Investment_Score":67.202034,"Total_Population":392138,"Median_Rent":1744,"Median_Income":104148,"Median_Home_Value":436500},{"msa_code":41940,"msa_name":"San Jose-Sunnyvale-Santa Clara, CA Metro Area","year":2024,"Employment_Rate":0.946222,"Employment_Growth":0.013906,"Pop_Growth":0.025551,"Income_Growth":0.07571,"Rent_to_Income_Ratio":0.205848,"Vacancy_Rate":0.04951,"New_Multi_Units":0,"Rent_Growth":0.019473,"Implied_Value":387702.857143,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.630189,"Stability_Index":0.819905,"Supply_Index":1.0,"Pricing_Index":0.26162,"Valuation_Index":1.0,"Capital_Index":0.496398,"Investment_Score":66.050845,"Total_Population":1995484,"Median_Rent":2827,"Median_Income":164801,"Median_Home_Value":1528500},{"msa_code":43900,"msa_name":"Spartanburg, SC Metro Area","year":2024,"Employment_Rate":0.950431,"Employment_Growth":0.042795,"Pop_Growth":0.032888,"Income_Growth":0.119436,"Rent_to_Income_Ratio":0.199518,"Vacancy_Rate":0.085238,"New_Multi_Units":0,"Rent_Growth":0.132207,"Implied_Value":123012.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":58,"Economic_Index":0.796738,"Stability_Index":0.758401,"Supply_Index":1.0,"Pricing_Index":0.750812,"Valuation_Index":0.159469,"Capital_Index":0.45988,"Investment_Score":60.801303,"Total_Population":395934,"Median_Rent":1139,"Median_Income":68505,"Median_Home_Value":257800},{"msa_code":37900,"msa_name":"Peoria, IL Metro Area","year":2024,"Employment_Rate":0.960347,"Employment_Growth":0.028993,"Pop_Growth":0.010163,"Income_Growth":0.085367,"Rent_to_Income_Ratio":0.161879,"Vacancy_Rate":0.074213,"New_Multi_Units":0,"Rent_Growth":0.115684,"Implied_Value":85589.333333,"Effective Tax Spread":0.0306,"Value Creation":4558404.558405,"Average HERS Index Score":56,"Economic_Index":0.628779,"Stability_Index":0.926479,"Supply_Index":1.0,"Pricing_Index":0.679114,"Valuation_Index":0.040633,"Capital_Index":1.0,"Investment_Score":59.049729,"Total_Population":365668,"Median_Rent":1003,"Median_Income":74352,"Median_Home_Value":173700},{"msa_code":24540,"msa_name":"Greeley, CO Metro Area","year":2024,"Employment_Rate":0.959196,"Employment_Growth":0.043277,"Pop_Growth":0.028664,"Income_Growth":0.115501,"Rent_to_Income_Ratio":0.186564,"Vacancy_Rate":0.047691,"New_Multi_Units":2385,"Rent_Growth":0.006373,"Implied_Value":192925.090909,"Effective Tax Spread":0.01436,"Value Creation":6060606.060606,"Average HERS Index Score":53,"Economic_Index":0.78886,"Stability_Index":0.896871,"Supply_Index":0.936581,"Pricing_Index":0.204774,"Valuation_Index":0.38148,"Capital_Index":0.816322,"Investment_Score":59.012476,"Total_Population":369745,"Median_Rent":1579,"Median_Income":101563,"Median_Home_Value":496100},{"msa_code":39340,"msa_name":"Provo-Orem-Lehi, UT Metro Area","year":2024,"Employment_Rate":0.956865,"Employment_Growth":0.041075,"Pop_Growth":0.036737,"Income_Growth":0.002212,"Rent_to_Income_Ratio":0.191379,"Vacancy_Rate":0.035935,"New_Multi_Units":0,"Rent_Growth":0.035347,"Implied_Value":207379.636364,"Effective Tax Spread":0.0,"Value Creation":6060606.060606,"Average HERS Index Score":58,"Economic_Index":0.68033,"Stability_Index":0.90682,"Supply_Index":1.0,"Pricing_Index":0.330501,"Valuation_Index":0.42738,"Capital_Index":0.485794,"Investment_Score":58.649176,"Total_Population":760154,"Median_Rent":1611,"Median_Income":101014,"Median_Home_Value":584600},{"msa_code":36100,"msa_name":"Ocala, FL Metro Area","year":2024,"Employment_Rate":0.951544,"Employment_Growth":0.069885,"Pop_Growth":0.046214,"Income_Growth":0.099034,"Rent_to_Income_Ratio":0.283745,"Vacancy_Rate":0.116614,"New_Multi_Units":1876,"Rent_Growth":0.115751,"Implied_Value":146208.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.904171,"Stability_Index":0.366276,"Supply_Index":0.950116,"Pricing_Index":0.679404,"Valuation_Index":0.233129,"Capital_Index":0.495887,"Investment_Score":58.426784,"Total_Population":428905,"Median_Rent":1523,"Median_Income":64410,"Median_Home_Value":275600},{"msa_code":41860,"msa_name":"San Francisco-Oakland-Fremont, CA Metro Area","year":2024,"Employment_Rate":0.942739,"Employment_Growth":0.017195,"Pop_Growth":0.017851,"Income_Growth":0.061021,"Rent_to_Income_Ratio":0.215503,"Vacancy_Rate":0.072374,"New_Multi_Units":5242,"Rent_Growth":0.015853,"Implied_Value":333942.857143,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.575384,"Stability_Index":0.728937,"Supply_Index":0.860611,"Pricing_Index":0.24591,"Valuation_Index":0.829284,"Capital_Index":0.496398,"Investment_Score":58.387468,"Total_Population":4648486,"Median_Rent":2435,"Median_Income":135590,"Median_Home_Value":1132900},{"msa_code":37100,"msa_name":"Oxnard-Thousand Oaks-Ventura, CA Metro Area","year":2024,"Employment_Rate":0.940371,"Employment_Growth":0.019006,"Pop_Growth":0.007036,"Income_Growth":0.061031,"Rent_to_Income_Ratio":0.242966,"Vacancy_Rate":0.051763,"New_Multi_Units":933,"Rent_Growth":0.021643,"Implied_Value":317211.428571,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.521797,"Stability_Index":0.674744,"Supply_Index":0.975191,"Pricing_Index":0.271035,"Valuation_Index":0.776153,"Capital_Index":0.496398,"Investment_Score":57.884074,"Total_Population":835427,"Median_Rent":2313,"Median_Income":114238,"Median_Home_Value":869300},{"msa_code":42220,"msa_name":"Santa Rosa-Petaluma, CA Metro Area","year":2024,"Employment_Rate":0.947376,"Employment_Growth":-0.027359,"Pop_Growth":0.007395,"Income_Growth":0.065209,"Rent_to_Income_Ratio":0.249343,"Vacancy_Rate":0.084366,"New_Multi_Units":1992,"Rent_Growth":0.081514,"Implied_Value":305691.428571,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.431619,"Stability_Index":0.572855,"Supply_Index":0.947031,"Pricing_Index":0.530836,"Valuation_Index":0.739571,"Capital_Index":0.496398,"Investment_Score":57.704036,"Total_Population":485375,"Median_Rent":2229,"Median_Income":107274,"Median_Home_Value":822400},{"msa_code":19740,"msa_name":"Denver-Aurora-Centennial, CO Metro Area","year":2024,"Employment_Rate":0.954201,"Employment_Growth":0.010317,"Pop_Growth":0.015101,"Income_Growth":0.04843,"Rent_to_Income_Ratio":0.215797,"Vacancy_Rate":0.047366,"New_Multi_Units":0,"Rent_Growth":0.023709,"Implied_Value":237399.272727,"Effective Tax Spread":0.01436,"Value Creation":6060606.060606,"Average HERS Index Score":53,"Economic_Index":0.551792,"Stability_Index":0.787561,"Supply_Index":1.0,"Pricing_Index":0.28,"Valuation_Index":0.522708,"Capital_Index":0.816322,"Investment_Score":57.547205,"Total_Population":3050512,"Median_Rent":1943,"Median_Income":108046,"Median_Home_Value":631000},{"msa_code":44060,"msa_name":"Spokane-Spokane Valley, WA Metro Area","year":2024,"Employment_Rate":0.946078,"Employment_Growth":0.018721,"Pop_Growth":0.00778,"Income_Growth":0.158352,"Rent_to_Income_Ratio":0.199881,"Vacancy_Rate":0.062984,"New_Multi_Units":3927,"Rent_Growth":0.098514,"Implied_Value":174730.909091,"Effective Tax Spread":0.0,"Value Creation":5681818.181818,"Average HERS Index Score":54,"Economic_Index":0.654811,"Stability_Index":0.810191,"Supply_Index":0.895578,"Pricing_Index":0.604608,"Valuation_Index":0.323704,"Capital_Index":0.437854,"Investment_Score":57.403419,"Total_Population":604962,"Median_Rent":1405,"Median_Income":84350,"Median_Home_Value":434300},{"msa_code":23060,"msa_name":"Fort Wayne, IN Metro Area","year":2024,"Employment_Rate":0.964688,"Employment_Growth":0.039936,"Pop_Growth":0.011218,"Income_Growth":0.0744,"Rent_to_Income_Ratio":0.17785,"Vacancy_Rate":0.061784,"New_Multi_Units":0,"Rent_Growth":0.12221,"Implied_Value":101376.0,"Effective Tax Spread":0.00768,"Value Creation":4288499.025341,"Average HERS Index Score":63,"Economic_Index":0.654855,"Stability_Index":0.896023,"Supply_Index":1.0,"Pricing_Index":0.707434,"Valuation_Index":0.090764,"Capital_Index":0.438285,"Investment_Score":57.316832,"Total_Population":462978,"Median_Rent":1056,"Median_Income":71251,"Median_Home_Value":245800},{"msa_code":40900,"msa_name":"Sacramento-Roseville-Folsom, CA Metro Area","year":2024,"Employment_Rate":0.936769,"Employment_Growth":0.010539,"Pop_Growth":0.017565,"Income_Growth":0.039824,"Rent_to_Income_Ratio":0.231314,"Vacancy_Rate":0.075419,"New_Multi_Units":0,"Rent_Growth":0.057778,"Implied_Value":261120.0,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.520828,"Stability_Index":0.662121,"Supply_Index":1.0,"Pricing_Index":0.427837,"Valuation_Index":0.598034,"Capital_Index":0.496398,"Investment_Score":57.255457,"Total_Population":2463127,"Median_Rent":1904,"Median_Income":98775,"Median_Home_Value":605500},{"msa_code":28700,"msa_name":"Kingsport-Bristol, TN-VA Metro Area","year":2024,"Employment_Rate":0.960351,"Employment_Growth":0.03363,"Pop_Growth":0.005661,"Income_Growth":0.154329,"Rent_to_Income_Ratio":0.177209,"Vacancy_Rate":0.112195,"New_Multi_Units":800,"Rent_Growth":0.132099,"Implied_Value":100870.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":59,"Economic_Index":0.702037,"Stability_Index":0.778021,"Supply_Index":0.978727,"Pricing_Index":0.750343,"Valuation_Index":0.089157,"Capital_Index":0.421874,"Investment_Score":57.198491,"Total_Population":314259,"Median_Rent":917,"Median_Income":62096,"Median_Home_Value":237300},{"msa_code":33100,"msa_name":"Miami-Fort Lauderdale-West Palm Beach, FL Metro Area","year":2024,"Employment_Rate":0.95387,"Employment_Growth":0.048835,"Pop_Growth":0.044441,"Income_Growth":0.057086,"Rent_to_Income_Ratio":0.310028,"Vacancy_Rate":0.122524,"New_Multi_Units":0,"Rent_Growth":0.088297,"Implied_Value":199968.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.798355,"Stability_Index":0.253183,"Supply_Index":1.0,"Pricing_Index":0.56027,"Valuation_Index":0.403845,"Capital_Index":0.495887,"Investment_Score":57.047889,"Total_Population":6457988,"Median_Rent":2083,"Median_Income":80625,"Median_Home_Value":510600},{"msa_code":44700,"msa_name":"Stockton-Lodi, CA Metro Area","year":2024,"Employment_Rate":0.918041,"Employment_Growth":-0.019076,"Pop_Growth":0.018906,"Income_Growth":0.064289,"Rent_to_Income_Ratio":0.230615,"Vacancy_Rate":0.053357,"New_Multi_Units":0,"Rent_Growth":0.080363,"Implied_Value":245211.428571,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.451314,"Stability_Index":0.717448,"Supply_Index":1.0,"Pricing_Index":0.52584,"Valuation_Index":0.547516,"Capital_Index":0.496398,"Investment_Score":56.975301,"Total_Population":816108,"Median_Rent":1788,"Median_Income":93038,"Median_Home_Value":562500},{"msa_code":40140,"msa_name":"Riverside-San Bernardino-Ontario, CA Metro Area","year":2024,"Employment_Rate":0.935343,"Employment_Growth":0.006315,"Pop_Growth":0.01198,"Income_Growth":0.036087,"Rent_to_Income_Ratio":0.26449,"Vacancy_Rate":0.096584,"New_Multi_Units":93,"Rent_Growth":0.084324,"Implied_Value":275108.571429,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.4759,"Stability_Index":0.486631,"Supply_Index":0.997527,"Pricing_Index":0.543032,"Valuation_Index":0.642455,"Capital_Index":0.496398,"Investment_Score":56.898081,"Total_Population":4744214,"Median_Rent":2006,"Median_Income":91013,"Median_Home_Value":579500},{"msa_code":41420,"msa_name":"Salem, OR Metro Area","year":2024,"Employment_Rate":0.945949,"Employment_Growth":0.009381,"Pop_Growth":0.015737,"Income_Growth":0.109692,"Rent_to_Income_Ratio":0.221341,"Vacancy_Rate":0.055095,"New_Multi_Units":345,"Rent_Growth":0.097052,"Implied_Value":178342.956522,"Effective Tax Spread":0.0,"Value Creation":4891304.347826,"Average HERS Index Score":54,"Economic_Index":0.612043,"Stability_Index":0.748222,"Supply_Index":0.990826,"Pricing_Index":0.598264,"Valuation_Index":0.335174,"Capital_Index":0.337805,"Investment_Score":56.849043,"Total_Population":443416,"Median_Rent":1526,"Median_Income":82732,"Median_Home_Value":447000},{"msa_code":49340,"msa_name":"Worcester, MA Metro Area","year":2024,"Employment_Rate":0.954372,"Employment_Growth":0.022057,"Pop_Growth":0.016591,"Income_Growth":0.0266,"Rent_to_Income_Ratio":0.194157,"Vacancy_Rate":0.04855,"New_Multi_Units":2252,"Rent_Growth":0.078675,"Implied_Value":179405.217391,"Effective Tax Spread":0.01438,"Value Creation":4488078.541374,"Average HERS Index Score":48,"Economic_Index":0.56069,"Stability_Index":0.866225,"Supply_Index":0.940118,"Pricing_Index":0.518517,"Valuation_Index":0.338547,"Capital_Index":0.61776,"Investment_Score":56.766308,"Total_Population":881248,"Median_Rent":1563,"Median_Income":96602,"Median_Home_Value":465500},{"msa_code":14460,"msa_name":"Boston-Cambridge-Newton, MA-NH Metro Area","year":2024,"Employment_Rate":0.958997,"Employment_Growth":0.025003,"Pop_Growth":0.021617,"Income_Growth":0.064392,"Rent_to_Income_Ratio":0.213164,"Vacancy_Rate":0.053562,"New_Multi_Units":8116,"Rent_Growth":0.0465,"Implied_Value":240240.0,"Effective Tax Spread":0.01438,"Value Creation":4488078.541374,"Average HERS Index Score":48,"Economic_Index":0.647591,"Stability_Index":0.782679,"Supply_Index":0.784189,"Pricing_Index":0.378898,"Valuation_Index":0.531729,"Capital_Index":0.61776,"Investment_Score":56.614064,"Total_Population":5025517,"Median_Rent":2093,"Median_Income":117825,"Median_Home_Value":681100},{"msa_code":12540,"msa_name":"Bakersfield-Delano, CA Metro Area","year":2024,"Employment_Rate":0.907424,"Employment_Growth":-0.012538,"Pop_Growth":0.00953,"Income_Growth":0.039235,"Rent_to_Income_Ratio":0.247891,"Vacancy_Rate":0.062397,"New_Multi_Units":0,"Rent_Growth":0.150078,"Implied_Value":202834.285714,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.369724,"Stability_Index":0.630799,"Supply_Index":1.0,"Pricing_Index":0.828361,"Valuation_Index":0.412947,"Capital_Index":0.496398,"Investment_Score":56.452699,"Total_Population":922529,"Median_Rent":1479,"Median_Income":71596,"Median_Home_Value":363600},{"msa_code":14500,"msa_name":"Boulder, CO Metro Area","year":2024,"Employment_Rate":0.953654,"Employment_Growth":0.012905,"Pop_Growth":0.010498,"Income_Growth":0.076906,"Rent_to_Income_Ratio":0.229724,"Vacancy_Rate":0.056081,"New_Multi_Units":2492,"Rent_Growth":0.026632,"Implied_Value":240209.454545,"Effective Tax Spread":0.01436,"Value Creation":6060606.060606,"Average HERS Index Score":53,"Economic_Index":0.569049,"Stability_Index":0.714297,"Supply_Index":0.933736,"Pricing_Index":0.292683,"Valuation_Index":0.531632,"Capital_Index":0.816322,"Investment_Score":56.418708,"Total_Population":330262,"Median_Rent":1966,"Median_Income":102697,"Median_Home_Value":783000},{"msa_code":42200,"msa_name":"Santa Maria-Santa Barbara, CA Metro Area","year":2024,"Employment_Rate":0.92416,"Employment_Growth":0.007549,"Pop_Growth":0.007349,"Income_Growth":0.048686,"Rent_to_Income_Ratio":0.2645,"Vacancy_Rate":0.072849,"New_Multi_Units":0,"Rent_Growth":0.060362,"Implied_Value":289097.142857,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.450149,"Stability_Index":0.543286,"Supply_Index":1.0,"Pricing_Index":0.439051,"Valuation_Index":0.686876,"Capital_Index":0.496398,"Investment_Score":56.253232,"Total_Population":444500,"Median_Rent":2108,"Median_Income":95637,"Median_Home_Value":900900},{"msa_code":39580,"msa_name":"Raleigh-Cary, NC Metro Area","year":2024,"Employment_Rate":0.962475,"Employment_Growth":0.045067,"Pop_Growth":0.03497,"Income_Growth":0.062937,"Rent_to_Income_Ratio":0.196664,"Vacancy_Rate":0.053887,"New_Multi_Units":6131,"Rent_Growth":0.042991,"Implied_Value":184140.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.766128,"Stability_Index":0.844038,"Supply_Index":0.836972,"Pricing_Index":0.36367,"Valuation_Index":0.353582,"Capital_Index":0.45988,"Investment_Score":56.210885,"Total_Population":1562009,"Median_Rent":1674,"Median_Income":102144,"Median_Home_Value":465800},{"msa_code":14260,"msa_name":"Boise City, ID Metro Area","year":2024,"Employment_Rate":0.95778,"Employment_Growth":0.012842,"Pop_Growth":0.022332,"Income_Growth":0.074752,"Rent_to_Income_Ratio":0.22026,"Vacancy_Rate":0.048321,"New_Multi_Units":5043,"Rent_Growth":0.077432,"Implied_Value":197058.782609,"Effective Tax Spread":0.0,"Value Creation":5270092.226614,"Average HERS Index Score":59,"Economic_Index":0.632548,"Stability_Index":0.768474,"Supply_Index":0.865903,"Pricing_Index":0.513124,"Valuation_Index":0.394606,"Capital_Index":0.385745,"Investment_Score":55.612348,"Total_Population":844979,"Median_Rent":1628,"Median_Income":88695,"Median_Home_Value":484000},{"msa_code":49180,"msa_name":"Winston-Salem, NC Metro Area","year":2024,"Employment_Rate":0.963848,"Employment_Growth":0.034335,"Pop_Growth":0.013739,"Income_Growth":0.023243,"Rent_to_Income_Ratio":0.200659,"Vacancy_Rate":0.055958,"New_Multi_Units":0,"Rent_Growth":0.108652,"Implied_Value":121220.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.589731,"Stability_Index":0.824047,"Supply_Index":1.0,"Pricing_Index":0.648599,"Valuation_Index":0.153779,"Capital_Index":0.45988,"Investment_Score":55.543571,"Total_Population":705187,"Median_Rent":1102,"Median_Income":65903,"Median_Home_Value":270700},{"msa_code":29540,"msa_name":"Lancaster, PA Metro Area","year":2024,"Employment_Rate":0.969579,"Employment_Growth":0.018372,"Pop_Growth":0.008421,"Income_Growth":0.071628,"Rent_to_Income_Ratio":0.202653,"Vacancy_Rate":0.018983,"New_Multi_Units":0,"Rent_Growth":0.090293,"Implied_Value":141779.076923,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.59561,"Stability_Index":0.904857,"Supply_Index":1.0,"Pricing_Index":0.568934,"Valuation_Index":0.219065,"Capital_Index":0.259615,"Investment_Score":55.362996,"Total_Population":563293,"Median_Rent":1449,"Median_Income":85802,"Median_Home_Value":332600},{"msa_code":28420,"msa_name":"Kennewick-Richland, WA Metro Area","year":2024,"Employment_Rate":0.935935,"Employment_Growth":0.032647,"Pop_Growth":0.016468,"Income_Growth":0.078504,"Rent_to_Income_Ratio":0.182198,"Vacancy_Rate":0.045222,"New_Multi_Units":1061,"Rent_Growth":0.047766,"Implied_Value":169134.545455,"Effective Tax Spread":0.0,"Value Creation":5681818.181818,"Average HERS Index Score":54,"Economic_Index":0.613816,"Stability_Index":0.919212,"Supply_Index":0.971787,"Pricing_Index":0.384391,"Valuation_Index":0.305932,"Capital_Index":0.437854,"Investment_Score":55.284518,"Total_Population":319428,"Median_Rent":1360,"Median_Income":89573,"Median_Home_Value":442000},{"msa_code":48900,"msa_name":"Wilmington, NC Metro Area","year":2024,"Employment_Rate":0.964392,"Employment_Growth":0.052115,"Pop_Growth":0.028213,"Income_Growth":0.025824,"Rent_to_Income_Ratio":0.24003,"Vacancy_Rate":0.207955,"New_Multi_Units":0,"Rent_Growth":0.106592,"Implied_Value":173580.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.707734,"Stability_Index":0.312713,"Supply_Index":1.0,"Pricing_Index":0.639659,"Valuation_Index":0.320049,"Capital_Index":0.45988,"Investment_Score":55.277069,"Total_Population":480522,"Median_Rent":1578,"Median_Income":78890,"Median_Home_Value":397300},{"msa_code":22660,"msa_name":"Fort Collins-Loveland, CO Metro Area","year":2024,"Employment_Rate":0.956698,"Employment_Growth":0.020299,"Pop_Growth":0.010257,"Income_Growth":0.057767,"Rent_to_Income_Ratio":0.225267,"Vacancy_Rate":0.051155,"New_Multi_Units":3038,"Rent_Growth":0.030606,"Implied_Value":213940.363636,"Effective Tax Spread":0.01436,"Value Creation":6060606.060606,"Average HERS Index Score":53,"Economic_Index":0.567811,"Stability_Index":0.74285,"Supply_Index":0.919217,"Pricing_Index":0.309929,"Valuation_Index":0.448214,"Capital_Index":0.816322,"Investment_Score":55.226809,"Total_Population":374574,"Median_Rent":1751,"Median_Income":93276,"Median_Home_Value":610000},{"msa_code":31080,"msa_name":"Los Angeles-Long Beach-Anaheim, CA Metro Area","year":2024,"Employment_Rate":0.942503,"Employment_Growth":0.0158,"Pop_Growth":0.010041,"Income_Growth":0.048336,"Rent_to_Income_Ratio":0.26314,"Vacancy_Rate":0.058768,"New_Multi_Units":7305,"Rent_Growth":0.060712,"Implied_Value":289920.0,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.517512,"Stability_Index":0.582043,"Supply_Index":0.805754,"Pricing_Index":0.440572,"Valuation_Index":0.689489,"Capital_Index":0.496398,"Investment_Score":55.113439,"Total_Population":12927614,"Median_Rent":2114,"Median_Income":96405,"Median_Home_Value":908500},{"msa_code":43620,"msa_name":"Sioux Falls, SD-MN Metro Area","year":2024,"Employment_Rate":0.979176,"Employment_Growth":0.014395,"Pop_Growth":0.016075,"Income_Growth":0.082426,"Rent_to_Income_Ratio":0.15911,"Vacancy_Rate":0.047799,"New_Multi_Units":2109,"Rent_Growth":0.107287,"Implied_Value":105024.0,"Effective Tax Spread":0.0,"Value Creation":3174603.174603,"Average HERS Index Score":48,"Economic_Index":0.6554,"Stability_Index":1.0,"Supply_Index":0.94392,"Pricing_Index":0.642678,"Valuation_Index":0.102348,"Capital_Index":0.120535,"Investment_Score":54.965408,"Total_Population":308711,"Median_Rent":1094,"Median_Income":82509,"Median_Home_Value":331400},{"msa_code":12260,"msa_name":"Augusta-Richmond County, GA-SC Metro Area","year":2024,"Employment_Rate":0.913394,"Employment_Growth":0.019024,"Pop_Growth":0.013486,"Income_Growth":0.074815,"Rent_to_Income_Ratio":0.206661,"Vacancy_Rate":0.104744,"New_Multi_Units":0,"Rent_Growth":0.128974,"Implied_Value":134244.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.519312,"Stability_Index":0.684908,"Supply_Index":1.0,"Pricing_Index":0.736782,"Valuation_Index":0.195137,"Capital_Index":0.495887,"Investment_Score":54.837194,"Total_Population":636658,"Median_Rent":1243,"Median_Income":72176,"Median_Home_Value":262100},{"msa_code":15980,"msa_name":"Cape Coral-Fort Myers, FL Metro Area","year":2024,"Employment_Rate":0.965755,"Employment_Growth":0.093351,"Pop_Growth":0.031616,"Income_Growth":0.168491,"Rent_to_Income_Ratio":0.268558,"Vacancy_Rate":0.274653,"New_Multi_Units":0,"Rent_Growth":0.04118,"Implied_Value":179616.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":1.0,"Stability_Index":0.045965,"Supply_Index":1.0,"Pricing_Index":0.355812,"Valuation_Index":0.339216,"Capital_Index":0.495887,"Investment_Score":54.725348,"Total_Population":860959,"Median_Rent":1871,"Median_Income":83602,"Median_Home_Value":396500},{"msa_code":36740,"msa_name":"Orlando-Kissimmee-Sanford, FL Metro Area","year":2024,"Employment_Rate":0.95067,"Employment_Growth":0.04736,"Pop_Growth":0.0435,"Income_Growth":0.047378,"Rent_to_Income_Ratio":0.277923,"Vacancy_Rate":0.085201,"New_Multi_Units":0,"Rent_Growth":0.043357,"Implied_Value":180192.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.772226,"Stability_Index":0.463234,"Supply_Index":1.0,"Pricing_Index":0.365261,"Valuation_Index":0.341046,"Capital_Index":0.495887,"Investment_Score":54.719449,"Total_Population":2940513,"Median_Rent":1877,"Median_Income":81044,"Median_Home_Value":409400},{"msa_code":31540,"msa_name":"Madison, WI Metro Area","year":2024,"Employment_Rate":0.977062,"Employment_Growth":0.041161,"Pop_Growth":0.019099,"Income_Growth":0.092315,"Rent_to_Income_Ratio":0.192211,"Vacancy_Rate":0.052634,"New_Multi_Units":5136,"Rent_Growth":0.076404,"Implied_Value":132842.666667,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":56,"Economic_Index":0.742142,"Stability_Index":0.8638,"Supply_Index":0.86343,"Pricing_Index":0.508665,"Valuation_Index":0.190687,"Capital_Index":0.261512,"Investment_Score":54.421059,"Total_Population":707606,"Median_Rent":1437,"Median_Income":89714,"Median_Home_Value":415500},{"msa_code":41500,"msa_name":"Salinas, CA Metro Area","year":2024,"Employment_Rate":0.937258,"Employment_Growth":0.043377,"Pop_Growth":0.012834,"Income_Growth":0.059692,"Rent_to_Income_Ratio":0.258163,"Vacancy_Rate":0.098903,"New_Multi_Units":0,"Rent_Growth":0.001497,"Implied_Value":275245.714286,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.600896,"Stability_Index":0.504918,"Supply_Index":1.0,"Pricing_Index":0.183613,"Valuation_Index":0.64289,"Capital_Index":0.496398,"Investment_Score":54.323496,"Total_Population":436251,"Median_Rent":2007,"Median_Income":93290,"Median_Home_Value":808600},{"msa_code":30700,"msa_name":"Lincoln, NE Metro Area","year":2024,"Employment_Rate":0.964283,"Employment_Growth":0.02981,"Pop_Growth":0.024152,"Income_Growth":0.053005,"Rent_to_Income_Ratio":0.178395,"Vacancy_Rate":0.041629,"New_Multi_Units":0,"Rent_Growth":0.094303,"Implied_Value":97395.428571,"Effective Tax Spread":0.0,"Value Creation":3174603.174603,"Average HERS Index Score":57,"Economic_Index":0.667654,"Stability_Index":0.942115,"Supply_Index":1.0,"Pricing_Index":0.586331,"Valuation_Index":0.078124,"Capital_Index":0.120535,"Investment_Score":54.173542,"Total_Population":351919,"Median_Rent":1114,"Median_Income":74935,"Median_Home_Value":287200},{"msa_code":46700,"msa_name":"Vallejo, CA Metro Area","year":2024,"Employment_Rate":0.906904,"Employment_Growth":-0.027213,"Pop_Growth":0.013096,"Income_Growth":-0.050956,"Rent_to_Income_Ratio":0.281007,"Vacancy_Rate":0.041852,"New_Multi_Units":83,"Rent_Growth":0.07965,"Implied_Value":304868.571429,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.240967,"Stability_Index":0.555165,"Supply_Index":0.997793,"Pricing_Index":0.52275,"Valuation_Index":0.736958,"Capital_Index":0.496398,"Investment_Score":54.148422,"Total_Population":455101,"Median_Rent":2223,"Median_Income":94930,"Median_Home_Value":629700},{"msa_code":16740,"msa_name":"Charlotte-Concord-Gastonia, NC-SC Metro Area","year":2024,"Employment_Rate":0.962224,"Employment_Growth":0.038916,"Pop_Growth":0.027897,"Income_Growth":0.057542,"Rent_to_Income_Ratio":0.222579,"Vacancy_Rate":0.074836,"New_Multi_Units":6032,"Rent_Growth":0.059136,"Implied_Value":175340.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.709475,"Stability_Index":0.696407,"Supply_Index":0.839604,"Pricing_Index":0.433731,"Valuation_Index":0.325638,"Capital_Index":0.45988,"Investment_Score":53.999191,"Total_Population":2883370,"Median_Rent":1594,"Median_Income":85938,"Median_Home_Value":400400},{"msa_code":34820,"msa_name":"Myrtle Beach-Conway-North Myrtle Beach, SC Metro Area","year":2024,"Employment_Rate":0.946207,"Employment_Growth":0.043372,"Pop_Growth":0.040035,"Income_Growth":-0.006581,"Rent_to_Income_Ratio":0.250912,"Vacancy_Rate":0.235342,"New_Multi_Units":0,"Rent_Growth":0.132806,"Implied_Value":154764.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":58,"Economic_Index":0.671064,"Stability_Index":0.206319,"Supply_Index":1.0,"Pricing_Index":0.753414,"Valuation_Index":0.260298,"Capital_Index":0.45988,"Investment_Score":53.978889,"Total_Population":413391,"Median_Rent":1433,"Median_Income":68534,"Median_Home_Value":325300},{"msa_code":41740,"msa_name":"San Diego-Chula Vista-Carlsbad, CA Metro Area","year":2024,"Employment_Rate":0.907898,"Employment_Growth":0.007661,"Pop_Growth":0.008815,"Income_Growth":0.052646,"Rent_to_Income_Ratio":0.256863,"Vacancy_Rate":0.068198,"New_Multi_Units":3440,"Rent_Growth":0.017422,"Implied_Value":320365.714286,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.431602,"Stability_Index":0.583155,"Supply_Index":0.908528,"Pricing_Index":0.252716,"Valuation_Index":0.78617,"Capital_Index":0.496398,"Investment_Score":53.851766,"Total_Population":3298799,"Median_Rent":2336,"Median_Income":109132,"Median_Home_Value":914700},{"msa_code":38940,"msa_name":"Port St. Lucie, FL Metro Area","year":2024,"Employment_Rate":0.942924,"Employment_Growth":0.030469,"Pop_Growth":0.036198,"Income_Growth":0.180675,"Rent_to_Income_Ratio":0.25619,"Vacancy_Rate":0.145247,"New_Multi_Units":0,"Rent_Growth":0.02561,"Implied_Value":165312.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.844466,"Stability_Index":0.401648,"Supply_Index":1.0,"Pricing_Index":0.288251,"Valuation_Index":0.293794,"Capital_Index":0.495887,"Investment_Score":53.532355,"Total_Population":556336,"Median_Rent":1722,"Median_Income":80659,"Median_Home_Value":420200},{"msa_code":24860,"msa_name":"Greenville-Anderson-Greer, SC Metro Area","year":2024,"Employment_Rate":0.9546,"Employment_Growth":0.01536,"Pop_Growth":0.021733,"Income_Growth":0.093181,"Rent_to_Income_Ratio":0.195464,"Vacancy_Rate":0.086977,"New_Multi_Units":484,"Rent_Growth":0.058219,"Implied_Value":133488.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":58,"Economic_Index":0.652107,"Stability_Index":0.769516,"Supply_Index":0.98713,"Pricing_Index":0.429752,"Valuation_Index":0.192736,"Capital_Index":0.45988,"Investment_Score":53.444055,"Total_Population":996680,"Median_Rent":1236,"Median_Income":75881,"Median_Home_Value":300400},{"msa_code":10900,"msa_name":"Allentown-Bethlehem-Easton, PA-NJ Metro Area","year":2024,"Employment_Rate":0.946525,"Employment_Growth":0.040658,"Pop_Growth":0.014725,"Income_Growth":0.034685,"Rent_to_Income_Ratio":0.20835,"Vacancy_Rate":0.066081,"New_Multi_Units":0,"Rent_Growth":0.082405,"Implied_Value":142659.692308,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.590748,"Stability_Index":0.770903,"Supply_Index":1.0,"Pricing_Index":0.534705,"Valuation_Index":0.221861,"Capital_Index":0.259615,"Investment_Score":53.323465,"Total_Population":886418,"Median_Rent":1458,"Median_Income":83974,"Median_Home_Value":332700},{"msa_code":41620,"msa_name":"Salt Lake City-Murray, UT Metro Area","year":2024,"Employment_Rate":0.957458,"Employment_Growth":0.024623,"Pop_Growth":0.025948,"Income_Growth":0.065026,"Rent_to_Income_Ratio":0.197995,"Vacancy_Rate":0.04864,"New_Multi_Units":8085,"Rent_Growth":0.012203,"Implied_Value":213558.545455,"Effective Tax Spread":0.0,"Value Creation":6060606.060606,"Average HERS Index Score":58,"Economic_Index":0.665925,"Stability_Index":0.851557,"Supply_Index":0.785013,"Pricing_Index":0.230069,"Valuation_Index":0.447002,"Capital_Index":0.485794,"Investment_Score":53.20824,"Total_Population":1300762,"Median_Rent":1659,"Median_Income":100548,"Median_Home_Value":575200},{"msa_code":16700,"msa_name":"Charleston-North Charleston, SC Metro Area","year":2024,"Employment_Rate":0.94386,"Employment_Growth":0.024797,"Pop_Growth":0.024161,"Income_Growth":0.060377,"Rent_to_Income_Ratio":0.227756,"Vacancy_Rate":0.104736,"New_Multi_Units":503,"Rent_Growth":0.044485,"Implied_Value":185112.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":58,"Economic_Index":0.625985,"Stability_Index":0.605488,"Supply_Index":0.986625,"Pricing_Index":0.370155,"Valuation_Index":0.356669,"Capital_Index":0.45988,"Investment_Score":53.160302,"Total_Population":869940,"Median_Rent":1714,"Median_Income":90307,"Median_Home_Value":430300},{"msa_code":28140,"msa_name":"Kansas City, MO-KS Metro Area","year":2024,"Employment_Rate":0.963194,"Employment_Growth":0.016231,"Pop_Growth":0.015507,"Income_Growth":0.049385,"Rent_to_Income_Ratio":0.188339,"Vacancy_Rate":0.065099,"New_Multi_Units":0,"Rent_Growth":0.060484,"Implied_Value":121731.428571,"Effective Tax Spread":0.01556,"Value Creation":3759398.496241,"Average HERS Index Score":58,"Economic_Index":0.586134,"Stability_Index":0.848605,"Supply_Index":1.0,"Pricing_Index":0.439579,"Valuation_Index":0.155403,"Capital_Index":0.552697,"Investment_Score":53.148212,"Total_Population":2254288,"Median_Rent":1315,"Median_Income":83785,"Median_Home_Value":314300},{"msa_code":11460,"msa_name":"Ann Arbor, MI Metro Area","year":2024,"Employment_Rate":0.95695,"Employment_Growth":0.016641,"Pop_Growth":0.022813,"Income_Growth":0.08082,"Rent_to_Income_Ratio":0.206003,"Vacancy_Rate":0.070199,"New_Multi_Units":2398,"Rent_Growth":0.070986,"Implied_Value":143658.666667,"Effective Tax Spread":0.0,"Value Creation":4558404.558405,"Average HERS Index Score":59,"Economic_Index":0.649818,"Stability_Index":0.769905,"Supply_Index":0.936235,"Pricing_Index":0.48515,"Valuation_Index":0.225033,"Capital_Index":0.295672,"Investment_Score":53.067121,"Total_Population":373875,"Median_Rent":1554,"Median_Income":90523,"Median_Home_Value":395300},{"msa_code":33700,"msa_name":"Modesto, CA Metro Area","year":2024,"Employment_Rate":0.914963,"Employment_Growth":-0.019153,"Pop_Growth":0.01005,"Income_Growth":-0.049361,"Rent_to_Income_Ratio":0.267385,"Vacancy_Rate":0.030294,"New_Multi_Units":0,"Rent_Growth":0.09906,"Implied_Value":240411.428571,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.26238,"Stability_Index":0.63407,"Supply_Index":1.0,"Pricing_Index":0.606974,"Valuation_Index":0.532273,"Capital_Index":0.496398,"Investment_Score":53.05913,"Total_Population":556972,"Median_Rent":1753,"Median_Income":78673,"Median_Home_Value":468300},{"msa_code":36260,"msa_name":"Ogden, UT Metro Area","year":2024,"Employment_Rate":0.958389,"Employment_Growth":-0.004403,"Pop_Growth":0.017016,"Income_Growth":-0.019958,"Rent_to_Income_Ratio":0.200008,"Vacancy_Rate":0.06788,"New_Multi_Units":5724,"Rent_Growth":0.073953,"Implied_Value":211241.454545,"Effective Tax Spread":0.0,"Value Creation":6060606.060606,"Average HERS Index Score":58,"Economic_Index":0.450422,"Stability_Index":0.798018,"Supply_Index":0.847794,"Pricing_Index":0.498027,"Valuation_Index":0.439644,"Capital_Index":0.485794,"Investment_Score":53.016773,"Total_Population":669210,"Median_Rent":1641,"Median_Income":98456,"Median_Home_Value":507500},{"msa_code":19780,"msa_name":"Des Moines-West Des Moines, IA Metro Area","year":2024,"Employment_Rate":0.96263,"Employment_Growth":0.027289,"Pop_Growth":0.022721,"Income_Growth":0.032855,"Rent_to_Income_Ratio":0.165438,"Vacancy_Rate":0.054852,"New_Multi_Units":0,"Rent_Growth":0.03606,"Implied_Value":107029.714286,"Effective Tax Spread":0.01895,"Value Creation":3474903.474903,"Average HERS Index Score":60,"Economic_Index":0.626772,"Stability_Index":0.959323,"Supply_Index":1.0,"Pricing_Index":0.333594,"Valuation_Index":0.108717,"Capital_Index":0.594719,"Investment_Score":53.00962,"Total_Population":753913,"Median_Rent":1178,"Median_Income":85446,"Median_Home_Value":288400},{"msa_code":17140,"msa_name":"Cincinnati, OH-KY-IN Metro Area","year":2024,"Employment_Rate":0.957757,"Employment_Growth":0.00996,"Pop_Growth":0.014032,"Income_Growth":0.046824,"Rent_to_Income_Ratio":0.177153,"Vacancy_Rate":0.057101,"New_Multi_Units":0,"Rent_Growth":0.092643,"Implied_Value":109072.0,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":61,"Economic_Index":0.550455,"Stability_Index":0.909836,"Supply_Index":1.0,"Pricing_Index":0.57913,"Valuation_Index":0.115203,"Capital_Index":0.261512,"Investment_Score":52.755037,"Total_Population":2304804,"Median_Rent":1203,"Median_Income":81489,"Median_Home_Value":288700},{"msa_code":30460,"msa_name":"Lexington-Fayette, KY Metro Area","year":2024,"Employment_Rate":0.953434,"Employment_Growth":0.027654,"Pop_Growth":0.025615,"Income_Growth":0.020235,"Rent_to_Income_Ratio":0.209115,"Vacancy_Rate":0.06092,"New_Multi_Units":2479,"Rent_Growth":0.114593,"Implied_Value":117385.714286,"Effective Tax Spread":0.0,"Value Creation":3174603.174603,"Average HERS Index Score":64,"Economic_Index":0.609004,"Stability_Index":0.780349,"Supply_Index":0.934081,"Pricing_Index":0.674378,"Valuation_Index":0.141603,"Capital_Index":0.120535,"Investment_Score":52.62042,"Total_Population":533366,"Median_Rent":1245,"Median_Income":71444,"Median_Home_Value":306900},{"msa_code":18140,"msa_name":"Columbus, OH Metro Area","year":2024,"Employment_Rate":0.961029,"Employment_Growth":0.018165,"Pop_Growth":0.020688,"Income_Growth":0.071689,"Rent_to_Income_Ratio":0.196629,"Vacancy_Rate":0.071872,"New_Multi_Units":3126,"Rent_Growth":0.083732,"Implied_Value":123216.0,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":61,"Economic_Index":0.639525,"Stability_Index":0.801211,"Supply_Index":0.916877,"Pricing_Index":0.540462,"Valuation_Index":0.160117,"Capital_Index":0.261512,"Investment_Score":52.351951,"Total_Population":2225377,"Median_Rent":1359,"Median_Income":82938,"Median_Home_Value":334800},{"msa_code":23420,"msa_name":"Fresno, CA Metro Area","year":2024,"Employment_Rate":0.912517,"Employment_Growth":0.026107,"Pop_Growth":0.008082,"Income_Growth":0.05402,"Rent_to_Income_Ratio":0.242135,"Vacancy_Rate":0.05994,"New_Multi_Units":4208,"Rent_Growth":0.066996,"Implied_Value":207497.142857,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.482353,"Stability_Index":0.658346,"Supply_Index":0.888106,"Pricing_Index":0.467837,"Valuation_Index":0.427754,"Capital_Index":0.496398,"Investment_Score":52.172483,"Total_Population":1189557,"Median_Rent":1513,"Median_Income":74983,"Median_Home_Value":416200},{"msa_code":25860,"msa_name":"Hickory-Lenoir-Morganton, NC Metro Area","year":2024,"Employment_Rate":0.960143,"Employment_Growth":-0.040055,"Pop_Growth":0.00811,"Income_Growth":0.101351,"Rent_to_Income_Ratio":0.174964,"Vacancy_Rate":0.101966,"New_Multi_Units":2481,"Rent_Growth":0.128019,"Implied_Value":102740.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.473447,"Stability_Index":0.810913,"Supply_Index":0.934028,"Pricing_Index":0.732641,"Valuation_Index":0.095095,"Capital_Index":0.45988,"Investment_Score":52.14026,"Total_Population":373031,"Median_Rent":934,"Median_Income":64059,"Median_Home_Value":266100},{"msa_code":19660,"msa_name":"Deltona-Daytona Beach-Ormond Beach, FL Metro Area","year":2024,"Employment_Rate":0.949884,"Employment_Growth":0.026226,"Pop_Growth":0.02455,"Income_Growth":0.097133,"Rent_to_Income_Ratio":0.262792,"Vacancy_Rate":0.138993,"New_Multi_Units":0,"Rent_Growth":0.064644,"Implied_Value":154944.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.687762,"Stability_Index":0.391726,"Supply_Index":1.0,"Pricing_Index":0.457631,"Valuation_Index":0.26087,"Capital_Index":0.495887,"Investment_Score":52.110877,"Total_Population":739516,"Median_Rent":1614,"Median_Income":73701,"Median_Home_Value":362600},{"msa_code":40220,"msa_name":"Roanoke, VA Metro Area","year":2024,"Employment_Rate":0.968182,"Employment_Growth":0.011988,"Pop_Growth":0.005322,"Income_Growth":0.107115,"Rent_to_Income_Ratio":0.19648,"Vacancy_Rate":0.111106,"New_Multi_Units":2344,"Rent_Growth":0.092916,"Implied_Value":125452.8,"Effective Tax Spread":0.0013,"Value Creation":4571428.571429,"Average HERS Index Score":62,"Economic_Index":0.605907,"Stability_Index":0.708054,"Supply_Index":0.937671,"Pricing_Index":0.580316,"Valuation_Index":0.16722,"Capital_Index":0.327243,"Investment_Score":52.067487,"Total_Population":315456,"Median_Rent":1188,"Median_Income":72557,"Median_Home_Value":278000},{"msa_code":37980,"msa_name":"Philadelphia-Camden-Wilmington, PA-NJ-DE-MD Metro Area","year":2024,"Employment_Rate":0.949314,"Employment_Growth":0.01729,"Pop_Growth":0.01349,"Income_Growth":0.045852,"Rent_to_Income_Ratio":0.206979,"Vacancy_Rate":0.055127,"New_Multi_Units":2434,"Rent_Growth":0.076236,"Implied_Value":153324.923077,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.547994,"Stability_Index":0.802232,"Supply_Index":0.935278,"Pricing_Index":0.507935,"Valuation_Index":0.255729,"Capital_Index":0.259615,"Investment_Score":51.968167,"Total_Population":6330422,"Median_Rent":1567,"Median_Income":90850,"Median_Home_Value":375100},{"msa_code":33860,"msa_name":"Montgomery, AL Metro Area","year":2024,"Employment_Rate":0.944363,"Employment_Growth":0.034401,"Pop_Growth":0.002916,"Income_Growth":0.069658,"Rent_to_Income_Ratio":0.205259,"Vacancy_Rate":0.104558,"New_Multi_Units":0,"Rent_Growth":0.120825,"Implied_Value":98204.689655,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.556251,"Stability_Index":0.690636,"Supply_Index":1.0,"Pricing_Index":0.701423,"Valuation_Index":0.080693,"Capital_Index":0.299077,"Investment_Score":51.912695,"Total_Population":386587,"Median_Rent":1141,"Median_Income":66706,"Median_Home_Value":220500},{"msa_code":33860,"msa_name":"Montgomery, AL Metro Area","year":2024,"Employment_Rate":0.944363,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.205259,"Vacancy_Rate":0.104558,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":94931.2,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.556251,"Stability_Index":0.690636,"Supply_Index":1.0,"Pricing_Index":0.701423,"Valuation_Index":0.080693,"Capital_Index":0.299077,"Investment_Score":51.912695,"Total_Population":386587,"Median_Rent":1141,"Median_Income":66706,"Median_Home_Value":220500},{"msa_code":26620,"msa_name":"Huntsville, AL Metro Area","year":2024,"Employment_Rate":0.965685,"Employment_Growth":0.048222,"Pop_Growth":0.028531,"Income_Growth":0.024962,"Rent_to_Income_Ratio":0.176866,"Vacancy_Rate":0.077061,"New_Multi_Units":0,"Rent_Growth":0.034677,"Implied_Value":110426.482759,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.701437,"Stability_Index":0.863237,"Supply_Index":1.0,"Pricing_Index":0.327596,"Valuation_Index":0.119504,"Capital_Index":0.299077,"Investment_Score":51.894001,"Total_Population":542297,"Median_Rent":1283,"Median_Income":87049,"Median_Home_Value":331800},{"msa_code":26620,"msa_name":"Huntsville, AL Metro Area","year":2024,"Employment_Rate":0.965685,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.176866,"Vacancy_Rate":0.077061,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":106745.6,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.701437,"Stability_Index":0.863237,"Supply_Index":1.0,"Pricing_Index":0.327596,"Valuation_Index":0.119504,"Capital_Index":0.299077,"Investment_Score":51.894001,"Total_Population":542297,"Median_Rent":1283,"Median_Income":87049,"Median_Home_Value":331800},{"msa_code":11700,"msa_name":"Asheville, NC Metro Area","year":2024,"Employment_Rate":0.957168,"Employment_Growth":0.016439,"Pop_Growth":0.012299,"Income_Growth":0.124386,"Rent_to_Income_Ratio":0.219626,"Vacancy_Rate":0.228312,"New_Multi_Units":0,"Rent_Growth":0.085537,"Implied_Value":153560.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.651175,"Stability_Index":0.340925,"Supply_Index":1.0,"Pricing_Index":0.548292,"Valuation_Index":0.256475,"Capital_Index":0.45988,"Investment_Score":51.869118,"Total_Population":422333,"Median_Rent":1396,"Median_Income":76275,"Median_Home_Value":420800},{"msa_code":36500,"msa_name":"Olympia-Lacey-Tumwater, WA Metro Area","year":2024,"Employment_Rate":0.902984,"Employment_Growth":-0.013177,"Pop_Growth":0.013073,"Income_Growth":0.054674,"Rent_to_Income_Ratio":0.223357,"Vacancy_Rate":0.046065,"New_Multi_Units":0,"Rent_Growth":0.029842,"Implied_Value":227461.090909,"Effective Tax Spread":0.0,"Value Creation":5681818.181818,"Average HERS Index Score":54,"Economic_Index":0.396168,"Stability_Index":0.7622,"Supply_Index":1.0,"Pricing_Index":0.306614,"Valuation_Index":0.491149,"Capital_Index":0.437854,"Investment_Score":51.633342,"Total_Population":302912,"Median_Rent":1829,"Median_Income":98264,"Median_Home_Value":525500},{"msa_code":42340,"msa_name":"Savannah, GA Metro Area","year":2024,"Employment_Rate":0.924119,"Employment_Growth":0.02445,"Pop_Growth":0.015659,"Income_Growth":0.070775,"Rent_to_Income_Ratio":0.236817,"Vacancy_Rate":0.131602,"New_Multi_Units":1350,"Rent_Growth":0.0722,"Implied_Value":171612.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.55839,"Stability_Index":0.507196,"Supply_Index":0.964102,"Pricing_Index":0.490419,"Valuation_Index":0.3138,"Capital_Index":0.495887,"Investment_Score":51.566224,"Total_Population":431589,"Median_Rent":1589,"Median_Income":80518,"Median_Home_Value":349900},{"msa_code":13820,"msa_name":"Birmingham, AL Metro Area","year":2024,"Employment_Rate":0.960686,"Employment_Growth":0.019761,"Pop_Growth":0.007003,"Income_Growth":0.081837,"Rent_to_Income_Ratio":0.202044,"Vacancy_Rate":0.106678,"New_Multi_Units":0,"Rent_Growth":0.094536,"Implied_Value":108619.034483,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.587511,"Stability_Index":0.697678,"Supply_Index":1.0,"Pricing_Index":0.587344,"Valuation_Index":0.113764,"Capital_Index":0.299077,"Investment_Score":51.518104,"Total_Population":1192583,"Median_Rent":1262,"Median_Income":74954,"Median_Home_Value":263900},{"msa_code":13820,"msa_name":"Birmingham, AL Metro Area","year":2024,"Employment_Rate":0.960686,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.202044,"Vacancy_Rate":0.106678,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":104998.4,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.587511,"Stability_Index":0.697678,"Supply_Index":1.0,"Pricing_Index":0.587344,"Valuation_Index":0.113764,"Capital_Index":0.299077,"Investment_Score":51.518104,"Total_Population":1192583,"Median_Rent":1262,"Median_Income":74954,"Median_Home_Value":263900},{"msa_code":14860,"msa_name":"Bridgeport-Stamford-Danbury, CT Metro Area","year":2024,"Employment_Rate":0.949611,"Employment_Growth":0.012116,"Pop_Growth":0.022196,"Income_Growth":0.048119,"Rent_to_Income_Ratio":0.195357,"Vacancy_Rate":0.054874,"New_Multi_Units":0,"Rent_Growth":0.017723,"Implied_Value":181920.0,"Effective Tax Spread":0.0,"Value Creation":3619909.502262,"Average HERS Index Score":51,"Economic_Index":0.582012,"Stability_Index":0.846599,"Supply_Index":1.0,"Pricing_Index":0.254024,"Valuation_Index":0.346533,"Capital_Index":0.176894,"Investment_Score":51.504321,"Total_Population":972679,"Median_Rent":1895,"Median_Income":116402,"Median_Home_Value":615800},{"msa_code":19430,"msa_name":"Dayton-Kettering-Beavercreek, OH Metro Area","year":2024,"Employment_Rate":0.935456,"Employment_Growth":0.021815,"Pop_Growth":0.009059,"Income_Growth":0.084106,"Rent_to_Income_Ratio":0.184676,"Vacancy_Rate":0.074925,"New_Multi_Units":0,"Rent_Growth":0.089581,"Implied_Value":101456.0,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":0,"Economic_Index":0.557391,"Stability_Index":0.838927,"Supply_Index":1.0,"Pricing_Index":0.565844,"Valuation_Index":0.091018,"Capital_Index":0.261512,"Investment_Score":51.481953,"Total_Population":821740,"Median_Rent":1119,"Median_Income":72711,"Median_Home_Value":228600},{"msa_code":47380,"msa_name":"Waco, TX Metro Area","year":2024,"Employment_Rate":0.968238,"Employment_Growth":0.012983,"Pop_Growth":0.001454,"Income_Growth":0.080471,"Rent_to_Income_Ratio":0.219141,"Vacancy_Rate":0.094884,"New_Multi_Units":1533,"Rent_Growth":0.110314,"Implied_Value":114276.923077,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.556652,"Stability_Index":0.661467,"Supply_Index":0.959236,"Pricing_Index":0.655811,"Valuation_Index":0.131731,"Capital_Index":0.333628,"Investment_Score":51.399385,"Total_Population":305814,"Median_Rent":1238,"Median_Income":67792,"Median_Home_Value":277100},{"msa_code":16860,"msa_name":"Chattanooga, TN-GA Metro Area","year":2024,"Employment_Rate":0.951209,"Employment_Growth":0.018701,"Pop_Growth":0.014491,"Income_Growth":0.093175,"Rent_to_Income_Ratio":0.202195,"Vacancy_Rate":0.084541,"New_Multi_Units":1057,"Rent_Growth":0.04201,"Implied_Value":139150.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":59,"Economic_Index":0.617845,"Stability_Index":0.749986,"Supply_Index":0.971894,"Pricing_Index":0.359414,"Valuation_Index":0.210716,"Capital_Index":0.421874,"Investment_Score":51.314423,"Total_Population":588763,"Median_Rent":1265,"Median_Income":75076,"Median_Home_Value":324500},{"msa_code":12580,"msa_name":"Baltimore-Columbia-Towson, MD Metro Area","year":2024,"Employment_Rate":0.94318,"Employment_Growth":0.016332,"Pop_Growth":0.008717,"Income_Growth":0.046421,"Rent_to_Income_Ratio":0.198609,"Vacancy_Rate":0.058688,"New_Multi_Units":0,"Rent_Growth":0.048812,"Implied_Value":162797.538462,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":52,"Economic_Index":0.511183,"Stability_Index":0.825242,"Supply_Index":1.0,"Pricing_Index":0.38893,"Valuation_Index":0.285809,"Capital_Index":0.259615,"Investment_Score":51.210943,"Total_Population":2859024,"Median_Rent":1633,"Median_Income":98666,"Median_Home_Value":403000},{"msa_code":21660,"msa_name":"Eugene-Springfield, OR Metro Area","year":2024,"Employment_Rate":0.946206,"Employment_Growth":0.012738,"Pop_Growth":0.003187,"Income_Growth":0.044079,"Rent_to_Income_Ratio":0.240078,"Vacancy_Rate":0.060771,"New_Multi_Units":0,"Rent_Growth":0.070648,"Implied_Value":171798.26087,"Effective Tax Spread":0.0,"Value Creation":4891304.347826,"Average HERS Index Score":54,"Economic_Index":0.4782,"Stability_Index":0.664104,"Supply_Index":1.0,"Pricing_Index":0.483686,"Valuation_Index":0.314391,"Capital_Index":0.337805,"Investment_Score":51.160099,"Total_Population":382396,"Median_Rent":1470,"Median_Income":73476,"Median_Home_Value":448000},{"msa_code":25420,"msa_name":"Harrisburg-Carlisle, PA Metro Area","year":2024,"Employment_Rate":0.960663,"Employment_Growth":0.010887,"Pop_Growth":0.015355,"Income_Growth":0.054014,"Rent_to_Income_Ratio":0.185998,"Vacancy_Rate":0.044677,"New_Multi_Units":0,"Rent_Growth":0.049372,"Implied_Value":122699.076923,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.573521,"Stability_Index":0.906202,"Supply_Index":1.0,"Pricing_Index":0.391363,"Valuation_Index":0.158476,"Capital_Index":0.259615,"Investment_Score":51.131232,"Total_Population":615361,"Median_Rent":1254,"Median_Income":80904,"Median_Home_Value":282600},{"msa_code":24660,"msa_name":"Greensboro-High Point, NC Metro Area","year":2024,"Employment_Rate":0.964169,"Employment_Growth":0.017687,"Pop_Growth":0.013775,"Income_Growth":0.044121,"Rent_to_Income_Ratio":0.212677,"Vacancy_Rate":0.060298,"New_Multi_Units":2172,"Rent_Growth":0.06165,"Implied_Value":128810.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.576453,"Stability_Index":0.768422,"Supply_Index":0.942245,"Pricing_Index":0.44464,"Valuation_Index":0.177881,"Capital_Index":0.45988,"Investment_Score":51.102069,"Total_Population":800722,"Median_Rent":1171,"Median_Income":66072,"Median_Home_Value":271000},{"msa_code":39900,"msa_name":"Reno, NV Metro Area","year":2024,"Employment_Rate":0.940802,"Employment_Growth":0.028931,"Pop_Growth":0.019023,"Income_Growth":0.064471,"Rent_to_Income_Ratio":0.226113,"Vacancy_Rate":0.084017,"New_Multi_Units":6371,"Rent_Growth":0.040248,"Implied_Value":194880.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":48,"Economic_Index":0.609655,"Stability_Index":0.661168,"Supply_Index":0.83059,"Pricing_Index":0.351767,"Valuation_Index":0.387688,"Capital_Index":0.421874,"Investment_Score":51.046868,"Total_Population":575266,"Median_Rent":1680,"Median_Income":89159,"Median_Home_Value":535700},{"msa_code":32820,"msa_name":"Memphis, TN-MS-AR Metro Area","year":2024,"Employment_Rate":0.941804,"Employment_Growth":0.013636,"Pop_Growth":0.001575,"Income_Growth":0.064022,"Rent_to_Income_Ratio":0.234279,"Vacancy_Rate":0.10015,"New_Multi_Units":2773,"Rent_Growth":0.108333,"Implied_Value":146300.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":59,"Economic_Index":0.488432,"Stability_Index":0.591883,"Supply_Index":0.926264,"Pricing_Index":0.647216,"Valuation_Index":0.233421,"Capital_Index":0.421874,"Investment_Score":50.921435,"Total_Population":1337653,"Median_Rent":1330,"Median_Income":68124,"Median_Home_Value":282900},{"msa_code":17980,"msa_name":"Columbus, GA-AL Metro Area","year":2024,"Employment_Rate":0.866993,"Employment_Growth":0.02322,"Pop_Growth":-0.002556,"Income_Growth":0.099504,"Rent_to_Income_Ratio":0.22822,"Vacancy_Rate":0.136499,"New_Multi_Units":0,"Rent_Growth":0.145291,"Implied_Value":123444.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.392137,"Stability_Index":0.527873,"Supply_Index":1.0,"Pricing_Index":0.807588,"Valuation_Index":0.160841,"Capital_Index":0.495887,"Investment_Score":50.902133,"Total_Population":328206,"Median_Rent":1143,"Median_Income":60100,"Median_Home_Value":224600},{"msa_code":29460,"msa_name":"Lakeland-Winter Haven, FL Metro Area","year":2024,"Employment_Rate":0.944351,"Employment_Growth":0.047141,"Pop_Growth":0.042218,"Income_Growth":-0.001943,"Rent_to_Income_Ratio":0.266671,"Vacancy_Rate":0.138438,"New_Multi_Units":0,"Rent_Growth":0.057733,"Implied_Value":142464.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.692969,"Stability_Index":0.378444,"Supply_Index":1.0,"Pricing_Index":0.427644,"Valuation_Index":0.22124,"Capital_Index":0.495887,"Investment_Score":50.901689,"Total_Population":852878,"Median_Rent":1484,"Median_Income":66779,"Median_Home_Value":305400},{"msa_code":44180,"msa_name":"Springfield, MO Metro Area","year":2024,"Employment_Rate":0.969808,"Employment_Growth":0.015644,"Pop_Growth":0.018575,"Income_Growth":0.068308,"Rent_to_Income_Ratio":0.181913,"Vacancy_Rate":0.069569,"New_Multi_Units":723,"Rent_Growth":0.035569,"Implied_Value":94330.285714,"Effective Tax Spread":0.01556,"Value Creation":3759398.496241,"Average HERS Index Score":58,"Economic_Index":0.635627,"Stability_Index":0.862128,"Supply_Index":0.980775,"Pricing_Index":0.331465,"Valuation_Index":0.06839,"Capital_Index":0.552697,"Investment_Score":50.81724,"Total_Population":500004,"Median_Rent":1019,"Median_Income":67219,"Median_Home_Value":260000},{"msa_code":29620,"msa_name":"Lansing-East Lansing, MI Metro Area","year":2024,"Employment_Rate":0.956894,"Employment_Growth":0.028014,"Pop_Growth":0.014358,"Income_Growth":0.028611,"Rent_to_Income_Ratio":0.185141,"Vacancy_Rate":0.052128,"New_Multi_Units":931,"Rent_Growth":0.066219,"Implied_Value":102705.777778,"Effective Tax Spread":0.0,"Value Creation":4558404.558405,"Average HERS Index Score":59,"Economic_Index":0.571103,"Stability_Index":0.891632,"Supply_Index":0.975244,"Pricing_Index":0.464466,"Valuation_Index":0.094987,"Capital_Index":0.295672,"Investment_Score":50.69758,"Total_Population":479971,"Median_Rent":1111,"Median_Income":72010,"Median_Home_Value":237100},{"msa_code":17820,"msa_name":"Colorado Springs, CO Metro Area","year":2024,"Employment_Rate":0.869502,"Employment_Growth":-0.009599,"Pop_Growth":0.01145,"Income_Growth":0.01078,"Rent_to_Income_Ratio":0.232834,"Vacancy_Rate":0.041046,"New_Multi_Units":0,"Rent_Growth":0.032239,"Implied_Value":215162.181818,"Effective Tax Spread":0.01436,"Value Creation":6060606.060606,"Average HERS Index Score":53,"Economic_Index":0.279295,"Stability_Index":0.738502,"Supply_Index":1.0,"Pricing_Index":0.317015,"Valuation_Index":0.452094,"Capital_Index":0.816322,"Investment_Score":50.588742,"Total_Population":777635,"Median_Rent":1761,"Median_Income":90760,"Median_Home_Value":487900},{"msa_code":47300,"msa_name":"Visalia, CA Metro Area","year":2024,"Employment_Rate":0.895042,"Employment_Growth":0.036686,"Pop_Growth":0.008505,"Income_Growth":-0.04401,"Rent_to_Income_Ratio":0.237665,"Vacancy_Rate":0.065758,"New_Multi_Units":2253,"Rent_Growth":0.08379,"Implied_Value":189805.714286,"Effective Tax Spread":0.0,"Value Creation":6144393.241167,"Average HERS Index Score":14,"Economic_Index":0.356378,"Stability_Index":0.661281,"Supply_Index":0.940091,"Pricing_Index":0.540714,"Valuation_Index":0.371574,"Capital_Index":0.496398,"Investment_Score":50.468308,"Total_Population":483546,"Median_Rent":1384,"Median_Income":69880,"Median_Home_Value":361500},{"msa_code":35840,"msa_name":"North Port-Bradenton-Sarasota, FL Metro Area","year":2024,"Employment_Rate":0.9631,"Employment_Growth":0.048556,"Pop_Growth":0.027302,"Income_Growth":0.040449,"Rent_to_Income_Ratio":0.280613,"Vacancy_Rate":0.185322,"New_Multi_Units":0,"Rent_Growth":0.035599,"Implied_Value":184320.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.710216,"Stability_Index":0.213951,"Supply_Index":1.0,"Pricing_Index":0.331593,"Valuation_Index":0.354154,"Capital_Index":0.495887,"Investment_Score":50.413889,"Total_Population":934956,"Median_Rent":1920,"Median_Income":82106,"Median_Home_Value":452100},{"msa_code":29820,"msa_name":"Las Vegas-Henderson-North Las Vegas, NV Metro Area","year":2024,"Employment_Rate":0.925992,"Employment_Growth":0.034297,"Pop_Growth":0.026662,"Income_Growth":0.066116,"Rent_to_Income_Ratio":0.260759,"Vacancy_Rate":0.087613,"New_Multi_Units":8532,"Rent_Growth":0.051391,"Implied_Value":201724.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":48,"Economic_Index":0.634025,"Stability_Index":0.522109,"Supply_Index":0.773127,"Pricing_Index":0.40012,"Valuation_Index":0.409421,"Capital_Index":0.421874,"Investment_Score":50.254478,"Total_Population":2398871,"Median_Rent":1739,"Median_Income":80028,"Median_Home_Value":451000},{"msa_code":39300,"msa_name":"Providence-Warwick, RI-MA Metro Area","year":2024,"Employment_Rate":0.94999,"Employment_Growth":0.030839,"Pop_Growth":0.013767,"Income_Growth":-0.00552,"Rent_to_Income_Ratio":0.202148,"Vacancy_Rate":0.069653,"New_Multi_Units":70,"Rent_Growth":0.049624,"Implied_Value":131534.222222,"Effective Tax Spread":0.01641,"Value Creation":2693602.693603,"Average HERS Index Score":55,"Economic_Index":0.519992,"Stability_Index":0.785727,"Supply_Index":0.998139,"Pricing_Index":0.392455,"Valuation_Index":0.186532,"Capital_Index":0.437372,"Investment_Score":50.22341,"Total_Population":1700901,"Median_Rent":1396,"Median_Income":82870,"Median_Home_Value":471000},{"msa_code":31180,"msa_name":"Lubbock, TX Metro Area","year":2024,"Employment_Rate":0.954794,"Employment_Growth":0.025236,"Pop_Growth":0.019948,"Income_Growth":0.129193,"Rent_to_Income_Ratio":0.224666,"Vacancy_Rate":0.122794,"New_Multi_Units":0,"Rent_Growth":0.050479,"Implied_Value":111415.384615,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.711267,"Stability_Index":0.573992,"Supply_Index":1.0,"Pricing_Index":0.396163,"Valuation_Index":0.122644,"Capital_Index":0.333628,"Investment_Score":50.219473,"Total_Population":367530,"Median_Rent":1207,"Median_Income":64469,"Median_Home_Value":218900},{"msa_code":40420,"msa_name":"Rockford, IL Metro Area","year":2024,"Employment_Rate":0.940175,"Employment_Growth":0.007975,"Pop_Growth":0.008916,"Income_Growth":0.047058,"Rent_to_Income_Ratio":0.173553,"Vacancy_Rate":0.051398,"New_Multi_Units":0,"Rent_Growth":0.023209,"Implied_Value":86528.0,"Effective Tax Spread":0.0306,"Value Creation":4558404.558405,"Average HERS Index Score":56,"Economic_Index":0.487337,"Stability_Index":0.937013,"Supply_Index":1.0,"Pricing_Index":0.277829,"Valuation_Index":0.043614,"Capital_Index":1.0,"Investment_Score":50.191866,"Total_Population":337103,"Median_Rent":1014,"Median_Income":70111,"Median_Home_Value":188400},{"msa_code":44140,"msa_name":"Springfield, MA Metro Area","year":2024,"Employment_Rate":0.959204,"Employment_Growth":0.005745,"Pop_Growth":0.008386,"Income_Growth":0.065749,"Rent_to_Income_Ratio":0.194616,"Vacancy_Rate":0.069727,"New_Multi_Units":0,"Rent_Growth":0.019366,"Implied_Value":132918.26087,"Effective Tax Spread":0.01438,"Value Creation":4488078.541374,"Average HERS Index Score":48,"Economic_Index":0.538459,"Stability_Index":0.813912,"Supply_Index":1.0,"Pricing_Index":0.261154,"Valuation_Index":0.190927,"Capital_Index":0.61776,"Investment_Score":50.095819,"Total_Population":464151,"Median_Rent":1158,"Median_Income":71402,"Median_Home_Value":331300},{"msa_code":23540,"msa_name":"Gainesville, FL Metro Area","year":2024,"Employment_Rate":0.952756,"Employment_Growth":0.025218,"Pop_Growth":0.030491,"Income_Growth":0.044847,"Rent_to_Income_Ratio":0.266736,"Vacancy_Rate":0.055997,"New_Multi_Units":2088,"Rent_Growth":0.045558,"Implied_Value":132192.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.656134,"Stability_Index":0.575122,"Supply_Index":0.944478,"Pricing_Index":0.374811,"Valuation_Index":0.188621,"Capital_Index":0.495887,"Investment_Score":50.029996,"Total_Population":360881,"Median_Rent":1377,"Median_Income":61949,"Median_Home_Value":305300},{"msa_code":25540,"msa_name":"Hartford-West Hartford-East Hartford, CT Metro Area","year":2024,"Employment_Rate":0.951253,"Employment_Growth":0.016917,"Pop_Growth":0.015201,"Income_Growth":0.024334,"Rent_to_Income_Ratio":0.185302,"Vacancy_Rate":0.066909,"New_Multi_Units":0,"Rent_Growth":0.043665,"Implied_Value":139968.0,"Effective Tax Spread":0.0,"Value Creation":3619909.502262,"Average HERS Index Score":51,"Economic_Index":0.53289,"Stability_Index":0.855721,"Supply_Index":1.0,"Pricing_Index":0.366596,"Valuation_Index":0.213314,"Capital_Index":0.176894,"Investment_Score":49.86384,"Total_Population":1169048,"Median_Rent":1458,"Median_Income":94419,"Median_Home_Value":367100},{"msa_code":22420,"msa_name":"Flint, MI Metro Area","year":2024,"Employment_Rate":0.922259,"Employment_Growth":-0.011536,"Pop_Growth":0.001885,"Income_Growth":0.059423,"Rent_to_Income_Ratio":0.199641,"Vacancy_Rate":0.096117,"New_Multi_Units":473,"Rent_Growth":0.140086,"Implied_Value":97806.222222,"Effective Tax Spread":0.0,"Value Creation":4558404.558405,"Average HERS Index Score":59,"Economic_Index":0.387265,"Stability_Index":0.731951,"Supply_Index":0.987423,"Pricing_Index":0.785004,"Valuation_Index":0.079428,"Capital_Index":0.295672,"Investment_Score":49.856326,"Total_Population":402279,"Median_Rent":1058,"Median_Income":63594,"Median_Home_Value":200400},{"msa_code":24340,"msa_name":"Grand Rapids-Wyoming-Kentwood, MI Metro Area","year":2024,"Employment_Rate":0.962325,"Employment_Growth":0.004048,"Pop_Growth":0.013651,"Income_Growth":0.045679,"Rent_to_Income_Ratio":0.189696,"Vacancy_Rate":0.057965,"New_Multi_Units":3501,"Rent_Growth":0.067937,"Implied_Value":119160.888889,"Effective Tax Spread":0.0,"Value Creation":4558404.558405,"Average HERS Index Score":59,"Economic_Index":0.541778,"Stability_Index":0.860536,"Supply_Index":0.906906,"Pricing_Index":0.471922,"Valuation_Index":0.14724,"Capital_Index":0.295672,"Investment_Score":49.732106,"Total_Population":1178826,"Median_Rent":1289,"Median_Income":81541,"Median_Home_Value":316600},{"msa_code":17900,"msa_name":"Columbia, SC Metro Area","year":2024,"Employment_Rate":0.92566,"Employment_Growth":0.009783,"Pop_Growth":0.016673,"Income_Growth":0.053565,"Rent_to_Income_Ratio":0.213087,"Vacancy_Rate":0.09593,"New_Multi_Units":2987,"Rent_Growth":0.075278,"Implied_Value":135756.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":58,"Economic_Index":0.510337,"Stability_Index":0.681765,"Supply_Index":0.920573,"Pricing_Index":0.503777,"Valuation_Index":0.199938,"Capital_Index":0.45988,"Investment_Score":49.722576,"Total_Population":871176,"Median_Rent":1257,"Median_Income":70788,"Median_Home_Value":270400},{"msa_code":10580,"msa_name":"Albany-Schenectady-Troy, NY Metro Area","year":2024,"Employment_Rate":0.963301,"Employment_Growth":0.031042,"Pop_Growth":0.00973,"Income_Growth":0.051292,"Rent_to_Income_Ratio":0.185741,"Vacancy_Rate":0.065334,"New_Multi_Units":1287,"Rent_Growth":0.037123,"Implied_Value":139464.0,"Effective Tax Spread":-0.00716,"Value Creation":4166666.666667,"Average HERS Index Score":49,"Economic_Index":0.595407,"Stability_Index":0.85783,"Supply_Index":0.965778,"Pricing_Index":0.338208,"Valuation_Index":0.211713,"Capital_Index":0.081289,"Investment_Score":49.64122,"Total_Population":913485,"Median_Rent":1341,"Median_Income":86637,"Median_Home_Value":316300},{"msa_code":41180,"msa_name":"St. Louis, MO-IL Metro Area","year":2024,"Employment_Rate":0.96027,"Employment_Growth":-0.000949,"Pop_Growth":0.005016,"Income_Growth":0.044168,"Rent_to_Income_Ratio":0.169542,"Vacancy_Rate":0.083837,"New_Multi_Units":0,"Rent_Growth":0.047187,"Implied_Value":106827.428571,"Effective Tax Spread":0.01556,"Value Creation":3759398.496241,"Average HERS Index Score":0,"Economic_Index":0.481482,"Stability_Index":0.874634,"Supply_Index":1.0,"Pricing_Index":0.381879,"Valuation_Index":0.108075,"Capital_Index":0.552697,"Investment_Score":49.514291,"Total_Population":2809527,"Median_Rent":1154,"Median_Income":81679,"Median_Home_Value":268300},{"msa_code":41700,"msa_name":"San Antonio-New Braunfels, TX Metro Area","year":2024,"Employment_Rate":0.926965,"Employment_Growth":0.022469,"Pop_Growth":0.021822,"Income_Growth":0.067177,"Rent_to_Income_Ratio":0.218456,"Vacancy_Rate":0.08251,"New_Multi_Units":2824,"Rent_Growth":0.059613,"Implied_Value":131261.538462,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.585116,"Stability_Index":0.693603,"Supply_Index":0.924908,"Pricing_Index":0.435798,"Valuation_Index":0.185666,"Capital_Index":0.333628,"Investment_Score":49.459907,"Total_Population":2763006,"Median_Rent":1422,"Median_Income":78112,"Median_Home_Value":304800},{"msa_code":35300,"msa_name":"New Haven, CT Metro Area","year":2024,"Employment_Rate":0.937042,"Employment_Growth":-0.016799,"Pop_Growth":0.015066,"Income_Growth":0.110389,"Rent_to_Income_Ratio":0.214178,"Vacancy_Rate":0.064108,"New_Multi_Units":7519,"Rent_Growth":0.087695,"Implied_Value":153600.0,"Effective Tax Spread":0.0,"Value Creation":3619909.502262,"Average HERS Index Score":51,"Economic_Index":0.530331,"Stability_Index":0.753668,"Supply_Index":0.800064,"Pricing_Index":0.557661,"Valuation_Index":0.256602,"Capital_Index":0.176894,"Investment_Score":49.230912,"Total_Population":576718,"Median_Rent":1600,"Median_Income":89645,"Median_Home_Value":383600},{"msa_code":31140,"msa_name":"Louisville/Jefferson County, KY-IN Metro Area","year":2024,"Employment_Rate":0.943926,"Employment_Growth":0.025516,"Pop_Growth":0.023462,"Income_Growth":0.078118,"Rent_to_Income_Ratio":0.184106,"Vacancy_Rate":0.071744,"New_Multi_Units":3215,"Rent_Growth":0.052632,"Implied_Value":107485.714286,"Effective Tax Spread":0.0,"Value Creation":3174603.174603,"Average HERS Index Score":64,"Economic_Index":0.646096,"Stability_Index":0.848674,"Supply_Index":0.914511,"Pricing_Index":0.405505,"Valuation_Index":0.110165,"Capital_Index":0.120535,"Investment_Score":49.202808,"Total_Population":1396762,"Median_Rent":1140,"Median_Income":74305,"Median_Home_Value":265900},{"msa_code":28940,"msa_name":"Knoxville, TN Metro Area","year":2024,"Employment_Rate":0.96621,"Employment_Growth":0.028292,"Pop_Growth":0.010939,"Income_Growth":0.061713,"Rent_to_Income_Ratio":0.197185,"Vacancy_Rate":0.086582,"New_Multi_Units":5634,"Rent_Growth":0.04188,"Implied_Value":134090.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":59,"Economic_Index":0.613113,"Stability_Index":0.763977,"Supply_Index":0.850187,"Pricing_Index":0.358852,"Valuation_Index":0.194648,"Capital_Index":0.421874,"Investment_Score":49.161577,"Total_Population":957376,"Median_Rent":1219,"Median_Income":74184,"Median_Home_Value":351400},{"msa_code":49620,"msa_name":"York-Hanover, PA Metro Area","year":2024,"Employment_Rate":0.963698,"Employment_Growth":-0.005308,"Pop_Growth":0.014205,"Income_Growth":0.001118,"Rent_to_Income_Ratio":0.177231,"Vacancy_Rate":0.036807,"New_Multi_Units":0,"Rent_Growth":0.046997,"Implied_Value":117708.923077,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.470279,"Stability_Index":0.958016,"Supply_Index":1.0,"Pricing_Index":0.381057,"Valuation_Index":0.142629,"Capital_Index":0.259615,"Investment_Score":49.097684,"Total_Population":471240,"Median_Rent":1203,"Median_Income":81453,"Median_Home_Value":275200},{"msa_code":24580,"msa_name":"Green Bay, WI Metro Area","year":2024,"Employment_Rate":0.981897,"Employment_Growth":0.010315,"Pop_Growth":0.008482,"Income_Growth":0.048641,"Rent_to_Income_Ratio":0.158045,"Vacancy_Rate":0.099948,"New_Multi_Units":0,"Rent_Growth":0.044687,"Implied_Value":97251.555556,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":56,"Economic_Index":0.571985,"Stability_Index":0.879446,"Supply_Index":1.0,"Pricing_Index":0.371032,"Valuation_Index":0.077667,"Capital_Index":0.261512,"Investment_Score":49.043414,"Total_Population":334697,"Median_Rent":1052,"Median_Income":79876,"Median_Home_Value":295100},{"msa_code":26900,"msa_name":"Indianapolis-Carmel-Greenwood, IN Metro Area","year":2024,"Employment_Rate":0.958738,"Employment_Growth":0.009046,"Pop_Growth":0.015703,"Income_Growth":0.029405,"Rent_to_Income_Ratio":0.190381,"Vacancy_Rate":0.068041,"New_Multi_Units":4657,"Rent_Growth":0.054681,"Implied_Value":122208.0,"Effective Tax Spread":0.00768,"Value Creation":4288499.025341,"Average HERS Index Score":63,"Economic_Index":0.537062,"Stability_Index":0.833889,"Supply_Index":0.876167,"Pricing_Index":0.414399,"Valuation_Index":0.156916,"Capital_Index":0.438285,"Investment_Score":48.997622,"Total_Population":2173288,"Median_Rent":1273,"Median_Income":80239,"Median_Home_Value":291400},{"msa_code":27260,"msa_name":"Jacksonville, FL Metro Area","year":2024,"Employment_Rate":0.936712,"Employment_Growth":0.053637,"Pop_Growth":0.027613,"Income_Growth":0.065015,"Rent_to_Income_Ratio":0.237651,"Vacancy_Rate":0.084608,"New_Multi_Units":10531,"Rent_Growth":0.039003,"Implied_Value":156000.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.703787,"Stability_Index":0.616305,"Supply_Index":0.719972,"Pricing_Index":0.346364,"Valuation_Index":0.264223,"Capital_Index":0.495887,"Investment_Score":48.900745,"Total_Population":1760548,"Median_Rent":1625,"Median_Income":82053,"Median_Home_Value":375200},{"msa_code":47930,"msa_name":"Waterbury-Shelton, CT Metro Area","year":2024,"Employment_Rate":0.947213,"Employment_Growth":0.013474,"Pop_Growth":0.013356,"Income_Growth":-0.01767,"Rent_to_Income_Ratio":0.211343,"Vacancy_Rate":0.053118,"New_Multi_Units":3206,"Rent_Growth":0.083975,"Implied_Value":135072.0,"Effective Tax Spread":0.0,"Value Creation":3619909.502262,"Average HERS Index Score":0,"Economic_Index":0.456469,"Stability_Index":0.790596,"Supply_Index":0.91475,"Pricing_Index":0.541518,"Valuation_Index":0.197766,"Capital_Index":0.176894,"Investment_Score":48.578027,"Total_Population":462220,"Median_Rent":1407,"Median_Income":79889,"Median_Home_Value":344300},{"msa_code":42540,"msa_name":"Scranton--Wilkes-Barre, PA Metro Area","year":2024,"Employment_Rate":0.953782,"Employment_Growth":0.0329,"Pop_Growth":0.008071,"Income_Growth":0.157137,"Rent_to_Income_Ratio":0.188957,"Vacancy_Rate":0.101731,"New_Multi_Units":781,"Rent_Growth":0.014191,"Implied_Value":104891.076923,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.703158,"Stability_Index":0.758777,"Supply_Index":0.979233,"Pricing_Index":0.238698,"Valuation_Index":0.101926,"Capital_Index":0.259615,"Investment_Score":48.563618,"Total_Population":574009,"Median_Rent":1072,"Median_Income":68079,"Median_Home_Value":215400},{"msa_code":17410,"msa_name":"Cleveland, OH Metro Area","year":2024,"Employment_Rate":0.958312,"Employment_Growth":0.019061,"Pop_Growth":0.005996,"Income_Growth":0.073181,"Rent_to_Income_Ratio":0.179838,"Vacancy_Rate":0.084079,"New_Multi_Units":1244,"Rent_Growth":0.053295,"Implied_Value":98554.666667,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":0,"Economic_Index":0.565764,"Stability_Index":0.835283,"Supply_Index":0.966921,"Pricing_Index":0.408382,"Valuation_Index":0.081805,"Capital_Index":0.261512,"Investment_Score":48.54988,"Total_Population":2171877,"Median_Rent":1087,"Median_Income":72532,"Median_Home_Value":234700},{"msa_code":30780,"msa_name":"Little Rock-North Little Rock-Conway, AR Metro Area","year":2024,"Employment_Rate":0.956869,"Employment_Growth":0.027544,"Pop_Growth":0.008341,"Income_Growth":0.031997,"Rent_to_Income_Ratio":0.191912,"Vacancy_Rate":0.08186,"New_Multi_Units":185,"Rent_Growth":0.060136,"Implied_Value":103054.285714,"Effective Tax Spread":0.0,"Value Creation":3759398.496241,"Average HERS Index Score":70,"Economic_Index":0.544362,"Stability_Index":0.795116,"Supply_Index":0.995081,"Pricing_Index":0.438069,"Valuation_Index":0.096093,"Capital_Index":0.194548,"Investment_Score":48.419563,"Total_Population":770959,"Median_Rent":1093,"Median_Income":68344,"Median_Home_Value":237300},{"msa_code":46060,"msa_name":"Tucson, AZ Metro Area","year":2024,"Employment_Rate":0.942906,"Employment_Growth":0.003989,"Pop_Growth":0.015978,"Income_Growth":0.0331,"Rent_to_Income_Ratio":0.216465,"Vacancy_Rate":0.074187,"New_Multi_Units":2490,"Rent_Growth":0.029295,"Implied_Value":145600.0,"Effective Tax Spread":0.00513,"Value Creation":5855855.855856,"Average HERS Index Score":50,"Economic_Index":0.500822,"Stability_Index":0.720979,"Supply_Index":0.933789,"Pricing_Index":0.304241,"Valuation_Index":0.231198,"Capital_Index":0.577959,"Investment_Score":48.399983,"Total_Population":1080149,"Median_Rent":1300,"Median_Income":72067,"Median_Home_Value":349500},{"msa_code":17300,"msa_name":"Clarksville, TN-KY Metro Area","year":2024,"Employment_Rate":0.835597,"Employment_Growth":0.105236,"Pop_Growth":0.021202,"Income_Growth":0.078486,"Rent_to_Income_Ratio":0.208993,"Vacancy_Rate":0.079208,"New_Multi_Units":0,"Rent_Growth":-0.008655,"Implied_Value":138600.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":59,"Economic_Index":0.619313,"Stability_Index":0.737126,"Supply_Index":1.0,"Pricing_Index":0.139562,"Valuation_Index":0.208969,"Capital_Index":0.421874,"Investment_Score":48.287509,"Total_Population":344003,"Median_Rent":1260,"Median_Income":72347,"Median_Home_Value":291700},{"msa_code":31700,"msa_name":"Manchester-Nashua, NH Metro Area","year":2024,"Employment_Rate":0.973885,"Employment_Growth":-0.01724,"Pop_Growth":0.007273,"Income_Growth":0.022039,"Rent_to_Income_Ratio":0.194014,"Vacancy_Rate":0.04734,"New_Multi_Units":0,"Rent_Growth":0.027578,"Implied_Value":161379.692308,"Effective Tax Spread":0.0,"Value Creation":3263403.263403,"Average HERS Index Score":52,"Economic_Index":0.452617,"Stability_Index":0.869656,"Supply_Index":1.0,"Pricing_Index":0.296788,"Valuation_Index":0.281307,"Capital_Index":0.131774,"Investment_Score":48.251659,"Total_Population":430462,"Median_Rent":1714,"Median_Income":106013,"Median_Home_Value":476000},{"msa_code":38900,"msa_name":"Portland-Vancouver-Hillsboro, OR-WA Metro Area","year":2024,"Employment_Rate":0.95183,"Employment_Growth":0.003751,"Pop_Growth":0.010815,"Income_Growth":0.042865,"Rent_to_Income_Ratio":0.214195,"Vacancy_Rate":0.055744,"New_Multi_Units":14279,"Rent_Growth":0.058084,"Implied_Value":206508.521739,"Effective Tax Spread":0.0,"Value Creation":4891304.347826,"Average HERS Index Score":54,"Economic_Index":0.503676,"Stability_Index":0.773584,"Supply_Index":0.62031,"Pricing_Index":0.429165,"Valuation_Index":0.424614,"Capital_Index":0.337805,"Investment_Score":48.118091,"Total_Population":2537070,"Median_Rent":1767,"Median_Income":98994,"Median_Home_Value":584800},{"msa_code":48620,"msa_name":"Wichita, KS Metro Area","year":2024,"Employment_Rate":0.941283,"Employment_Growth":0.005604,"Pop_Growth":0.012678,"Income_Growth":0.064893,"Rent_to_Income_Ratio":0.168779,"Vacancy_Rate":0.086072,"New_Multi_Units":2682,"Rent_Growth":0.046632,"Implied_Value":91765.714286,"Effective Tax Spread":0.015187,"Value Creation":3474903.474903,"Average HERS Index Score":67,"Economic_Index":0.524217,"Stability_Index":0.87217,"Supply_Index":0.928683,"Pricing_Index":0.379472,"Valuation_Index":0.060246,"Capital_Index":0.508105,"Investment_Score":48.098916,"Total_Population":661217,"Median_Rent":1010,"Median_Income":71810,"Median_Home_Value":223700},{"msa_code":12060,"msa_name":"Atlanta-Sandy Springs-Roswell, GA Metro Area","year":2024,"Employment_Rate":0.952957,"Employment_Growth":0.019283,"Pop_Growth":0.016367,"Income_Growth":0.067499,"Rent_to_Income_Ratio":0.23001,"Vacancy_Rate":0.071095,"New_Multi_Units":14046,"Rent_Growth":0.040564,"Implied_Value":191160.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.600376,"Stability_Index":0.67736,"Supply_Index":0.626506,"Pricing_Index":0.353141,"Valuation_Index":0.375875,"Capital_Index":0.495887,"Investment_Score":48.07074,"Total_Population":6409047,"Median_Rent":1770,"Median_Income":92344,"Median_Home_Value":402100},{"msa_code":45220,"msa_name":"Tallahassee, FL Metro Area","year":2024,"Employment_Rate":0.934646,"Employment_Growth":0.003815,"Pop_Growth":0.014448,"Income_Growth":0.015877,"Rent_to_Income_Ratio":0.245504,"Vacancy_Rate":0.101179,"New_Multi_Units":0,"Rent_Growth":0.074313,"Implied_Value":127680.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.456064,"Stability_Index":0.547151,"Supply_Index":1.0,"Pricing_Index":0.499591,"Valuation_Index":0.174293,"Capital_Index":0.495887,"Investment_Score":48.036276,"Total_Population":399098,"Median_Rent":1330,"Median_Income":65009,"Median_Home_Value":304300},{"msa_code":15940,"msa_name":"Canton-Massillon, OH Metro Area","year":2024,"Employment_Rate":0.962565,"Employment_Growth":-0.003445,"Pop_Growth":0.002696,"Income_Growth":0.091307,"Rent_to_Income_Ratio":0.160352,"Vacancy_Rate":0.080289,"New_Multi_Units":0,"Rent_Growth":0.048478,"Implied_Value":84320.0,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":61,"Economic_Index":0.526166,"Stability_Index":0.917717,"Supply_Index":1.0,"Pricing_Index":0.387482,"Valuation_Index":0.036602,"Capital_Index":0.261512,"Investment_Score":48.009473,"Total_Population":400551,"Median_Rent":930,"Median_Income":69597,"Median_Home_Value":205400},{"msa_code":20500,"msa_name":"Durham-Chapel Hill, NC Metro Area","year":2024,"Employment_Rate":0.967275,"Employment_Growth":-0.003068,"Pop_Growth":0.019122,"Income_Growth":0.003146,"Rent_to_Income_Ratio":0.229537,"Vacancy_Rate":0.088064,"New_Multi_Units":6429,"Rent_Growth":0.043081,"Implied_Value":175780.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.509177,"Stability_Index":0.638606,"Supply_Index":0.829048,"Pricing_Index":0.364062,"Valuation_Index":0.327035,"Capital_Index":0.45988,"Investment_Score":47.981589,"Total_Population":620522,"Median_Rent":1598,"Median_Income":83542,"Median_Home_Value":441300},{"msa_code":19340,"msa_name":"Davenport-Moline-Rock Island, IA-IL Metro Area","year":2024,"Employment_Rate":0.96774,"Employment_Growth":-0.01013,"Pop_Growth":0.00407,"Income_Growth":0.002582,"Rent_to_Income_Ratio":0.163088,"Vacancy_Rate":0.06531,"New_Multi_Units":1872,"Rent_Growth":0.056583,"Implied_Value":88222.285714,"Effective Tax Spread":0.01895,"Value Creation":3474903.474903,"Average HERS Index Score":60,"Economic_Index":0.418221,"Stability_Index":0.94319,"Supply_Index":0.950222,"Pricing_Index":0.422653,"Valuation_Index":0.048994,"Capital_Index":0.594719,"Investment_Score":47.954546,"Total_Population":381415,"Median_Rent":971,"Median_Income":71446,"Median_Home_Value":182100},{"msa_code":19820,"msa_name":"Detroit-Warren-Dearborn, MI Metro Area","year":2024,"Employment_Rate":0.949348,"Employment_Growth":0.008976,"Pop_Growth":0.01342,"Income_Growth":0.05276,"Rent_to_Income_Ratio":0.196013,"Vacancy_Rate":0.087249,"New_Multi_Units":2610,"Rent_Growth":0.054945,"Implied_Value":115370.666667,"Effective Tax Spread":0.0,"Value Creation":4558404.558405,"Average HERS Index Score":59,"Economic_Index":0.536378,"Stability_Index":0.766797,"Supply_Index":0.930598,"Pricing_Index":0.415544,"Valuation_Index":0.135204,"Capital_Index":0.295672,"Investment_Score":47.890275,"Total_Population":4400578,"Median_Rent":1248,"Median_Income":76403,"Median_Home_Value":271600},{"msa_code":25060,"msa_name":"Gulfport-Biloxi, MS Metro Area","year":2024,"Employment_Rate":0.909977,"Employment_Growth":0.005628,"Pop_Growth":0.011559,"Income_Growth":0.085537,"Rent_to_Income_Ratio":0.210739,"Vacancy_Rate":0.116023,"New_Multi_Units":0,"Rent_Growth":0.108317,"Implied_Value":93513.6,"Effective Tax Spread":0.0,"Value Creation":3076923.076923,"Average HERS Index Score":60,"Economic_Index":0.48454,"Stability_Index":0.642612,"Supply_Index":1.0,"Pricing_Index":0.647146,"Valuation_Index":0.065797,"Capital_Index":0.108173,"Investment_Score":47.679322,"Total_Population":426793,"Median_Rent":1146,"Median_Income":65256,"Median_Home_Value":227600},{"msa_code":47260,"msa_name":"Virginia Beach-Chesapeake-Norfolk, VA-NC Metro Area","year":2024,"Employment_Rate":0.8817,"Employment_Growth":0.002265,"Pop_Growth":0.008429,"Income_Growth":0.03879,"Rent_to_Income_Ratio":0.226596,"Vacancy_Rate":0.073009,"New_Multi_Units":0,"Rent_Growth":0.062116,"Implied_Value":164313.6,"Effective Tax Spread":0.0013,"Value Creation":4571428.571429,"Average HERS Index Score":62,"Economic_Index":0.350098,"Stability_Index":0.685642,"Supply_Index":1.0,"Pricing_Index":0.446662,"Valuation_Index":0.290623,"Capital_Index":0.327243,"Investment_Score":47.664732,"Total_Population":1796689,"Median_Rent":1556,"Median_Income":82402,"Median_Home_Value":363400},{"msa_code":25180,"msa_name":"Hagerstown-Martinsburg, MD-WV Metro Area","year":2024,"Employment_Rate":0.956402,"Employment_Growth":0.02406,"Pop_Growth":0.027868,"Income_Growth":0.073399,"Rent_to_Income_Ratio":0.166426,"Vacancy_Rate":0.062478,"New_Multi_Units":0,"Rent_Growth":-0.034423,"Implied_Value":111854.769231,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":52,"Economic_Index":0.682317,"Stability_Index":0.937388,"Supply_Index":1.0,"Pricing_Index":0.027741,"Valuation_Index":0.124039,"Capital_Index":0.259615,"Investment_Score":47.624717,"Total_Population":312992,"Median_Rent":1122,"Median_Income":80901,"Median_Home_Value":298400},{"msa_code":46140,"msa_name":"Tulsa, OK Metro Area","year":2024,"Employment_Rate":0.950698,"Employment_Growth":0.02644,"Pop_Growth":0.015452,"Income_Growth":0.062491,"Rent_to_Income_Ratio":0.192081,"Vacancy_Rate":0.075436,"New_Multi_Units":0,"Rent_Growth":0.037209,"Implied_Value":95966.896552,"Effective Tax Spread":0.0,"Value Creation":3266787.658802,"Average HERS Index Score":52,"Economic_Index":0.602468,"Stability_Index":0.809822,"Supply_Index":1.0,"Pricing_Index":0.338582,"Valuation_Index":0.073587,"Capital_Index":0.132202,"Investment_Score":47.596292,"Total_Population":1060423,"Median_Rent":1115,"Median_Income":69658,"Median_Home_Value":247500},{"msa_code":49660,"msa_name":"Youngstown-Warren, OH Metro Area","year":2024,"Employment_Rate":0.948594,"Employment_Growth":-0.008861,"Pop_Growth":0.000275,"Income_Growth":0.125842,"Rent_to_Income_Ratio":0.173943,"Vacancy_Rate":0.085825,"New_Multi_Units":825,"Rent_Growth":0.063452,"Implied_Value":75978.666667,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":61,"Economic_Index":0.517057,"Stability_Index":0.85331,"Supply_Index":0.978063,"Pricing_Index":0.452458,"Valuation_Index":0.010114,"Capital_Index":0.261512,"Investment_Score":47.270336,"Total_Population":426086,"Median_Rent":838,"Median_Income":57812,"Median_Home_Value":166800},{"msa_code":32580,"msa_name":"McAllen-Edinburg-Mission, TX Metro Area","year":2024,"Employment_Rate":0.937868,"Employment_Growth":0.045576,"Pop_Growth":0.018196,"Income_Growth":0.057006,"Rent_to_Income_Ratio":0.20543,"Vacancy_Rate":0.125657,"New_Multi_Units":0,"Rent_Growth":0.037393,"Implied_Value":89630.769231,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.630481,"Stability_Index":0.639591,"Supply_Index":1.0,"Pricing_Index":0.33938,"Valuation_Index":0.053467,"Capital_Index":0.333628,"Investment_Score":47.136822,"Total_Population":914820,"Median_Rent":971,"Median_Income":56720,"Median_Home_Value":164200},{"msa_code":10740,"msa_name":"Albuquerque, NM Metro Area","year":2024,"Employment_Rate":0.941303,"Employment_Growth":0.004059,"Pop_Growth":0.006931,"Income_Growth":0.12503,"Rent_to_Income_Ratio":0.192386,"Vacancy_Rate":0.072405,"New_Multi_Units":957,"Rent_Growth":0.014131,"Implied_Value":121457.777778,"Effective Tax Spread":0.002667,"Value Creation":3703703.703704,"Average HERS Index Score":53,"Economic_Index":0.565836,"Stability_Index":0.815913,"Supply_Index":0.974553,"Pricing_Index":0.238438,"Valuation_Index":0.154534,"Capital_Index":0.248886,"Investment_Score":47.13312,"Total_Population":929919,"Median_Rent":1220,"Median_Income":76097,"Median_Home_Value":322700},{"msa_code":38060,"msa_name":"Phoenix-Mesa-Chandler, AZ Metro Area","year":2024,"Employment_Rate":0.9548,"Employment_Growth":0.031507,"Pop_Growth":0.023046,"Income_Growth":0.051727,"Rent_to_Income_Ratio":0.242175,"Vacancy_Rate":0.084517,"New_Multi_Units":18906,"Rent_Growth":0.033523,"Implied_Value":203728.0,"Effective Tax Spread":0.00513,"Value Creation":5855855.855856,"Average HERS Index Score":50,"Economic_Index":0.646651,"Stability_Index":0.599486,"Supply_Index":0.497274,"Pricing_Index":0.322585,"Valuation_Index":0.415785,"Capital_Index":0.577959,"Investment_Score":46.898968,"Total_Population":5186958,"Median_Rent":1819,"Median_Income":90133,"Median_Home_Value":470600},{"msa_code":45300,"msa_name":"Tampa-St. Petersburg-Clearwater, FL Metro Area","year":2024,"Employment_Rate":0.951771,"Employment_Growth":0.040846,"Pop_Growth":0.024409,"Income_Growth":0.076049,"Rent_to_Income_Ratio":0.272271,"Vacancy_Rate":0.119235,"New_Multi_Units":10009,"Rent_Growth":0.027183,"Implied_Value":170496.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.699637,"Stability_Index":0.403224,"Supply_Index":0.733853,"Pricing_Index":0.295076,"Valuation_Index":0.310256,"Capital_Index":0.495887,"Investment_Score":46.750907,"Total_Population":3424560,"Median_Rent":1776,"Median_Income":78275,"Median_Home_Value":387400},{"msa_code":26580,"msa_name":"Huntington-Ashland, WV-KY-OH Metro Area","year":2024,"Employment_Rate":0.956789,"Employment_Growth":-0.003964,"Pop_Growth":-0.001176,"Income_Growth":0.067906,"Rent_to_Income_Ratio":0.177645,"Vacancy_Rate":0.12252,"New_Multi_Units":0,"Rent_Growth":0.09988,"Implied_Value":79252.645161,"Effective Tax Spread":0.0,"Value Creation":2376910.016978,"Average HERS Index Score":55,"Economic_Index":0.466177,"Stability_Index":0.751717,"Supply_Index":1.0,"Pricing_Index":0.610533,"Valuation_Index":0.020511,"Capital_Index":0.019578,"Investment_Score":46.600688,"Total_Population":366760,"Median_Rent":914,"Median_Income":61741,"Median_Home_Value":159600},{"msa_code":36540,"msa_name":"Omaha, NE-IA Metro Area","year":2024,"Employment_Rate":0.95191,"Employment_Growth":-0.006583,"Pop_Growth":0.016899,"Income_Growth":0.038685,"Rent_to_Income_Ratio":0.174625,"Vacancy_Rate":0.052417,"New_Multi_Units":4813,"Rent_Growth":0.053082,"Implied_Value":107537.142857,"Effective Tax Spread":0.0,"Value Creation":3174603.174603,"Average HERS Index Score":57,"Economic_Index":0.504153,"Stability_Index":0.930543,"Supply_Index":0.872019,"Pricing_Index":0.407461,"Valuation_Index":0.110329,"Capital_Index":0.120535,"Investment_Score":46.499655,"Total_Population":1001186,"Median_Rent":1230,"Median_Income":84524,"Median_Home_Value":292800},{"msa_code":33340,"msa_name":"Milwaukee-Waukesha, WI Metro Area","year":2024,"Employment_Rate":0.960722,"Employment_Growth":0.003156,"Pop_Growth":0.00899,"Income_Growth":0.011856,"Rent_to_Income_Ratio":0.181265,"Vacancy_Rate":0.062782,"New_Multi_Units":3465,"Rent_Growth":0.04902,"Implied_Value":108807.111111,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":56,"Economic_Index":0.47217,"Stability_Index":0.880778,"Supply_Index":0.907863,"Pricing_Index":0.389832,"Valuation_Index":0.114362,"Capital_Index":0.261512,"Investment_Score":46.476182,"Total_Population":1574452,"Median_Rent":1177,"Median_Income":77919,"Median_Home_Value":331100},{"msa_code":37860,"msa_name":"Pensacola-Ferry Pass-Brent, FL Metro Area","year":2024,"Employment_Rate":0.894489,"Employment_Growth":0.020921,"Pop_Growth":0.016673,"Income_Growth":-0.051931,"Rent_to_Income_Ratio":0.23936,"Vacancy_Rate":0.138357,"New_Multi_Units":0,"Rent_Growth":0.077875,"Implied_Value":142176.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.348433,"Stability_Index":0.481484,"Supply_Index":1.0,"Pricing_Index":0.515045,"Valuation_Index":0.220325,"Capital_Index":0.495887,"Investment_Score":46.132793,"Total_Population":538928,"Median_Rent":1481,"Median_Income":74248,"Median_Home_Value":314100},{"msa_code":18580,"msa_name":"Corpus Christi, TX Metro Area","year":2024,"Employment_Rate":0.954308,"Employment_Growth":0.004892,"Pop_Growth":0.006304,"Income_Growth":0.098418,"Rent_to_Income_Ratio":0.226016,"Vacancy_Rate":0.153535,"New_Multi_Units":1742,"Rent_Growth":0.052932,"Implied_Value":119353.846154,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.556848,"Stability_Index":0.49548,"Supply_Index":0.953679,"Pricing_Index":0.406807,"Valuation_Index":0.147853,"Capital_Index":0.333628,"Investment_Score":46.020002,"Total_Population":448853,"Median_Rent":1293,"Median_Income":68650,"Median_Home_Value":232100},{"msa_code":15380,"msa_name":"Buffalo-Cheektowaga, NY Metro Area","year":2024,"Employment_Rate":0.95699,"Employment_Growth":0.00487,"Pop_Growth":0.003953,"Income_Growth":0.034912,"Rent_to_Income_Ratio":0.184896,"Vacancy_Rate":0.072245,"New_Multi_Units":3357,"Rent_Growth":0.056926,"Implied_Value":115856.0,"Effective Tax Spread":-0.00716,"Value Creation":4166666.666667,"Average HERS Index Score":49,"Economic_Index":0.472517,"Stability_Index":0.8445,"Supply_Index":0.910735,"Pricing_Index":0.424141,"Valuation_Index":0.136745,"Capital_Index":0.081289,"Investment_Score":46.002167,"Total_Population":1160172,"Median_Rent":1114,"Median_Income":72300,"Median_Home_Value":253200},{"msa_code":33660,"msa_name":"Mobile, AL Metro Area","year":2024,"Employment_Rate":0.939086,"Employment_Growth":-0.006699,"Pop_Growth":0.001698,"Income_Growth":0.090819,"Rent_to_Income_Ratio":0.219812,"Vacancy_Rate":0.138528,"New_Multi_Units":0,"Rent_Growth":0.082192,"Implied_Value":95192.275862,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.468278,"Stability_Index":0.554691,"Supply_Index":1.0,"Pricing_Index":0.533778,"Valuation_Index":0.071127,"Capital_Index":0.299077,"Investment_Score":45.87099,"Total_Population":412339,"Median_Rent":1106,"Median_Income":60379,"Median_Home_Value":207400},{"msa_code":33660,"msa_name":"Mobile, AL Metro Area","year":2024,"Employment_Rate":0.939086,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.219812,"Vacancy_Rate":0.138528,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":92019.2,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.468278,"Stability_Index":0.554691,"Supply_Index":1.0,"Pricing_Index":0.533778,"Valuation_Index":0.071127,"Capital_Index":0.299077,"Investment_Score":45.87099,"Total_Population":412339,"Median_Rent":1106,"Median_Income":60379,"Median_Home_Value":207400},{"msa_code":16980,"msa_name":"Chicago-Naperville-Elgin, IL-IN Metro Area","year":2024,"Employment_Rate":0.942147,"Employment_Growth":0.010175,"Pop_Growth":0.015586,"Income_Growth":0.042483,"Rent_to_Income_Ratio":0.194205,"Vacancy_Rate":0.059535,"New_Multi_Units":20869,"Rent_Growth":0.056835,"Implied_Value":125354.666667,"Effective Tax Spread":0.0306,"Value Creation":4558404.558405,"Average HERS Index Score":56,"Economic_Index":0.52366,"Stability_Index":0.839805,"Supply_Index":0.445077,"Pricing_Index":0.423744,"Valuation_Index":0.166909,"Capital_Index":1.0,"Investment_Score":45.62933,"Total_Population":9406924,"Median_Rent":1469,"Median_Income":90770,"Median_Home_Value":339700},{"msa_code":36420,"msa_name":"Oklahoma City, OK Metro Area","year":2024,"Employment_Rate":0.947118,"Employment_Growth":0.018895,"Pop_Growth":0.013461,"Income_Growth":0.043422,"Rent_to_Income_Ratio":0.191197,"Vacancy_Rate":0.072331,"New_Multi_Units":0,"Rent_Growth":0.019298,"Implied_Value":100012.137931,"Effective Tax Spread":0.0,"Value Creation":3266787.658802,"Average HERS Index Score":52,"Economic_Index":0.544525,"Stability_Index":0.820568,"Supply_Index":1.0,"Pricing_Index":0.26086,"Valuation_Index":0.086433,"Capital_Index":0.132202,"Investment_Score":45.559869,"Total_Population":1497821,"Median_Rent":1162,"Median_Income":72930,"Median_Home_Value":253200},{"msa_code":12940,"msa_name":"Baton Rouge, LA Metro Area","year":2024,"Employment_Rate":0.948382,"Employment_Growth":0.018958,"Pop_Growth":0.010291,"Income_Growth":0.073478,"Rent_to_Income_Ratio":0.197076,"Vacancy_Rate":0.121849,"New_Multi_Units":0,"Rent_Growth":0.034545,"Implied_Value":85577.6,"Effective Tax Spread":0.007275,"Value Creation":3076923.076923,"Average HERS Index Score":56,"Economic_Index":0.568224,"Stability_Index":0.680148,"Supply_Index":1.0,"Pricing_Index":0.327023,"Valuation_Index":0.040596,"Capital_Index":0.275623,"Investment_Score":45.520924,"Total_Population":882652,"Median_Rent":1138,"Median_Income":69293,"Median_Home_Value":252000},{"msa_code":10420,"msa_name":"Akron, OH Metro Area","year":2024,"Employment_Rate":0.9569,"Employment_Growth":0.000518,"Pop_Growth":0.005457,"Income_Growth":0.017668,"Rent_to_Income_Ratio":0.178073,"Vacancy_Rate":0.057327,"New_Multi_Units":518,"Rent_Growth":0.029155,"Implied_Value":96016.0,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":61,"Economic_Index":0.448296,"Stability_Index":0.905831,"Supply_Index":0.986226,"Pricing_Index":0.30363,"Valuation_Index":0.073743,"Capital_Index":0.261512,"Investment_Score":45.439764,"Total_Population":702209,"Median_Rent":1059,"Median_Income":71364,"Median_Home_Value":237300},{"msa_code":45780,"msa_name":"Toledo, OH Metro Area","year":2024,"Employment_Rate":0.953188,"Employment_Growth":0.011541,"Pop_Growth":0.002091,"Income_Growth":0.047896,"Rent_to_Income_Ratio":0.172297,"Vacancy_Rate":0.071308,"New_Multi_Units":0,"Rent_Growth":0.023732,"Implied_Value":86042.666667,"Effective Tax Spread":0.0,"Value Creation":4288499.025341,"Average HERS Index Score":61,"Economic_Index":0.487879,"Stability_Index":0.894183,"Supply_Index":1.0,"Pricing_Index":0.280101,"Valuation_Index":0.042073,"Capital_Index":0.261512,"Investment_Score":45.425393,"Total_Population":601396,"Median_Rent":949,"Median_Income":66095,"Median_Home_Value":194700},{"msa_code":45060,"msa_name":"Syracuse, NY Metro Area","year":2024,"Employment_Rate":0.949981,"Employment_Growth":-0.020245,"Pop_Growth":0.00342,"Income_Growth":0.04156,"Rent_to_Income_Ratio":0.175173,"Vacancy_Rate":0.076868,"New_Multi_Units":374,"Rent_Growth":0.044049,"Implied_Value":115856.0,"Effective Tax Spread":-0.00716,"Value Creation":4166666.666667,"Average HERS Index Score":49,"Economic_Index":0.404917,"Stability_Index":0.870073,"Supply_Index":0.990055,"Pricing_Index":0.368261,"Valuation_Index":0.136745,"Capital_Index":0.081289,"Investment_Score":45.267247,"Total_Population":655189,"Median_Rent":1114,"Median_Income":76313,"Median_Home_Value":217600},{"msa_code":28880,"msa_name":"Kiryas Joel-Poughkeepsie-Newburgh, NY Metro Area","year":2024,"Employment_Rate":0.94417,"Employment_Growth":-0.010449,"Pop_Growth":0.010091,"Income_Growth":-0.00745,"Rent_to_Income_Ratio":0.212941,"Vacancy_Rate":0.067917,"New_Multi_Units":5502,"Rent_Growth":0.048447,"Implied_Value":175552.0,"Effective Tax Spread":-0.00716,"Value Creation":4166666.666667,"Average HERS Index Score":0,"Economic_Index":0.390124,"Stability_Index":0.749229,"Supply_Index":0.853697,"Pricing_Index":0.387348,"Valuation_Index":0.326311,"Capital_Index":0.081289,"Investment_Score":45.220221,"Total_Population":711730,"Median_Rent":1688,"Median_Income":95125,"Median_Home_Value":434900},{"msa_code":15180,"msa_name":"Brownsville-Harlingen, TX Metro Area","year":2024,"Employment_Rate":0.951026,"Employment_Growth":-0.003892,"Pop_Growth":0.012102,"Income_Growth":0.020245,"Rent_to_Income_Ratio":0.217621,"Vacancy_Rate":0.103469,"New_Multi_Units":1349,"Rent_Growth":0.068584,"Implied_Value":89169.230769,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.462607,"Stability_Index":0.646684,"Supply_Index":0.964129,"Pricing_Index":0.474729,"Valuation_Index":0.052001,"Capital_Index":0.333628,"Investment_Score":45.162119,"Total_Population":431874,"Median_Rent":966,"Median_Income":53267,"Median_Home_Value":163300},{"msa_code":40060,"msa_name":"Richmond, VA Metro Area","year":2024,"Employment_Rate":0.944607,"Employment_Growth":0.012064,"Pop_Growth":0.013403,"Income_Growth":-0.01034,"Rent_to_Income_Ratio":0.222286,"Vacancy_Rate":0.054869,"New_Multi_Units":9045,"Rent_Growth":0.036888,"Implied_Value":163257.6,"Effective Tax Spread":0.0013,"Value Creation":4571428.571429,"Average HERS Index Score":62,"Economic_Index":0.457368,"Stability_Index":0.745204,"Supply_Index":0.759486,"Pricing_Index":0.337188,"Valuation_Index":0.28727,"Capital_Index":0.327243,"Investment_Score":45.075796,"Total_Population":1368219,"Median_Rent":1546,"Median_Income":83460,"Median_Home_Value":378100},{"msa_code":38300,"msa_name":"Pittsburgh, PA Metro Area","year":2024,"Employment_Rate":0.958872,"Employment_Growth":0.001778,"Pop_Growth":0.002969,"Income_Growth":0.064551,"Rent_to_Income_Ratio":0.168311,"Vacancy_Rate":0.095212,"New_Multi_Units":5356,"Rent_Growth":0.037356,"Implied_Value":105967.384615,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.500165,"Stability_Index":0.852096,"Supply_Index":0.85758,"Pricing_Index":0.33922,"Valuation_Index":0.105344,"Capital_Index":0.259615,"Investment_Score":45.018472,"Total_Population":2429917,"Median_Rent":1083,"Median_Income":77214,"Median_Home_Value":230300},{"msa_code":34940,"msa_name":"Naples-Marco Island, FL Metro Area","year":2024,"Employment_Rate":0.970414,"Employment_Growth":0.007891,"Pop_Growth":0.02949,"Income_Growth":0.064282,"Rent_to_Income_Ratio":0.254366,"Vacancy_Rate":0.316272,"New_Multi_Units":505,"Rent_Growth":-0.003433,"Implied_Value":195072.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.667293,"Stability_Index":0.0,"Supply_Index":0.986572,"Pricing_Index":0.16222,"Valuation_Index":0.388297,"Capital_Index":0.495887,"Investment_Score":45.013908,"Total_Population":416233,"Median_Rent":2032,"Median_Income":95862,"Median_Home_Value":636600},{"msa_code":19100,"msa_name":"Dallas-Fort Worth-Arlington, TX Metro Area","year":2024,"Employment_Rate":0.953366,"Employment_Growth":0.021808,"Pop_Growth":0.030123,"Income_Growth":0.067615,"Rent_to_Income_Ratio":0.222316,"Vacancy_Rate":0.068789,"New_Multi_Units":20787,"Rent_Growth":0.04884,"Implied_Value":158584.615385,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.675238,"Stability_Index":0.711843,"Supply_Index":0.447257,"Pricing_Index":0.389053,"Valuation_Index":0.272431,"Capital_Index":0.333628,"Investment_Score":44.924865,"Total_Population":8344032,"Median_Rent":1718,"Median_Income":92733,"Median_Home_Value":389500},{"msa_code":22220,"msa_name":"Fayetteville-Springdale-Rogers, AR Metro Area","year":2024,"Employment_Rate":0.976181,"Employment_Growth":0.020505,"Pop_Growth":0.025838,"Income_Growth":0.045215,"Rent_to_Income_Ratio":0.180573,"Vacancy_Rate":0.080244,"New_Multi_Units":8296,"Rent_Growth":-0.000818,"Implied_Value":115217.142857,"Effective Tax Spread":0.0,"Value Creation":3759398.496241,"Average HERS Index Score":70,"Economic_Index":0.666902,"Stability_Index":0.841675,"Supply_Index":0.779403,"Pricing_Index":0.173569,"Valuation_Index":0.134717,"Capital_Index":0.194548,"Investment_Score":44.812991,"Total_Population":605547,"Median_Rent":1222,"Median_Income":81208,"Median_Home_Value":362500},{"msa_code":27140,"msa_name":"Jackson, MS Metro Area","year":2024,"Employment_Rate":0.950229,"Employment_Growth":0.005136,"Pop_Growth":-0.006199,"Income_Growth":0.10655,"Rent_to_Income_Ratio":0.203594,"Vacancy_Rate":0.120985,"New_Multi_Units":2816,"Rent_Growth":0.075269,"Implied_Value":89760.0,"Effective Tax Spread":0.0,"Value Creation":3076923.076923,"Average HERS Index Score":60,"Economic_Index":0.49789,"Stability_Index":0.657667,"Supply_Index":0.92512,"Pricing_Index":0.503737,"Valuation_Index":0.053877,"Capital_Index":0.108173,"Investment_Score":44.564955,"Total_Population":605803,"Median_Rent":1100,"Median_Income":64835,"Median_Home_Value":210000},{"msa_code":34980,"msa_name":"Nashville-Davidson--Murfreesboro--Franklin, TN Metro Area","year":2024,"Employment_Rate":0.965037,"Employment_Growth":0.024147,"Pop_Growth":0.022564,"Income_Growth":0.048592,"Rent_to_Income_Ratio":0.219865,"Vacancy_Rate":0.083425,"New_Multi_Units":21950,"Rent_Growth":0.038953,"Implied_Value":178970.0,"Effective Tax Spread":0.0,"Value Creation":5555555.555556,"Average HERS Index Score":59,"Economic_Index":0.64236,"Stability_Index":0.686111,"Supply_Index":0.416332,"Pricing_Index":0.346148,"Valuation_Index":0.337165,"Capital_Index":0.421874,"Investment_Score":44.510522,"Total_Population":2151715,"Median_Rent":1627,"Median_Income":88800,"Median_Home_Value":449300},{"msa_code":40380,"msa_name":"Rochester, NY Metro Area","year":2024,"Employment_Rate":0.969313,"Employment_Growth":0.01904,"Pop_Growth":0.004877,"Income_Growth":0.0431,"Rent_to_Income_Ratio":0.183956,"Vacancy_Rate":0.073214,"New_Multi_Units":7267,"Rent_Growth":0.029877,"Implied_Value":121888.0,"Effective Tax Spread":-0.00716,"Value Creation":4166666.666667,"Average HERS Index Score":49,"Economic_Index":0.544257,"Stability_Index":0.845727,"Supply_Index":0.806765,"Pricing_Index":0.306765,"Valuation_Index":0.1559,"Capital_Index":0.081289,"Investment_Score":44.458482,"Total_Population":1057218,"Median_Rent":1172,"Median_Income":76453,"Median_Home_Value":234100},{"msa_code":33460,"msa_name":"Minneapolis-St. Paul-Bloomington, MN-WI Metro Area","year":2024,"Employment_Rate":0.96085,"Employment_Growth":-0.001208,"Pop_Growth":0.012374,"Income_Growth":0.029715,"Rent_to_Income_Ratio":0.176946,"Vacancy_Rate":0.05207,"New_Multi_Units":12778,"Rent_Growth":0.011913,"Implied_Value":136056.888889,"Effective Tax Spread":0.01003,"Value Creation":4558404.558405,"Average HERS Index Score":47,"Economic_Index":0.500606,"Stability_Index":0.922629,"Supply_Index":0.660223,"Pricing_Index":0.228813,"Valuation_Index":0.200894,"Capital_Index":0.526535,"Investment_Score":44.330969,"Total_Population":3757952,"Median_Rent":1444,"Median_Income":97928,"Median_Home_Value":384300},{"msa_code":12100,"msa_name":"Atlantic City-Hammonton, NJ Metro Area","year":2024,"Employment_Rate":0.923546,"Employment_Growth":0.017482,"Pop_Growth":0.008561,"Income_Growth":0.009154,"Rent_to_Income_Ratio":0.217855,"Vacancy_Rate":0.31812,"New_Multi_Units":2459,"Rent_Growth":0.110522,"Implied_Value":143766.0,"Effective Tax Spread":0.0,"Value Creation":4901960.784314,"Average HERS Index Score":52,"Economic_Index":0.430203,"Stability_Index":0.133076,"Supply_Index":0.934613,"Pricing_Index":0.656715,"Valuation_Index":0.225374,"Capital_Index":0.339153,"Investment_Score":44.31123,"Total_Population":372989,"Median_Rent":1467,"Median_Income":80806,"Median_Home_Value":366000},{"msa_code":42660,"msa_name":"Seattle-Tacoma-Bellevue, WA Metro Area","year":2024,"Employment_Rate":0.942232,"Employment_Growth":0.023383,"Pop_Growth":0.024885,"Income_Growth":0.014845,"Rent_to_Income_Ratio":0.218885,"Vacancy_Rate":0.053644,"New_Multi_Units":32641,"Rent_Growth":0.043257,"Implied_Value":254945.454545,"Effective Tax Spread":0.0,"Value Creation":5681818.181818,"Average HERS Index Score":54,"Economic_Index":0.567345,"Stability_Index":0.760939,"Supply_Index":0.13205,"Pricing_Index":0.364826,"Valuation_Index":0.578426,"Capital_Index":0.437854,"Investment_Score":44.058651,"Total_Population":4145494,"Median_Rent":2050,"Median_Income":112388,"Median_Home_Value":743000},{"msa_code":37340,"msa_name":"Palm Bay-Melbourne-Titusville, FL Metro Area","year":2024,"Employment_Rate":0.942123,"Employment_Growth":0.010621,"Pop_Growth":0.022467,"Income_Growth":-0.004823,"Rent_to_Income_Ratio":0.257967,"Vacancy_Rate":0.137534,"New_Multi_Units":4842,"Rent_Growth":0.020024,"Implied_Value":161376.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.500729,"Stability_Index":0.413378,"Supply_Index":0.871247,"Pricing_Index":0.26401,"Valuation_Index":0.281295,"Capital_Index":0.495887,"Investment_Score":43.860843,"Total_Population":658447,"Median_Rent":1681,"Median_Income":78196,"Median_Home_Value":372900},{"msa_code":39740,"msa_name":"Reading, PA Metro Area","year":2024,"Employment_Rate":0.932943,"Employment_Growth":0.011791,"Pop_Growth":0.014546,"Income_Growth":0.031701,"Rent_to_Income_Ratio":0.183672,"Vacancy_Rate":0.042019,"New_Multi_Units":3026,"Rent_Growth":-0.019688,"Implied_Value":116926.153846,"Effective Tax Spread":0.0,"Value Creation":4273504.273504,"Average HERS Index Score":58,"Economic_Index":0.491681,"Stability_Index":0.921311,"Supply_Index":0.919536,"Pricing_Index":0.091683,"Valuation_Index":0.140144,"Capital_Index":0.259615,"Investment_Score":43.459217,"Total_Population":439117,"Median_Rent":1195,"Median_Income":78074,"Median_Home_Value":281100},{"msa_code":18880,"msa_name":"Crestview-Fort Walton Beach-Destin, FL Metro Area","year":2024,"Employment_Rate":0.881727,"Employment_Growth":0.051746,"Pop_Growth":0.017489,"Income_Growth":-0.000768,"Rent_to_Income_Ratio":0.261287,"Vacancy_Rate":0.28378,"New_Multi_Units":0,"Rent_Growth":0.042056,"Implied_Value":171264.0,"Effective Tax Spread":0.0,"Value Creation":6140350.877193,"Average HERS Index Score":57,"Economic_Index":0.464246,"Stability_Index":0.051547,"Supply_Index":1.0,"Pricing_Index":0.359614,"Valuation_Index":0.312695,"Capital_Index":0.495887,"Investment_Score":43.158355,"Total_Population":310149,"Median_Rent":1784,"Median_Income":81933,"Median_Home_Value":391500},{"msa_code":13140,"msa_name":"Beaumont-Port Arthur, TX Metro Area","year":2024,"Employment_Rate":0.92731,"Employment_Growth":-0.004763,"Pop_Growth":0.008228,"Income_Growth":0.045774,"Rent_to_Income_Ratio":0.206887,"Vacancy_Rate":0.130594,"New_Multi_Units":0,"Rent_Growth":0.030909,"Implied_Value":104676.923077,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.427597,"Stability_Index":0.622313,"Supply_Index":1.0,"Pricing_Index":0.311243,"Valuation_Index":0.101246,"Capital_Index":0.333628,"Investment_Score":43.144887,"Total_Population":398733,"Median_Rent":1134,"Median_Income":65775,"Median_Home_Value":181700},{"msa_code":38860,"msa_name":"Portland-South Portland, ME Metro Area","year":2024,"Employment_Rate":0.9661,"Employment_Growth":-0.011912,"Pop_Growth":0.009191,"Income_Growth":0.010259,"Rent_to_Income_Ratio":0.205025,"Vacancy_Rate":0.154863,"New_Multi_Units":3009,"Rent_Growth":0.025145,"Implied_Value":158510.769231,"Effective Tax Spread":0.0,"Value Creation":2884615.384615,"Average HERS Index Score":37,"Economic_Index":0.445553,"Stability_Index":0.571356,"Supply_Index":0.919988,"Pricing_Index":0.286231,"Valuation_Index":0.272196,"Capital_Index":0.083834,"Investment_Score":42.969518,"Total_Population":571534,"Median_Rent":1590,"Median_Income":93062,"Median_Home_Value":474200},{"msa_code":35380,"msa_name":"New Orleans-Metairie, LA Metro Area","year":2024,"Employment_Rate":0.945086,"Employment_Growth":0.020291,"Pop_Growth":0.004225,"Income_Growth":0.022508,"Rent_to_Income_Ratio":0.242797,"Vacancy_Rate":0.137798,"New_Multi_Units":6205,"Rent_Growth":0.08887,"Implied_Value":94902.4,"Effective Tax Spread":0.007275,"Value Creation":3076923.076923,"Average HERS Index Score":56,"Economic_Index":0.472761,"Stability_Index":0.469873,"Supply_Index":0.835004,"Pricing_Index":0.562756,"Valuation_Index":0.070207,"Capital_Index":0.275623,"Investment_Score":42.731915,"Total_Population":966230,"Median_Rent":1262,"Median_Income":62373,"Median_Home_Value":267900},{"msa_code":29180,"msa_name":"Lafayette, LA Metro Area","year":2024,"Employment_Rate":0.947556,"Employment_Growth":-0.020586,"Pop_Growth":0.013073,"Income_Growth":0.056115,"Rent_to_Income_Ratio":0.191914,"Vacancy_Rate":0.137423,"New_Multi_Units":0,"Rent_Growth":0.023256,"Implied_Value":72793.6,"Effective Tax Spread":0.007275,"Value Creation":3076923.076923,"Average HERS Index Score":56,"Economic_Index":0.464992,"Stability_Index":0.662386,"Supply_Index":1.0,"Pricing_Index":0.278033,"Valuation_Index":0.0,"Capital_Index":0.275623,"Investment_Score":41.689715,"Total_Population":419704,"Median_Rent":968,"Median_Income":60527,"Median_Home_Value":222100},{"msa_code":26620,"msa_name":"Huntsville, AL Metro Area","year":2024,"Employment_Rate":0.965685,"Employment_Growth":0.048222,"Pop_Growth":0.028531,"Income_Growth":0.024962,"Rent_to_Income_Ratio":0.176866,"Vacancy_Rate":0.077061,"New_Multi_Units":0,"Rent_Growth":0.034677,"Implied_Value":110426.482759,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.415172,"Stability_Index":0.863237,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.107815,"Capital_Index":0.0,"Investment_Score":41.671975,"Total_Population":542297,"Median_Rent":1283,"Median_Income":87049,"Median_Home_Value":331800},{"msa_code":26620,"msa_name":"Huntsville, AL Metro Area","year":2024,"Employment_Rate":0.965685,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.176866,"Vacancy_Rate":0.077061,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":106745.6,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.415172,"Stability_Index":0.863237,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.107815,"Capital_Index":0.0,"Investment_Score":41.671975,"Total_Population":542297,"Median_Rent":1283,"Median_Income":87049,"Median_Home_Value":331800},{"msa_code":12420,"msa_name":"Austin-Round Rock-San Marcos, TX Metro Area","year":2024,"Employment_Rate":0.958598,"Employment_Growth":0.033873,"Pop_Growth":0.031279,"Income_Growth":0.0141,"Rent_to_Income_Ratio":0.214301,"Vacancy_Rate":0.058742,"New_Multi_Units":25269,"Rent_Growth":0.018265,"Implied_Value":164676.923077,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.654083,"Stability_Index":0.766025,"Supply_Index":0.328077,"Pricing_Index":0.256375,"Valuation_Index":0.291777,"Capital_Index":0.333628,"Investment_Score":41.553442,"Total_Population":2550637,"Median_Rent":1784,"Median_Income":99897,"Median_Home_Value":482800},{"msa_code":43780,"msa_name":"South Bend-Mishawaka, IN-MI Metro Area","year":2024,"Employment_Rate":0.937705,"Employment_Growth":-0.008123,"Pop_Growth":0.002478,"Income_Growth":-0.029468,"Rent_to_Income_Ratio":0.20678,"Vacancy_Rate":0.113883,"New_Multi_Units":3214,"Rent_Growth":0.040643,"Implied_Value":105696.0,"Effective Tax Spread":0.00768,"Value Creation":4288499.025341,"Average HERS Index Score":63,"Economic_Index":0.318819,"Stability_Index":0.662632,"Supply_Index":0.914537,"Pricing_Index":0.353481,"Valuation_Index":0.104482,"Capital_Index":0.438285,"Investment_Score":41.281967,"Total_Population":325294,"Median_Rent":1101,"Median_Income":63894,"Median_Home_Value":216500},{"msa_code":22180,"msa_name":"Fayetteville, NC Metro Area","year":2024,"Employment_Rate":0.775175,"Employment_Growth":-0.031468,"Pop_Growth":0.003762,"Income_Growth":0.002597,"Rent_to_Income_Ratio":0.260806,"Vacancy_Rate":0.092195,"New_Multi_Units":81,"Rent_Growth":0.093443,"Implied_Value":146740.0,"Effective Tax Spread":0.0,"Value Creation":5855855.855856,"Average HERS Index Score":63,"Economic_Index":0.0,"Stability_Index":0.510988,"Supply_Index":0.997846,"Pricing_Index":0.5826,"Valuation_Index":0.234818,"Capital_Index":0.45988,"Investment_Score":40.210093,"Total_Population":393812,"Median_Rent":1334,"Median_Income":61379,"Median_Home_Value":227400},{"msa_code":13820,"msa_name":"Birmingham, AL Metro Area","year":2024,"Employment_Rate":0.960686,"Employment_Growth":0.019761,"Pop_Growth":0.007003,"Income_Growth":0.081837,"Rent_to_Income_Ratio":0.202044,"Vacancy_Rate":0.106678,"New_Multi_Units":0,"Rent_Growth":0.094536,"Implied_Value":108619.034483,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.405674,"Stability_Index":0.697678,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.102267,"Capital_Index":0.0,"Investment_Score":39.554844,"Total_Population":1192583,"Median_Rent":1262,"Median_Income":74954,"Median_Home_Value":263900},{"msa_code":13820,"msa_name":"Birmingham, AL Metro Area","year":2024,"Employment_Rate":0.960686,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.202044,"Vacancy_Rate":0.106678,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":104998.4,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.405674,"Stability_Index":0.697678,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.102267,"Capital_Index":0.0,"Investment_Score":39.554844,"Total_Population":1192583,"Median_Rent":1262,"Median_Income":74954,"Median_Home_Value":263900},{"msa_code":33860,"msa_name":"Montgomery, AL Metro Area","year":2024,"Employment_Rate":0.944363,"Employment_Growth":0.034401,"Pop_Growth":0.002916,"Income_Growth":0.069658,"Rent_to_Income_Ratio":0.205259,"Vacancy_Rate":0.104558,"New_Multi_Units":0,"Rent_Growth":0.120825,"Implied_Value":98204.689655,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.374655,"Stability_Index":0.690636,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.070298,"Capital_Index":0.0,"Investment_Score":38.249036,"Total_Population":386587,"Median_Rent":1141,"Median_Income":66706,"Median_Home_Value":220500},{"msa_code":33860,"msa_name":"Montgomery, AL Metro Area","year":2024,"Employment_Rate":0.944363,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.205259,"Vacancy_Rate":0.104558,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":94931.2,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.374655,"Stability_Index":0.690636,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.070298,"Capital_Index":0.0,"Investment_Score":38.249036,"Total_Population":386587,"Median_Rent":1141,"Median_Income":66706,"Median_Home_Value":220500},{"msa_code":26420,"msa_name":"Houston-Pasadena-The Woodlands, TX Metro Area","year":2024,"Employment_Rate":0.942508,"Employment_Growth":0.032226,"Pop_Growth":0.038072,"Income_Growth":0.02459,"Rent_to_Income_Ratio":0.216515,"Vacancy_Rate":0.090439,"New_Multi_Units":31523,"Rent_Growth":0.025122,"Implied_Value":135600.0,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.665977,"Stability_Index":0.681972,"Supply_Index":0.161778,"Pricing_Index":0.286132,"Valuation_Index":0.199443,"Capital_Index":0.333628,"Investment_Score":37.048315,"Total_Population":7796182,"Median_Rent":1469,"Median_Income":81417,"Median_Home_Value":327400},{"msa_code":28660,"msa_name":"Killeen-Temple, TX Metro Area","year":2024,"Employment_Rate":0.843005,"Employment_Growth":0.005848,"Pop_Growth":0.016263,"Income_Growth":-0.035881,"Rent_to_Income_Ratio":0.224874,"Vacancy_Rate":0.079758,"New_Multi_Units":1710,"Rent_Growth":-0.013836,"Implied_Value":118430.769231,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.232345,"Stability_Index":0.676007,"Supply_Index":0.95453,"Pricing_Index":0.11708,"Valuation_Index":0.144922,"Capital_Index":0.333628,"Investment_Score":36.793567,"Total_Population":509487,"Median_Rent":1283,"Median_Income":68465,"Median_Home_Value":268400},{"msa_code":33660,"msa_name":"Mobile, AL Metro Area","year":2024,"Employment_Rate":0.939086,"Employment_Growth":-0.006699,"Pop_Growth":0.001698,"Income_Growth":0.090819,"Rent_to_Income_Ratio":0.219812,"Vacancy_Rate":0.138528,"New_Multi_Units":0,"Rent_Growth":0.082192,"Implied_Value":95192.275862,"Effective Tax Spread":0.00725,"Value Creation":3266787.658802,"Average HERS Index Score":61,"Economic_Index":0.364628,"Stability_Index":0.554691,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.061051,"Capital_Index":0.0,"Investment_Score":36.37892,"Total_Population":412339,"Median_Rent":1106,"Median_Income":60379,"Median_Home_Value":207400},{"msa_code":33660,"msa_name":"Mobile, AL Metro Area","year":2024,"Employment_Rate":0.939086,"Employment_Growth":0.0,"Pop_Growth":0.0,"Income_Growth":0.0,"Rent_to_Income_Ratio":0.219812,"Vacancy_Rate":0.138528,"New_Multi_Units":0,"Rent_Growth":0.0,"Implied_Value":92019.2,"Effective Tax Spread":0.0,"Value Creation":2222222.222222,"Average HERS Index Score":61,"Economic_Index":0.364628,"Stability_Index":0.554691,"Supply_Index":1.0,"Pricing_Index":0.177117,"Valuation_Index":0.061051,"Capital_Index":0.0,"Investment_Score":36.37892,"Total_Population":412339,"Median_Rent":1106,"Median_Income":60379,"Median_Home_Value":207400},{"msa_code":35620,"msa_name":"New York-Newark-Jersey City, NY-NJ Metro Area","year":2024,"Employment_Rate":0.942057,"Employment_Growth":0.018084,"Pop_Growth":0.02267,"Income_Growth":0.048645,"Rent_to_Income_Ratio":0.222449,"Vacancy_Rate":0.079061,"New_Multi_Units":37607,"Rent_Growth":0.04932,"Implied_Value":192504.0,"Effective Tax Spread":-0.00716,"Value Creation":4166666.666667,"Average HERS Index Score":49,"Economic_Index":0.584848,"Stability_Index":0.686804,"Supply_Index":0.0,"Pricing_Index":0.391134,"Valuation_Index":0.380143,"Capital_Index":0.081289,"Investment_Score":36.260067,"Total_Population":19940274,"Median_Rent":1851,"Median_Income":99852,"Median_Home_Value":648800},{"msa_code":21340,"msa_name":"El Paso, TX Metro Area","year":2024,"Employment_Rate":0.90974,"Employment_Growth":-0.000465,"Pop_Growth":0.006625,"Income_Growth":0.0135,"Rent_to_Income_Ratio":0.2168,"Vacancy_Rate":0.079755,"New_Multi_Units":4363,"Rent_Growth":-0.040816,"Implied_Value":99784.615385,"Effective Tax Spread":0.0,"Value Creation":4858299.595142,"Average HERS Index Score":53,"Economic_Index":0.357003,"Stability_Index":0.706421,"Supply_Index":0.883984,"Pricing_Index":0.0,"Valuation_Index":0.08571,"Capital_Index":0.333628,"Investment_Score":35.784265,"Total_Population":877840,"Median_Rent":1081,"Median_Income":59834,"Median_Home_Value":208800},{"msa_code":43340,"msa_name":"Shreveport-Bossier City, LA Metro Area","year":2024,"Employment_Rate":0.916919,"Employment_Growth":0.001057,"Pop_Growth":-6.8e-05,"Income_Growth":0.047538,"Rent_to_Income_Ratio":0.206558,"Vacancy_Rate":0.125266,"New_Multi_Units":1041,"Rent_Growth":-0.037901,"Implied_Value":74448.0,"Effective Tax Spread":0.007275,"Value Creation":3076923.076923,"Average HERS Index Score":56,"Economic_Index":0.382899,"Stability_Index":0.636278,"Supply_Index":0.972319,"Pricing_Index":0.012651,"Valuation_Index":0.005254,"Capital_Index":0.275623,"Investment_Score":35.333637,"Total_Population":383269,"Median_Rent":990,"Median_Income":57514,"Median_Home_Value":195300}]};
 
+        // ...existing code...
         async function loadData() {
-            const res = await fetch('./data/sample_data.json');
-            if (!res.ok) {
-                throw new Error(`Failed to load data: HTTP ${res.status}`);
+            try {
+                // index.html 位于 /docs，所以这里请按你的 JSON 实际位置选择：
+                // 如果文件在 /docs/data/sample_data.json，用 './data/sample_data.json'
+                // 如果文件在 /data/sample_data.json，用 '../data/sample_data.json'
+                const res = await fetch('./data/sample_data.json', { cache: 'no-store' });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                allMSAs = Array.isArray(data?.msas) ? data.msas : [];
+
+                if (!allMSAs.length) {
+                    throw new Error('sample_data.json 中没有 msas 数组');
+                }
+
+                calculateScores();
+                allMSAs.forEach(msa => { msa.baseScore = msa.customScore; });
+
+                console.log('✅ Loaded ' + allMSAs.length + ' MSAs (from JSON)');
+                loadStats(data);
+
+                renderScoringTable();
+                renderOverviewView();
+                renderTop10View();
+                if (typeof rziBuildList === 'function') rziBuildList();
+            } catch (e) {
+                console.error('❌ Failed to load sample_data.json:', e);
+
+                const tbody = document.getElementById('scoringTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="color:#f87171;">
+                                Failed to load sample_data.json: ${e.message}
+                            </td>
+                        </tr>
+                    `;
+                }
             }
-
-            const data = await res.json();
-            allMSAs = data.msas || [];
-
-            console.log('✅ Loaded ' + allMSAs.length + ' MSAs (from JSON)');
-            loadStats(data);
-
-            // Precompute and render default-weight ranking so scoring panel is never empty on first load
-            calculateScores();
-            renderScoringTable();
-            renderOverviewView();
-            renderTop10View();
-            if (typeof renderComparisonView === 'function') renderComparisonView();
-            if (typeof rziBuildList === 'function') rziBuildList();
         }
+// ...existing code...
 
         function loadStats(data) {
             const stats = data.stats;
@@ -2058,7 +2291,7 @@
 
             if (msas.length === 0) return;
             
-            const scores = msas.map(m => m.Investment_Score || 0);
+            const scores = allMSAs.map(m => getCurrentDisplayScore(m));
 
             document.getElementById('totalMSA').textContent = msas.length;
             document.getElementById('avgScore').textContent = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
@@ -2139,17 +2372,17 @@
 
         function isUsingDefaultWeights() {
             return (
-                Math.abs(currentWeights.economic - 0.25) < 0.01 &&
+                Math.abs(currentWeights.economic - 0.20) < 0.01 &&
                 Math.abs(currentWeights.stability - 0.15) < 0.01 &&
                 Math.abs(currentWeights.supply - 0.15) < 0.01 &&
                 Math.abs(currentWeights.pricing - 0.15) < 0.01 &&
-                Math.abs(currentWeights.valuation - 0.20) < 0.01 &&
-                Math.abs(currentWeights.capital - 0.10) < 0.01
+                Math.abs(currentWeights.valuation - 0.15) < 0.01 &&
+                Math.abs(currentWeights.regulatory - 0.20) < 0.01
             );
         }
 
         function getCurrentDisplayScore(msa) {
-            return isUsingDefaultWeights() ? (msa.Investment_Score || 0) : (msa.customScore || 0);
+            return (msa.customScore != null) ? msa.customScore : (msa.Investment_Score || 0);
         }
 
         function getSortedMSAsByCurrentScore() {
@@ -2186,8 +2419,8 @@
                     scales: {
                         y: {
                             beginAtZero: false,
-                            min: 40,
-                            max: 80,
+                            min: 0,
+                            max: 100,
                             ticks: { color: '#999' }
                         },
                         x: { ticks: { color: '#999' } }
@@ -2542,19 +2775,196 @@
             document.getElementById('weightSupply').value = currentWeights.supply * 100;
             document.getElementById('weightPricing').value = currentWeights.pricing * 100;
             document.getElementById('weightValuation').value = currentWeights.valuation * 100;
-            document.getElementById('weightCapital').value = currentWeights.capital * 100;
+            document.getElementById('weightRegulatory').value = currentWeights.regulatory * 100;
             
+            // Sync intra-weight sliders
+            document.getElementById('intraEmpRate').value    = intraWeights.empRate;
+            document.getElementById('intraEmpGrowth').value  = intraWeights.empGrowth;
+            document.getElementById('intraPopGrowth').value  = intraWeights.popGrowth;
+            document.getElementById('intraIncGrowth').value  = intraWeights.incGrowth;
+            document.getElementById('intraRentIncome').value = intraWeights.rentIncome;
+            document.getElementById('intraVacancy').value    = intraWeights.vacancy;
+
+            updateSubFactorWeightLabels();
+            updateFactorTotalBars();
+            updateSubFactorWeightWarnings();
+            clearSubFactorUpdateStatus();
+
             updateWeights();
         }
 
+        function formatWeightPercentage(value) {
+            return `${Math.round(value)}%`;
+        }
+
+        function updateSubFactorWeightLabels() {
+            // Economic group: show raw slider percentages (absolute values)
+            const empRate   = parseInt(document.getElementById('intraEmpRate').value)   || 0;
+            const empGrowth = parseInt(document.getElementById('intraEmpGrowth').value)  || 0;
+            const popGrowth = parseInt(document.getElementById('intraPopGrowth').value)  || 0;
+            const incGrowth = parseInt(document.getElementById('intraIncGrowth').value)  || 0;
+            document.getElementById('intraEmpRateVal').textContent   = formatWeightPercentage(empRate);
+            document.getElementById('intraEmpGrowthVal').textContent = formatWeightPercentage(empGrowth);
+            document.getElementById('intraPopGrowthVal').textContent = formatWeightPercentage(popGrowth);
+            document.getElementById('intraIncGrowthVal').textContent = formatWeightPercentage(incGrowth);
+
+            // Stability group: show raw slider percentages (absolute values)
+            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            const vacancy    = parseInt(document.getElementById('intraVacancy').value)    || 0;
+            document.getElementById('intraRentIncomeVal').textContent = formatWeightPercentage(rentIncome);
+            document.getElementById('intraVacancyVal').textContent    = formatWeightPercentage(vacancy);
+        }
+
+        function updateFactorTotalBars() {
+            const empRate   = parseInt(document.getElementById('intraEmpRate').value) || 0;
+            const empGrowth = parseInt(document.getElementById('intraEmpGrowth').value) || 0;
+            const popGrowth = parseInt(document.getElementById('intraPopGrowth').value) || 0;
+            const incGrowth = parseInt(document.getElementById('intraIncGrowth').value) || 0;
+            const econTotal = empRate + empGrowth + popGrowth + incGrowth;
+
+            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            const vacancy = parseInt(document.getElementById('intraVacancy').value) || 0;
+            const stabilityTotal = rentIncome + vacancy;
+
+            const econTotalValue = document.getElementById('econTotalValue');
+            const econTotalFill = document.getElementById('econTotalFill');
+            const stabilityTotalValue = document.getElementById('stabilityTotalValue');
+            const stabilityTotalFill = document.getElementById('stabilityTotalFill');
+
+            if (econTotalValue) econTotalValue.textContent = `${econTotal}%`;
+            if (stabilityTotalValue) stabilityTotalValue.textContent = `${stabilityTotal}%`;
+
+            if (econTotalFill) {
+                econTotalFill.style.width = `${Math.min(econTotal, 100)}%`;
+                econTotalFill.style.background = (econTotal === 100) ? '#32B576' : '#ffb84d';
+            }
+
+            if (stabilityTotalFill) {
+                stabilityTotalFill.style.width = `${Math.min(stabilityTotal, 100)}%`;
+                stabilityTotalFill.style.background = (stabilityTotal === 100) ? '#32B576' : '#ffb84d';
+            }
+        }
+
+        function updateSubFactorWeightWarnings(showEcon = false, showStability = false) {
+            const empRate   = parseInt(document.getElementById('intraEmpRate').value) || 0;
+            const empGrowth = parseInt(document.getElementById('intraEmpGrowth').value) || 0;
+            const popGrowth = parseInt(document.getElementById('intraPopGrowth').value) || 0;
+            const incGrowth = parseInt(document.getElementById('intraIncGrowth').value) || 0;
+            const econTotal = empRate + empGrowth + popGrowth + incGrowth;
+
+            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            const vacancy = parseInt(document.getElementById('intraVacancy').value) || 0;
+            const stabilityTotal = rentIncome + vacancy;
+
+            const econWarning = document.getElementById('econWeightWarning');
+            const stabilityWarning = document.getElementById('stabilityWeightWarning');
+
+            if (econWarning) econWarning.style.display = (showEcon && econTotal !== 100) ? 'block' : 'none';
+            if (stabilityWarning) stabilityWarning.style.display = (showStability && stabilityTotal !== 100) ? 'block' : 'none';
+        }
+
+        function clearSubFactorUpdateStatus() {
+            const econStatus = document.getElementById('econUpdateStatus');
+            const stabilityStatus = document.getElementById('stabilityUpdateStatus');
+            if (econStatus) econStatus.textContent = '';
+            if (stabilityStatus) stabilityStatus.textContent = '';
+        }
+
+        function getScoreImpactStats(beforeScores, afterScores) {
+            const diffs = beforeScores.map((s, i) => Math.abs((afterScores[i] || 0) - (s || 0)));
+            const changedCount = diffs.filter(d => d > 0.0001).length;
+            const maxDiff = diffs.length ? Math.max(...diffs) : 0;
+            return { changedCount, maxDiff };
+        }
+
+        function applyEconomicSubFactors() {
+            const empRate   = parseInt(document.getElementById('intraEmpRate').value) || 0;
+            const empGrowth = parseInt(document.getElementById('intraEmpGrowth').value) || 0;
+            const popGrowth = parseInt(document.getElementById('intraPopGrowth').value) || 0;
+            const incGrowth = parseInt(document.getElementById('intraIncGrowth').value) || 0;
+            const econTotal = empRate + empGrowth + popGrowth + incGrowth;
+
+            const econStatus = document.getElementById('econUpdateStatus');
+
+            if (econTotal !== 100) {
+                updateSubFactorWeightWarnings(true, false);
+                if (econStatus) econStatus.textContent = '';
+                return;
+            }
+
+            updateSubFactorWeightWarnings(false, false);
+            const beforeScores = allMSAs.map(msa => msa.customScore || 0);
+            intraWeights.empRate = empRate;
+            intraWeights.empGrowth = empGrowth;
+            intraWeights.popGrowth = popGrowth;
+            intraWeights.incGrowth = incGrowth;
+
+            calculateScores();
+            renderScoringTable();
+            renderOverviewView();
+            updateStats();
+
+            const afterScores = allMSAs.map(msa => msa.customScore || 0);
+            const impact = getScoreImpactStats(beforeScores, afterScores);
+
+            if (econStatus) econStatus.textContent = `Economic index updated. ${impact.changedCount} MSAs changed (max Δ ${impact.maxDiff.toFixed(2)}).`;
+        }
+
+        function applyStabilitySubFactors() {
+            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            const vacancy = parseInt(document.getElementById('intraVacancy').value) || 0;
+            const stabilityTotal = rentIncome + vacancy;
+
+            const stabilityStatus = document.getElementById('stabilityUpdateStatus');
+
+            if (stabilityTotal !== 100) {
+                updateSubFactorWeightWarnings(false, true);
+                if (stabilityStatus) stabilityStatus.textContent = '';
+                return;
+            }
+
+            updateSubFactorWeightWarnings(false, false);
+            const beforeScores = allMSAs.map(msa => msa.customScore || 0);
+            intraWeights.rentIncome = rentIncome;
+            intraWeights.vacancy = vacancy;
+
+            calculateScores();
+            renderScoringTable();
+            renderOverviewView();
+            updateStats();
+
+            const afterScores = allMSAs.map(msa => msa.customScore || 0);
+            const impact = getScoreImpactStats(beforeScores, afterScores);
+
+            if (stabilityStatus) stabilityStatus.textContent = `Stability index updated. ${impact.changedCount} MSAs changed (max Δ ${impact.maxDiff.toFixed(2)}).`;
+        }
+
+        function updateOverallWeightWarning(total) {
+            const overallWarning = document.getElementById('overallWeightWarning');
+            if (overallWarning) overallWarning.style.display = (total === 100) ? 'none' : 'block';
+        }
+
         function resetWeights() {
-            document.getElementById('weightEconomic').value = 25;
+            document.getElementById('weightEconomic').value = 20;
             document.getElementById('weightStability').value = 15;
             document.getElementById('weightSupply').value = 15;
             document.getElementById('weightPricing').value = 15;
-            document.getElementById('weightValuation').value = 20;
-            document.getElementById('weightCapital').value = 10;
+            document.getElementById('weightValuation').value = 15;
+            document.getElementById('weightRegulatory').value = 20;
             
+            // Reset intra-weight sliders
+            document.getElementById('intraEmpRate').value    = 25;
+            document.getElementById('intraEmpGrowth').value  = 25;
+            document.getElementById('intraPopGrowth').value  = 25;
+            document.getElementById('intraIncGrowth').value  = 25;
+            document.getElementById('intraRentIncome').value = 50;
+            document.getElementById('intraVacancy').value    = 50;
+            intraWeights = { empRate:25, empGrowth:25, popGrowth:25, incGrowth:25,
+                             rentIncome:50, vacancy:50 };
+            updateSubFactorWeightLabels();
+            updateFactorTotalBars();
+            updateSubFactorWeightWarnings();
+            clearSubFactorUpdateStatus();
             updateWeights();
         }
 
@@ -2564,16 +2974,16 @@
             const supply = parseInt(document.getElementById('weightSupply').value);
             const pricing = parseInt(document.getElementById('weightPricing').value);
             const valuation = parseInt(document.getElementById('weightValuation').value);
-            const capital = parseInt(document.getElementById('weightCapital').value);
+            const regulatory = parseInt(document.getElementById('weightRegulatory').value);
             
             document.getElementById('valueEconomic').textContent = economic + '%';
             document.getElementById('valueStability').textContent = stability + '%';
             document.getElementById('valueSupply').textContent = supply + '%';
             document.getElementById('valuePricing').textContent = pricing + '%';
             document.getElementById('valueValuation').textContent = valuation + '%';
-            document.getElementById('valueCapital').textContent = capital + '%';
+            document.getElementById('valueRegulatory').textContent = regulatory + '%';
             
-            const total = economic + stability + supply + pricing + valuation + capital;
+            const total = economic + stability + supply + pricing + valuation + regulatory;
             document.getElementById('totalWeight').textContent = total + '%';
             
             if (total > 0) {
@@ -2583,9 +2993,11 @@
                     supply: supply / total,
                     pricing: pricing / total,
                     valuation: valuation / total,
-                    capital: capital / total
+                    regulatory: regulatory / total
                 };
             }
+
+            updateOverallWeightWarning(total);
             
             calculateScores();
             renderScoringTable();
@@ -2593,25 +3005,110 @@
             updateStats();
         }
 
+        // ===================================================================
+        // computeIndices: min-max-normalize raw factors → weighted index values
+        // ===================================================================
+        function computeIndices() {
+            if (allMSAs.length === 0) return;
+
+            // Helper: min-max normalize an array to [0,1], optionally inverting
+            function mmNorm(vals, invert) {
+                const min = Math.min(...vals);
+                const max = Math.max(...vals);
+                const range = max - min;
+                if (range <= 1e-12) return vals.map(() => 0.5);
+                return vals.map(v => {
+                    const n = (v - min) / range;
+                    return invert ? 1 - n : n;
+                });
+            }
+
+            // Extract raw values (fallback to 0 for missing data)
+            const empRateRaw    = allMSAs.map(m => m.Employment_Rate            || 0);
+            const empGrowthRaw  = allMSAs.map(m => m.Employment_Growth          || 0);
+            const popGrowthRaw  = allMSAs.map(m => m.Pop_Growth                 || 0);
+            const incGrowthRaw  = allMSAs.map(m => m.Income_Growth              || 0);
+            const rentIncomeRaw = allMSAs.map(m => m.Rent_to_Income_Ratio       || 0);
+            const vacancyRaw    = allMSAs.map(m => m.Vacancy_Rate               || 0);
+            const supplyRaw     = allMSAs.map(m => m.New_Multi_Units            || 0);
+            const rentGrowthRaw = allMSAs.map(m => m.Rent_Growth                || 0);
+            const valuationRaw  = allMSAs.map(m => m.Value_Creation             || 0);
+            const hotelConvRaw  = allMSAs.map(m => m.Hotel_Conversion_Relevance || 0);
+
+            // Normalize: ↑ positive = false, ↓ lower-is-better = true (inverted)
+            const empRateN    = mmNorm(empRateRaw,    false);
+            const empGrowthN  = mmNorm(empGrowthRaw,  false);
+            const popGrowthN  = mmNorm(popGrowthRaw,  false);
+            const incGrowthN  = mmNorm(incGrowthRaw,  false);
+            const rentIncomeN = mmNorm(rentIncomeRaw, false);  // larger ratio = better
+            const vacancyN    = mmNorm(vacancyRaw,    true);   // lower vacancy = better
+            const supplyN     = mmNorm(supplyRaw,     true);   // lower new supply = better
+            const pricingN    = mmNorm(rentGrowthRaw, false);
+            const valuationN  = mmNorm(valuationRaw,  false);
+            const hotelConvN  = mmNorm(hotelConvRaw,  false);
+
+            // Intra-weight fractions (auto-normalize within each group)
+            const totEcon = intraWeights.empRate + intraWeights.empGrowth + intraWeights.popGrowth + intraWeights.incGrowth || 1;
+            const wER = intraWeights.empRate    / totEcon;
+            const wEG = intraWeights.empGrowth  / totEcon;
+            const wPG = intraWeights.popGrowth  / totEcon;
+            const wIG = intraWeights.incGrowth  / totEcon;
+
+            const totStab = intraWeights.rentIncome + intraWeights.vacancy || 1;
+            const wRI = intraWeights.rentIncome / totStab;
+            const wVR = intraWeights.vacancy    / totStab;
+
+            // Assign computed index values [0, 1] to each MSA
+            allMSAs.forEach((msa, i) => {
+                msa.Economic_Index   = empRateN[i] * wER + empGrowthN[i] * wEG + popGrowthN[i] * wPG + incGrowthN[i] * wIG;
+                msa.Stability_Index  = rentIncomeN[i] * wRI + vacancyN[i] * wVR;
+                msa.Supply_Index     = supplyN[i];
+                msa.Pricing_Index    = pricingN[i];
+                msa.Valuation_Index  = valuationN[i];
+                msa.Regulatory_Index = hotelConvN[i];
+            });
+        }
+
+        // ===================================================================
+        // updateIntraWeights: read sub-factor sliders → update intraWeights
+        // ===================================================================
+        function updateIntraWeights() {
+            updateSubFactorWeightLabels();
+            updateFactorTotalBars();
+            updateSubFactorWeightWarnings(false, false);
+            clearSubFactorUpdateStatus();
+        }
+
         function calculateScores() {
-            // Calculate weighted z-scores for all MSAs
-            // Each Index is already z-score normalized (range: -3 to 3)
-            // Weighted average of z-scores will also be in -3 to 3 range
+            // Step 1: compute 6 index values from raw factors + intra-weights
+            computeIndices();
+
+            // Step 2: inter-index weighted raw score
             allMSAs.forEach(msa => {
-                const weighted_z_score = (
-                    (msa.Economic_Index || 0) * currentWeights.economic +
+                msa.customRawScore = (
+                    (msa.Economic_Index  || 0) * currentWeights.economic  +
                     (msa.Stability_Index || 0) * currentWeights.stability +
-                    (msa.Supply_Index || 0) * currentWeights.supply +
-                    (msa.Pricing_Index || 0) * currentWeights.pricing +
+                    (msa.Supply_Index    || 0) * currentWeights.supply    +
+                    (msa.Pricing_Index   || 0) * currentWeights.pricing   +
                     (msa.Valuation_Index || 0) * currentWeights.valuation +
-                    (msa.Capital_Index || 0) * currentWeights.capital
+                    (msa.Regulatory_Index   || 0) * currentWeights.regulatory
                 );
-                
-                // Linear transformation: z-score (-3 to 3) → score (0 to 100)
-                // weighted_z_score = -3 → score = 0
-                // weighted_z_score = 0  → score = 50
-                // weighted_z_score = 3  → score = 100
-                msa.customScore = ((weighted_z_score + 4) / 8) * 100;
+            });
+
+            // Step 3: min-max scale to 0-100 (best MSA = 100, worst = 0)
+            const rawScores = allMSAs.map(msa => msa.customRawScore || 0);
+            const minRaw = Math.min(...rawScores);
+            const maxRaw = Math.max(...rawScores);
+            const range = maxRaw - minRaw;
+
+            allMSAs.forEach(msa => {
+                if (range <= 1e-12) {
+                    // Degenerate case: all raw scores identical
+                    msa.customScore = 50;
+                    return;
+                }
+
+                msa.customScore = ((msa.customRawScore - minRaw) / range) * 100;
             });
         }
 
@@ -2625,13 +3122,11 @@
             const tbody = document.getElementById('scoringTableBody');
             tbody.innerHTML = '';
 
-            const isDefaultWeights = isUsingDefaultWeights();
-
             const sorted = getSortedMSAsByCurrentScore();
             
             sorted.slice(0, 10).forEach((msa, index) => {
-                const displayScore = isDefaultWeights ? (msa.Investment_Score || 0) : (msa.customScore || 0);
-                const scoreChange = isDefaultWeights ? 0 : (displayScore - (msa.Investment_Score || 0)).toFixed(1);
+                const displayScore = getCurrentDisplayScore(msa);
+                const scoreChange = (displayScore - (msa.baseScore || 0)).toFixed(1);
                 const changeColor = scoreChange > 0 ? '#4caf50' : scoreChange < 0 ? '#f44336' : '#999';
                 
                 const row = document.createElement('tr');
@@ -2652,6 +3147,28 @@
         function renderRawDataView() {
             console.log('📊 Rendering Raw Data View...');
             renderRawDataTable();
+        }
+
+        function getAverageHersIndexScore(msa) {
+            return msa.Average_HERS_Index_Score ?? msa['Average HERS Index Score'] ?? 0;
+        }
+
+        function getValueCreationValue(msa) {
+            return msa.Value_Creation ?? msa['Value Creation'] ?? 0;
+        }
+
+        function getHotelConversionGrade(score) {
+            // Map [0, 1] score back to letter grades based on reference table
+            // A+: 1.00, A: 0.90, B+: 0.78, B: 0.66, C: 0.52, C-: 0.40, D: 0.25, D-: 0.12, F: 0.00
+            if (score >= 0.95) return 'A+';
+            if (score >= 0.84) return 'A';
+            if (score >= 0.72) return 'B+';
+            if (score >= 0.59) return 'B';
+            if (score >= 0.46) return 'C';
+            if (score >= 0.325) return 'C-';
+            if (score >= 0.185) return 'D';
+            if (score >= 0.06) return 'D-';
+            return 'F';
         }
 
         function renderRawDataTable() {
@@ -2706,8 +3223,6 @@
                     <th>Operating Expense Ratio %</th>
                     <th>Hotel Cap Rate %</th>
                     <th>Multifamily Cap Rate %</th>
-                    <th>Hotel Effective Tax Rate %</th>
-                    <th>Multifamily Effective Tax Rate %</th>
                     <th>Employment Rate %</th>
                     <th>Employment Growth %</th>
                     <th>Pop Growth %</th>
@@ -2716,16 +3231,9 @@
                     <th>Vacancy Rate %</th>
                     <th>New Multi Units</th>
                     <th>Rent Growth %</th>
-                    <th>Implied Value</th>
-                    <th>Effective Tax Spread %</th>
                     <th>Value Creation</th>
+                    <th>Hotel Conversion Relevance</th>
                     <th>Average HERS Index Score</th>
-                    <th>Economic Index</th>
-                    <th>Stability Index</th>
-                    <th>Supply Index</th>
-                    <th>Pricing Index</th>
-                    <th>Valuation Index</th>
-                    <th>Capital Index</th>
                     <th>Investment Score</th>
                 </tr>
             `;
@@ -2747,8 +3255,6 @@
                     <td>${((msa.Operating_Expense_Ratio || 0) * 100).toFixed(2)}</td>
                     <td>${((msa.Hotel_Cap_Rate || 0) * 100).toFixed(2)}</td>
                     <td>${((msa.Multifamily_Cap_Rate || 0) * 100).toFixed(2)}</td>
-                    <td>${((msa.Hotel_Effective_Tax_Rate || 0) * 100).toFixed(3)}</td>
-                    <td>${((msa.Multifamily_Effective_Tax_Rate || 0) * 100).toFixed(3)}</td>
                     <td>${((msa.Employment_Rate || 0) * 100).toFixed(2)}</td>
                     <td>${((msa.Employment_Growth || 0) * 100).toFixed(2)}</td>
                     <td>${((msa.Pop_Growth || 0) * 100).toFixed(2)}</td>
@@ -2757,16 +3263,9 @@
                     <td>${((msa.Vacancy_Rate || 0) * 100).toFixed(2)}</td>
                     <td>${formatNumber(Math.round(msa.New_Multi_Units || 0))}</td>
                     <td>${((msa.Rent_Growth || 0) * 100).toFixed(2)}</td>
-                    <td>$${formatNumber(Math.round(msa.Implied_Value || 0))}</td>
-                    <td>${((msa['Effective Tax Spread'] || 0) * 100).toFixed(2)}</td>
-                    <td>$${formatNumber(Math.round(msa['Value Creation'] || 0))}</td>
-                    <td>${(msa['Average HERS Index Score'] || 0).toFixed(0)}</td>
-                    <td>${(msa.Economic_Index || 0).toFixed(3)}</td>
-                    <td>${(msa.Stability_Index || 0).toFixed(3)}</td>
-                    <td>${(msa.Supply_Index || 0).toFixed(3)}</td>
-                    <td>${(msa.Pricing_Index || 0).toFixed(3)}</td>
-                    <td>${(msa.Valuation_Index || 0).toFixed(3)}</td>
-                    <td>${(msa.Capital_Index || 0).toFixed(3)}</td>
+                    <td>$${formatNumber(Math.round(getValueCreationValue(msa) || 0))}</td>
+                    <td>${getHotelConversionGrade(msa.Hotel_Conversion_Relevance || 0)}</td>
+                    <td>${getAverageHersIndexScore(msa).toFixed(0)}</td>
                     <td><strong style="color: #667eea;">${getCurrentDisplayScore(msa).toFixed(2)}</strong></td>
                 `;
                 tbody.appendChild(row);
@@ -2811,10 +3310,10 @@
                     break;
             }
             
-            let csv = 'Rank,MSA Name,Population,Pop Growth %,Median Income,Income Growth %,Employment Rate %,Employment Growth %,Median Rent,Rent Growth %,Rent/Income %,Vacancy Rate %,New Multi-Units,Implied Value,Effective Tax Spread %,Value Creation,Investment Score\n';
+            let csv = 'Rank,MSA Name,Population,Pop Growth %,Median Income,Income Growth %,Employment Rate %,Employment Growth %,Median Rent,Rent Growth %,Rent/Income %,Vacancy Rate %,New Multi-Units,Value Creation,Hotel Conversion Relevance,Average HERS Index Score,Investment Score\n';
             
             sorted.forEach((msa, index) => {
-                csv += `${index + 1},"${msa.msa_name}",${msa.Total_Population},${((msa.Pop_Growth || 0) * 100).toFixed(2)},${msa.Median_Income},${((msa.Income_Growth || 0) * 100).toFixed(2)},${((msa.Employment_Rate || 0) * 100).toFixed(1)},${((msa.Employment_Growth || 0) * 100).toFixed(2)},${msa.Median_Rent},${((msa.Rent_Growth || 0) * 100).toFixed(2)},${((msa.Rent_to_Income_Ratio || 0) * 100).toFixed(1)},${((msa.Vacancy_Rate || 0) * 100).toFixed(1)},${Math.round(msa.New_Multi_Units || 0)},${Math.round(msa.Implied_Value || 0)},${((msa['Effective Tax Spread'] || 0) * 100).toFixed(2)},${Math.round(msa['Value Creation'] || 0)},${getCurrentDisplayScore(msa).toFixed(2)}\n`;
+                csv += `${index + 1},"${msa.msa_name}",${msa.Total_Population},${((msa.Pop_Growth || 0) * 100).toFixed(2)},${msa.Median_Income},${((msa.Income_Growth || 0) * 100).toFixed(2)},${((msa.Employment_Rate || 0) * 100).toFixed(1)},${((msa.Employment_Growth || 0) * 100).toFixed(2)},${msa.Median_Rent},${((msa.Rent_Growth || 0) * 100).toFixed(2)},${((msa.Rent_to_Income_Ratio || 0) * 100).toFixed(1)},${((msa.Vacancy_Rate || 0) * 100).toFixed(1)},${Math.round(msa.New_Multi_Units || 0)},${Math.round(getValueCreationValue(msa) || 0)},${getHotelConversionGrade(msa.Hotel_Conversion_Relevance || 0)},${Math.round(getAverageHersIndexScore(msa) || 0)},${getCurrentDisplayScore(msa).toFixed(2)}\n`;
             });
             
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -2857,10 +3356,14 @@
             renderRadarChart();
         }
 
+        // ...existing code...
         function renderMSAList() {
             const input = document.getElementById('msaSelector');
             const listDiv = document.getElementById('msaList');
-            const query = input.value.toLowerCase();
+
+            if (!listDiv) return;
+
+            const query = (input?.value || '').toLowerCase();
             
             let filtered = allMSAs;
             if (query) {
@@ -2895,6 +3398,7 @@
                 });
             }
         }
+// ...existing code...
 
         function filterMSAList() {
             renderMSAList();
@@ -2921,10 +3425,10 @@
 
             const categories = [
                 'Economic_Index', 'Stability_Index', 'Supply_Index',
-                'Pricing_Index', 'Valuation_Index', 'Capital_Index'
+                'Pricing_Index', 'Valuation_Index', 'Regulatory_Index'
             ];
             
-            const categoryLabels = ['Economic', 'Stability', 'Supply', 'Pricing', 'Valuation', 'Capital'];
+            const categoryLabels = ['Economic', 'Stability', 'Supply', 'Pricing', 'Valuation', 'Regulatory'];
             
             const selectedMSAs = allMSAs.filter(m => selectedMSAsForComparison.includes(m.msa_code));
             
@@ -2991,6 +3495,13 @@
             return colors[idx % colors.length];
         }
 
+        function getCurrentMSARanking(msaCode) {
+            // Get current ranking based on display score (considers custom weights)
+            const sorted = getSortedMSAsByCurrentScore();
+            const ranking = sorted.findIndex(m => m.msa_code === msaCode) + 1;
+            return ranking || 0;
+        }
+
         function showMSADetail(msaCode) {
             console.log(`🔍 Loading details for MSA ${msaCode}...`);
 
@@ -3000,10 +3511,11 @@
                 return;
             }
 
+            const ranking = getCurrentMSARanking(msaCode);
             const detailHtml = `
                 <div class="msa-detail">
                     <h3>${msa.msa_name}</h3>
-                    <p style="color: #999; margin-bottom: 20px;">MSA Code: ${msa.msa_code}</p>
+                    <p style="color: #999; margin-bottom: 20px;">MSA Code: ${msa.msa_code} &nbsp;|&nbsp; <strong style="color: #667eea;">Rank: #${ranking}</strong></p>
 
                     <h4 style="margin-top: 25px; margin-bottom: 15px; color: #667eea;">📊 Demographics</h4>
                     <div class="detail-grid">
@@ -3040,8 +3552,8 @@
                             <div class="detail-value">${(msa.Vacancy_Rate * 100 || 0).toFixed(1)}%</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-label">Implied MF Value</div>
-                            <div class="detail-value">$${formatNumber(Math.round(msa.Implied_Value || 0))}</div>
+                            <div class="detail-label">Hotel Conversion Relevance</div>
+                            <div class="detail-value">${getHotelConversionGrade(msa.Hotel_Conversion_Relevance || 0)}</div>
                         </div>
                     </div>
 
@@ -3049,19 +3561,15 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <div class="detail-label">Investment Score</div>
-                            <div class="detail-value" style="color: #667eea;">${(msa.Investment_Score || 0).toFixed(2)}</div>
+                            <div class="detail-value" style="color: #667eea;">${getCurrentDisplayScore(msa).toFixed(2)}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Value Creation</div>
-                            <div class="detail-value">$${formatNumber(Math.round(msa['Value Creation'] || 0))}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Effective Tax Spread</div>
-                            <div class="detail-value">${((msa['Effective Tax Spread'] || 0) * 100).toFixed(2)}%</div>
+                            <div class="detail-value">$${formatNumber(Math.round(getValueCreationValue(msa) || 0))}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">HERS Index Score</div>
-                            <div class="detail-value">${(msa['Average HERS Index Score'] || 0).toFixed(0)}</div>
+                            <div class="detail-value">${getAverageHersIndexScore(msa).toFixed(0)}</div>
                         </div>
                     </div>
                 </div>
