@@ -4327,7 +4327,7 @@ Rules: 4-5 projects (prioritize announced or started in 2024-2025, then 2023-202
             for (const modelName of modelsToTry) {
                 attemptedModels.push(modelName);
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                const timeoutId = setTimeout(() => controller.abort(), 180000);
                 try {
                     res = await fetch(
                         'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(modelName) + ':generateContent?key=' + encodeURIComponent(cleanKey),
@@ -4355,7 +4355,7 @@ Rules: 4-5 projects (prioritize announced or started in 2024-2025, then 2023-202
                 let detail = 'HTTP ' + (res?.status || lastStatus || 'unknown');
                 if (!res) {
                     detail = lastStatus === 408
-                        ? 'Request timed out (30s). Check your internet connection.'
+                        ? 'Request timed out (3 minutes). Check your internet connection.'
                         : 'All model requests failed. Check your API key and internet connection.';
                 } else {
                     const e = await res.json().catch(() => ({}));
