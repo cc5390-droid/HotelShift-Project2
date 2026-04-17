@@ -4229,17 +4229,25 @@
                 </div>`
             ).join('');
 
-            // Animated ticker
+            // Animated ticker with faster updates and timeout
             let fi = 0;
             const tick = setInterval(() => {
                 fi = Math.min(fi + 1, cities.length - 1);
                 for (let i = 0; i < fi; i++) rziSetSt(i, 'done');
                 rziSetSt(fi, 'active');
                 rziSetProg(fi, cities.length);
-            }, 2000);
+            }, 800);
+
+            // Add timeout for the entire operation (60 seconds max)
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Request timed out after 60 seconds')), 60000);
+            });
 
             try {
-                const data = await rziCallGemini(apiKey, cities, tick);
+                const data = await Promise.race([
+                    rziCallGemini(apiKey, cities, tick),
+                    timeoutPromise
+                ]);
                 RZI_CITIES = data;
                 rziRenderReport(cities);
             } catch(err) {
@@ -4274,11 +4282,19 @@
             const scOpts = '"cg" (green=booming), "cb" (blue=active), "co" (orange=surging), "cr" (red=emerging), "cp" (purple=building)';
                         const prompt = `You are a commercial real estate intelligence analyst. Generate a detailed ${focus} report for: ${cities.join(', ')}.
 
+EMPHASIS: Focus primarily on the most recent developments, proposals, and events from 2024-2025. Prioritize current rezoning activity, new policy proposals, recent project announcements, and current market conditions. Include forward-looking 2025 projections where relevant, but ground analysis in recent actual developments.
+
+For each city, calculate an Investment Index Score (0-100) based on:
+- Economic factors: employment growth, population growth, income trends
+- Market factors: vacancy rates, rent growth, pipeline activity  
+- Policy factors: recent rezoning activity, new incentives, regulatory changes
+- Supply factors: new multi-family construction, conversion potential
+
 Return ONLY valid JSON — no markdown, no explanation:
 
-{"cities":[{"name":"Full City Name, ST","state":"ST","region":"Northeast|South|Midwest|West|Mid-Atlantic|West Coast|Southwest","pipeline":"X,XXX+","pipeNum":5200,"vacancy":"XX.X%","yoy":"+XX% or Growing","statusLabel":"Booming|Active|Surging|Building|Emerging","sc":${scOpts},"color":"#hexcolor","catalyst":"2-3 sentence description.","profile":"2-3 sentence description.","stats":[{"val":"X,XXX","lbl":"Pipeline Units","color":"#hex"},{"val":"XX%","lbl":"Office Vacancy","color":"#f87171"},{"val":"$XXM","lbl":"Notable Incentive","color":"#fbbf24"},{"val":"XX","lbl":"Active Projects","color":"#60a5fa"}],"projects":[{"name":"Building Name","addr":"Address, City","units":"XXX","invest":"$XXM or N/A","program":"Financing program","status":"Under Construction|Completed|Approved|Planned","sc":"cg|cb|co|cr|cp"}],"timeline":[{"date":"Month Year","title":"Policy Name","desc":"1-2 sentence description."}],"finance":[{"amount":"Dollar or term","label":"Program Name","desc":"2-3 sentence description.","color":"#hex"}],"news":[{"type":"Policy|Deal|Pipeline|Finance|Reform|Market|Milestone|Risk","cls":"cg|cb|co|cr|cp|ci","text":"1-2 sentences.","src":"Source, Date"}],"rentControl":{"status":"ACTIVE|EXEMPT|LIMITED","title":"Policy name","coverage":"1 sentence coverage summary.","details":"2-3 sentence explanation of rent control mechanics and exemptions.","impact":"1-2 sentence hotel-to-apartment conversion impact."}}]}
+{"cities":[{"name":"Full City Name, ST","state":"ST","region":"Northeast|South|Midwest|West|Mid-Atlantic|West Coast|Southwest","pipeline":"X,XXX+","pipeNum":5200,"vacancy":"XX.X%","yoy":"+XX% or Growing","statusLabel":"Booming|Active|Surging|Building|Emerging","indexScore":85.5,"sc":${scOpts},"color":"#hexcolor","catalyst":"2-3 sentence description of the PRIMARY market catalyst from 2024-2025 (or recent 2023-2024 if current data limited).","profile":"2-3 sentence description.","stats":[{"val":"X,XXX","lbl":"Pipeline Units","color":"#hex"},{"val":"XX%","lbl":"Office Vacancy","color":"#f87171"},{"val":"$XXM","lbl":"Notable Incentive","color":"#fbbf24"},{"val":"XX","lbl":"Active Projects","color":"#60a5fa"},{"val":"XX.X","lbl":"Index Score","color":"#10b981"}],"projects":[{"name":"Building Name","addr":"Address, City","units":"XXX","invest":"$XXM or N/A","program":"Financing program","status":"Under Construction|Completed|Approved|Planned","sc":"cg|cb|co|cr|cp"}],"timeline":[{"date":"Month 2024-2025 (or 2023-2024 if needed)","title":"Policy Name","desc":"1-2 sentence description."}],"finance":[{"amount":"Dollar or term","label":"Program Name","desc":"2-3 sentence description.","color":"#hex"}],"news":[{"type":"Policy|Deal|Pipeline|Finance|Reform|Market|Milestone|Risk","cls":"cg|cb|co|cr|cp|ci","text":"1-2 sentences from 2024-2025 (or recent 2023-2024 if needed).","src":"Source, Date"}],"rentControl":{"status":"ACTIVE|EXEMPT|LIMITED","title":"Policy name","coverage":"1 sentence coverage summary.","details":"2-3 sentence explanation of rent control mechanics and exemptions.","impact":"1-2 sentence hotel-to-apartment conversion impact."}}]}
 
-Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per city. Include rentControl for every city. Use real names and figures. Unique hex per city. Return ONLY JSON.`;
+Rules: 4-5 projects (prioritize announced or started in 2024-2025, then 2023-2024), 4 timeline events (focus on 2024-2025, then 2023-2024), 3 finance mechanisms, 5 news items per city (prioritize 2024-2025, then recent 2023-2024). Include rentControl for every city. Use real names and figures. Calculate realistic indexScore (0-100). Unique hex per city. Return ONLY JSON.`;
 
             const payload = { contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.6,maxOutputTokens:65536} };
             const modelFamilies = {
@@ -4290,29 +4306,63 @@ Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per c
             const requestedModels = modelFamilies[selected] || [selected, 'gemini-2.5-flash'];
             const modelsToTry = [...new Set([...requestedModels, 'gemini-2.5-flash'])];
 
+            let cleanKey = String(apiKey || '').trim();
+            cleanKey = cleanKey.replace(/^["'`]+|["'`]+$/g, '');
+            if ((cleanKey.includes('?') || cleanKey.includes('&') || cleanKey.includes('=')) && !cleanKey.startsWith('AIza')) {
+                const match = cleanKey.match(/AIza[A-Za-z0-9_-]{35,}/);
+                if (match) {
+                    cleanKey = match[0];
+                } else {
+                    cleanKey = cleanKey.split(/[?&]/)[0];
+                }
+            }
+            cleanKey = cleanKey.replace(/[^A-Za-z0-9_-]/g, '');
+            if (!cleanKey.startsWith('AIza') || cleanKey.length < 35) {
+                throw new Error('API key format looks invalid. It should start with "AIza" and be about 39 characters. Please copy only the key from aistudio.google.com/app/apikey.');
+            }
+
             let res = null;
             let lastStatus = 0;
             const attemptedModels = [];
 
             for (const modelName of modelsToTry) {
                 attemptedModels.push(modelName);
-                res = await fetch(
-                    'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(modelName) + ':generateContent?key=' + apiKey,
-                    { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }
-                );
-
-                if (res.ok) break;
-                lastStatus = res.status;
-
-                if (lastStatus !== 400 && lastStatus !== 404) {
-                    break;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                try {
+                    res = await fetch(
+                        'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(modelName) + ':generateContent?key=' + encodeURIComponent(cleanKey),
+                        {
+                            method:'POST',
+                            headers:{'Content-Type':'application/json'},
+                            body: JSON.stringify(payload),
+                            signal: controller.signal
+                        }
+                    );
+                    clearTimeout(timeoutId);
+                    if (res.ok) break;
+                    lastStatus = res.status;
+                    if (lastStatus === 400 || lastStatus === 404) {
+                        break;
+                    }
+                } catch (fetchErr) {
+                    clearTimeout(timeoutId);
+                    lastStatus = fetchErr.name === 'AbortError' ? 408 : 0;
+                    if (lastStatus === 408) break;
                 }
             }
             clearInterval(tick);
-            if (!res.ok) {
-                const e = await res.json().catch(() => ({}));
-                const detail = e?.error?.message || ('HTTP ' + (res?.status || lastStatus));
-                throw new Error(detail + ' (Tried models: ' + attemptedModels.join(', ') + ')');
+            if (!res || !res.ok) {
+                let detail = 'HTTP ' + (res?.status || lastStatus || 'unknown');
+                if (!res) {
+                    detail = lastStatus === 408
+                        ? 'Request timed out (30s). Check your internet connection.'
+                        : 'All model requests failed. Check your API key and internet connection.';
+                } else {
+                    const e = await res.json().catch(() => ({}));
+                    detail = e?.error?.message || detail;
+                }
+                throw new Error(detail + ' (Tried: ' + attemptedModels.join(', ') + ')');
             }
             const data = await res.json();
             const raw  = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -4347,8 +4397,11 @@ Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per c
 
         // ── Render report ──
         function rziRenderReport(cityNames) {
+            RZI_CITIES.sort((a,b) => (b.indexScore || 0) - (a.indexScore || 0));
+
             const total = RZI_CITIES.reduce((s,c)=>s+(c.pipeNum||0),0);
             const avgV  = (RZI_CITIES.reduce((s,c)=>s+parseFloat((c.vacancy||'0').replace('%','')),0)/RZI_CITIES.length).toFixed(1);
+            const avgIndex = (RZI_CITIES.reduce((s,c)=>s+(c.indexScore||0),0)/RZI_CITIES.length).toFixed(1);
 
             document.getElementById('rzi-rep-title').textContent = 'ReZone Intelligence Report';
             document.getElementById('rzi-rep-desc').textContent  =
@@ -4358,11 +4411,11 @@ Rules: 4-5 projects, 4 timeline events, 3 finance mechanisms, 5 news items per c
                 '<div class="rzi-kpi"><div class="rzi-kpi-n">' + RZI_CITIES.length + '</div><div class="rzi-kpi-l">Cities Analyzed</div></div>' +
                 '<div class="rzi-kpi"><div class="rzi-kpi-n">' + Math.round(total/1000) + 'k</div><div class="rzi-kpi-l">Total Pipeline</div></div>' +
                 '<div class="rzi-kpi"><div class="rzi-kpi-n">' + avgV + '%</div><div class="rzi-kpi-l">Avg Vacancy</div></div>' +
-                '<div class="rzi-kpi"><div class="rzi-kpi-n">' + RZI_CITIES.filter(c=>c.statusLabel==='Booming'||c.statusLabel==='Surging').length + '</div><div class="rzi-kpi-l">High-Activity</div></div>';
+                '<div class="rzi-kpi"><div class="rzi-kpi-n">' + avgIndex + '</div><div class="rzi-kpi-l">Avg Index Score</div></div>';
 
             const maxP = Math.max(...RZI_CITIES.map(c=>c.pipeNum||0));
             document.getElementById('rzi-pipe-bars').innerHTML =
-                [...RZI_CITIES].sort((a,b)=>(b.pipeNum||0)-(a.pipeNum||0)).map(c=>
+                [...RZI_CITIES].sort((a,b)=>(b.indexScore||0)-(a.indexScore||0)).map(c=>
                     '<div class="rzi-pipe-row">' +
                     '<div class="rzi-pipe-city">' + c.name.split(',')[0] + '</div>' +
                     '<div class="rzi-pipe-bg"><div class="rzi-pipe-fill" style="width:' + (maxP>0?((c.pipeNum||0)/maxP*100).toFixed(1):0) + '%;background:' + (c.color||'#D4AF37') + '"></div></div>' +
