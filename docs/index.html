@@ -4308,17 +4308,16 @@ Rules: 4-5 projects (prioritize announced or started in 2024-2025, then 2023-202
 
             let cleanKey = String(apiKey || '').trim();
             cleanKey = cleanKey.replace(/^["'`]+|["'`]+$/g, '');
-            if ((cleanKey.includes('?') || cleanKey.includes('&') || cleanKey.includes('=')) && !cleanKey.startsWith('AIza')) {
-                const match = cleanKey.match(/AIza[A-Za-z0-9_-]{35,}/);
-                if (match) {
-                    cleanKey = match[0];
-                } else {
-                    cleanKey = cleanKey.split(/[?&]/)[0];
-                }
+
+            // Be tolerant of pasted content: URL/query strings or surrounding text.
+            const keyMatch = cleanKey.match(/AIza[A-Za-z0-9_-]{20,}/);
+            if (keyMatch) {
+                cleanKey = keyMatch[0];
             }
-            cleanKey = cleanKey.replace(/[^A-Za-z0-9_-]/g, '');
-            if (!cleanKey.startsWith('AIza') || cleanKey.length < 35) {
-                throw new Error('API key format looks invalid. It should start with "AIza" and be about 39 characters. Please copy only the key from aistudio.google.com/app/apikey.');
+            cleanKey = cleanKey.replace(/\s+/g, '');
+
+            if (!cleanKey) {
+                throw new Error('Please enter your Gemini API key.');
             }
 
             let res = null;
