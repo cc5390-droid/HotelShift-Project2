@@ -1112,6 +1112,13 @@
             border-top: 2px solid #D4AF37;
         }
 
+        .build-version-label {
+            margin-left: 8px;
+            color: #f2d37a;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
         /* =====================
            Info Box
            ===================== */
@@ -2168,7 +2175,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>📊 MSA Investment Analyzer | Data sourced from US Census Bureau ACS1 & Market Analysis | Last Updated: 2024</p>
+            <p>📊 MSA Investment Analyzer | Data sourced from US Census Bureau ACS1 & Market Analysis | Last Updated: 2024 <span id="buildVersionLabel" class="build-version-label"></span></p>
         </footer>
     </div>
 
@@ -2199,6 +2206,9 @@
                 // Stability Index
                 rentIncome: 50, vacancy: 50
             };
+
+        // Cache-busting version for GitHub Pages and local JSON fetch.
+        const BUILD_VERSION = '9e314ae';
 
         const US_STATE_ABBR_TO_FIPS = {
             AL: '01', AZ: '04', AR: '05', CA: '06', CO: '08', CT: '09', DE: '10', FL: '12',
@@ -2278,8 +2288,35 @@
         // Initialize Application
         // ========================================
 
+        function withBuildVersion(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}v=${encodeURIComponent(BUILD_VERSION)}`;
+        }
+
+        function ensureVersionQueryParam() {
+            const currentUrl = new URL(window.location.href);
+            if (currentUrl.searchParams.has('v')) return false;
+
+            currentUrl.searchParams.set('v', BUILD_VERSION);
+            window.location.replace(currentUrl.toString());
+            return true;
+        }
+
+        function showBuildVersionLabel() {
+            const label = document.getElementById('buildVersionLabel');
+            if (label) {
+                label.textContent = `Build ${BUILD_VERSION}`;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             console.log('🚀 MSA Investment Analyzer Initializing...');
+
+            if (ensureVersionQueryParam()) {
+                return;
+            }
+
+            showBuildVersionLabel();
             launchApp();
         });
 
@@ -2318,7 +2355,7 @@
                 // index.html 位于 /docs，所以这里请按你的 JSON 实际位置选择：
                 // 如果文件在 /docs/data/sample_data.json，用 './data/sample_data.json'
                 // 如果文件在 /data/sample_data.json，用 '../data/sample_data.json'
-                const res = await fetch('./data/sample_data.json', { cache: 'no-store' });
+                const res = await fetch(withBuildVersion('./data/sample_data.json'), { cache: 'no-store' });
 
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}`);
