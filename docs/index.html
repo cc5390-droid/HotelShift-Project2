@@ -2190,8 +2190,45 @@
                       <button onclick="rziQuickSelect('clear')" style="padding:5px 12px;background:#333;border:1px solid #444;color:#888;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit">Clear All</button>
                     </div>
                   </div>
+
+                  <!-- ── CUSTOM PROMPT MODULE ── -->
+                  <div style="margin-top:22px;padding-top:18px;border-top:1px solid #3a3a3a">
+                    <div class="rzi-how-head" style="margin-bottom:8px">Custom Prompt <span style="font-weight:normal;font-size:.68rem;color:#888;letter-spacing:0">(advanced)</span></div>
+                    <p style="font-size:.72rem;color:#aaa;margin:0 0 10px 0;line-height:1.5">Modify the prompt sent to Gemini. Leave unchanged to use the default.</p>
+                    <div id="rzi-prompt-status" style="font-size:.72rem;margin-bottom:10px;color:#6b7280">Using default prompt</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                      <button onclick="rziOpenPromptEditor()" style="padding:5px 12px;background:#333;border:1px solid #D4AF37;color:#D4AF37;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit">✏️ Edit Prompt</button>
+                      <button onclick="rziResetPromptFromPanel()" style="padding:5px 12px;background:#333;border:1px solid #444;color:#888;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit">Reset to Default</button>
+                    </div>
+                  </div>
                 </div>
 
+              </div>
+            </div>
+          </div>
+
+          <!-- ── PROMPT EDITOR MODAL ── -->
+          <div id="rzi-prompt-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:10000;align-items:center;justify-content:center;padding:20px;font-family:inherit">
+            <div style="background:#1a1a1a;border:1px solid #D4AF37;border-radius:4px;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+              <div style="padding:16px 22px;border-bottom:1px solid #3a3a3a;display:flex;justify-content:space-between;align-items:center">
+                <h3 style="margin:0;color:#D4AF37;font-size:1rem;font-weight:700;letter-spacing:.05em">✏️ EDIT GEMINI PROMPT</h3>
+                <button onclick="rziClosePromptEditor()" style="background:none;border:none;color:#888;font-size:1.6rem;cursor:pointer;padding:0 4px;line-height:1;font-family:inherit">×</button>
+              </div>
+              <div style="padding:18px 22px;overflow-y:auto;flex:1">
+                <div style="background:#242424;border-left:3px solid #D4AF37;padding:12px 14px;margin-bottom:14px;font-size:.75rem;color:#ddd;line-height:1.6">
+                  <strong style="color:#D4AF37">Available placeholders (keep these intact):</strong><br>
+                  <code style="color:#fbbf24;background:#111;padding:1px 5px;border-radius:2px;font-family:monospace">&#36;{focus}</code> &nbsp;— replaced with the Report Focus input<br>
+                  <code style="color:#fbbf24;background:#111;padding:1px 5px;border-radius:2px;font-family:monospace">&#36;{cities.join(', ')}</code> &nbsp;or&nbsp; <code style="color:#fbbf24;background:#111;padding:1px 5px;border-radius:2px;font-family:monospace">&#36;{cities}</code> &nbsp;— replaced with selected MSA names<br>
+                  <code style="color:#fbbf24;background:#111;padding:1px 5px;border-radius:2px;font-family:monospace">&#36;{scOpts}</code> &nbsp;— replaced with the status-color legend<br>
+                  <span style="color:#f87171;display:inline-block;margin-top:6px">⚠️ Don't rename JSON fields (pipeline, vacancy, indexScore, rentControl, etc.) — the dashboard depends on them.</span>
+                </div>
+                <textarea id="rzi-prompt-textarea" spellcheck="false" style="width:100%;min-height:380px;background:#0f0f0f;border:1px solid #3a3a3a;color:#e5e5e5;font-family:Consolas,Monaco,monospace;font-size:.78rem;padding:12px;line-height:1.55;resize:vertical;box-sizing:border-box;border-radius:2px"></textarea>
+                <div id="rzi-prompt-editor-msg" style="margin-top:8px;font-size:.72rem;min-height:16px"></div>
+              </div>
+              <div style="padding:14px 22px;border-top:1px solid #3a3a3a;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+                <button onclick="rziResetPromptInEditor()" style="padding:8px 16px;background:#333;border:1px solid #444;color:#bbb;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit">Restore Default</button>
+                <button onclick="rziClosePromptEditor()" style="padding:8px 16px;background:#333;border:1px solid #444;color:#ddd;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+                <button onclick="rziSavePrompt()" style="padding:8px 22px;background:#D4AF37;border:1px solid #D4AF37;color:#111;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">Save</button>
               </div>
             </div>
           </div>
@@ -4381,11 +4418,8 @@
             if (lbl) lbl.textContent = done + ' of ' + total + ' cities complete';
         }
 
-        // ── Gemini API call ──
-        async function rziCallGemini(apiKey, cities, tick) {
-            const focus = (document.getElementById('rzi-focus').value || '').trim() || 'hotel-to-apartment conversion potential';
-            const scOpts = '"cg" (green=booming), "cb" (blue=active), "co" (orange=surging), "cr" (red=emerging), "cp" (purple=building)';
-                        const prompt = `You are a commercial real estate intelligence analyst. Generate a detailed ${focus} report for: ${cities.join(', ')}.
+        // ── Default prompt template (with literal ${...} placeholders — escaped with \$) ──
+        const RZI_DEFAULT_PROMPT = `You are a commercial real estate intelligence analyst. Generate a detailed \${focus} report for: \${cities.join(', ')}.
 
 EMPHASIS: Focus primarily on the most recent developments, proposals, and events from 2024-2025. Prioritize current rezoning activity, new policy proposals, recent project announcements, and current market conditions. Include forward-looking 2025 projections where relevant, but ground analysis in recent actual developments.
 
@@ -4397,9 +4431,128 @@ For each city, calculate an Investment Index Score (0-100) based on:
 
 Return ONLY valid JSON — no markdown, no explanation:
 
-{"cities":[{"name":"Full City Name, ST","state":"ST","region":"Northeast|South|Midwest|West|Mid-Atlantic|West Coast|Southwest","pipeline":"X,XXX+","pipeNum":5200,"vacancy":"XX.X%","yoy":"+XX% or Growing","statusLabel":"Booming|Active|Surging|Building|Emerging","indexScore":85.5,"sc":${scOpts},"color":"#hexcolor","catalyst":"2-3 sentence description of the PRIMARY market catalyst from 2024-2025 (or recent 2023-2024 if current data limited).","profile":"2-3 sentence description.","stats":[{"val":"X,XXX","lbl":"Pipeline Units","color":"#hex"},{"val":"XX%","lbl":"Office Vacancy","color":"#f87171"},{"val":"$XXM","lbl":"Notable Incentive","color":"#fbbf24"},{"val":"XX","lbl":"Active Projects","color":"#60a5fa"},{"val":"XX.X","lbl":"Index Score","color":"#10b981"}],"projects":[{"name":"Building Name","addr":"Address, City","units":"XXX","invest":"$XXM or N/A","program":"Financing program","status":"Under Construction|Completed|Approved|Planned","sc":"cg|cb|co|cr|cp"}],"timeline":[{"date":"Month 2024-2025 (or 2023-2024 if needed)","title":"Policy Name","desc":"1-2 sentence description."}],"finance":[{"amount":"Dollar or term","label":"Program Name","desc":"2-3 sentence description.","color":"#hex"}],"news":[{"type":"Policy|Deal|Pipeline|Finance|Reform|Market|Milestone|Risk","cls":"cg|cb|co|cr|cp|ci","text":"1-2 sentences from 2024-2025 (or recent 2023-2024 if needed).","src":"Source, Date"}],"rentControl":{"status":"ACTIVE|EXEMPT|LIMITED","title":"Policy name","coverage":"1 sentence coverage summary.","details":"2-3 sentence explanation of rent control mechanics and exemptions.","impact":"1-2 sentence hotel-to-apartment conversion impact."}}]}
+{"cities":[{"name":"Full City Name, ST","state":"ST","region":"Northeast|South|Midwest|West|Mid-Atlantic|West Coast|Southwest","pipeline":"X,XXX+","pipeNum":5200,"vacancy":"XX.X%","yoy":"+XX% or Growing","statusLabel":"Booming|Active|Surging|Building|Emerging","indexScore":85.5,"sc":\${scOpts},"color":"#hexcolor","catalyst":"2-3 sentence description of the PRIMARY market catalyst from 2024-2025 (or recent 2023-2024 if current data limited).","profile":"2-3 sentence description.","stats":[{"val":"X,XXX","lbl":"Pipeline Units","color":"#hex"},{"val":"XX%","lbl":"Office Vacancy","color":"#f87171"},{"val":"$XXM","lbl":"Notable Incentive","color":"#fbbf24"},{"val":"XX","lbl":"Active Projects","color":"#60a5fa"},{"val":"XX.X","lbl":"Index Score","color":"#10b981"}],"projects":[{"name":"Building Name","addr":"Address, City","units":"XXX","invest":"$XXM or N/A","program":"Financing program","status":"Under Construction|Completed|Approved|Planned","sc":"cg|cb|co|cr|cp"}],"timeline":[{"date":"Month 2024-2025 (or 2023-2024 if needed)","title":"Policy Name","desc":"1-2 sentence description."}],"finance":[{"amount":"Dollar or term","label":"Program Name","desc":"2-3 sentence description.","color":"#hex"}],"news":[{"type":"Policy|Deal|Pipeline|Finance|Reform|Market|Milestone|Risk","cls":"cg|cb|co|cr|cp|ci","text":"1-2 sentences from 2024-2025 (or recent 2023-2024 if needed).","src":"Source, Date"}],"rentControl":{"status":"ACTIVE|EXEMPT|LIMITED","title":"Policy name","coverage":"1 sentence coverage summary.","details":"2-3 sentence explanation of rent control mechanics and exemptions.","impact":"1-2 sentence hotel-to-apartment conversion impact."}}]}
 
 Rules: 4-5 projects (prioritize announced or started in 2024-2025, then 2023-2024), 4 timeline events (focus on 2024-2025, then 2023-2024), 3 finance mechanisms, 5 news items per city (prioritize 2024-2025, then recent 2023-2024). Include rentControl for every city. Use real names and figures. Calculate realistic indexScore (0-100). Unique hex per city. Return ONLY JSON.`;
+
+        const RZI_PROMPT_STORAGE_KEY = 'hotelshift_rzi_custom_prompt_v1';
+
+        // Return currently active prompt — user's custom one if saved, otherwise the default
+        function rziGetActivePrompt() {
+            try {
+                const saved = localStorage.getItem(RZI_PROMPT_STORAGE_KEY);
+                return (saved && saved.trim()) ? saved : RZI_DEFAULT_PROMPT;
+            } catch (e) {
+                return RZI_DEFAULT_PROMPT;
+            }
+        }
+
+        function rziHasCustomPrompt() {
+            try {
+                const saved = localStorage.getItem(RZI_PROMPT_STORAGE_KEY);
+                return !!(saved && saved.trim());
+            } catch (e) { return false; }
+        }
+
+        // Update the small status line in the right-column panel
+        function rziUpdatePromptStatus() {
+            const el = document.getElementById('rzi-prompt-status');
+            if (!el) return;
+            if (rziHasCustomPrompt()) {
+                el.innerHTML = '<span style="color:#fbbf24;font-weight:600">● Using custom prompt</span>';
+            } else {
+                el.innerHTML = '<span style="color:#6b7280">Using default prompt</span>';
+            }
+        }
+
+        function rziOpenPromptEditor() {
+            const textarea = document.getElementById('rzi-prompt-textarea');
+            const modal = document.getElementById('rzi-prompt-modal');
+            const msg = document.getElementById('rzi-prompt-editor-msg');
+            if (!textarea || !modal) return;
+            textarea.value = rziGetActivePrompt();
+            if (msg) msg.textContent = '';
+            modal.style.display = 'flex';
+        }
+
+        function rziClosePromptEditor() {
+            const modal = document.getElementById('rzi-prompt-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function rziResetPromptInEditor() {
+            const textarea = document.getElementById('rzi-prompt-textarea');
+            const msg = document.getElementById('rzi-prompt-editor-msg');
+            if (textarea) textarea.value = RZI_DEFAULT_PROMPT;
+            if (msg) { msg.style.color = '#6b7280'; msg.textContent = 'Default prompt restored in editor. Click Save to apply.'; }
+        }
+
+        function rziResetPromptFromPanel() {
+            if (!rziHasCustomPrompt()) return;
+            if (!confirm('Reset to the default prompt? Your saved custom prompt will be deleted.')) return;
+            try {
+                localStorage.removeItem(RZI_PROMPT_STORAGE_KEY);
+                rziUpdatePromptStatus();
+            } catch (e) {
+                alert('Could not reset: ' + (e && e.message ? e.message : 'unknown error'));
+            }
+        }
+
+        function rziSavePrompt() {
+            const textarea = document.getElementById('rzi-prompt-textarea');
+            const msg = document.getElementById('rzi-prompt-editor-msg');
+            if (!textarea) return;
+            const val = (textarea.value || '').trim();
+            if (!val) {
+                if (msg) { msg.style.color = '#f87171'; msg.textContent = 'Prompt cannot be empty.'; }
+                return;
+            }
+            // Soft warning if required placeholders are missing — still allows saving
+            const warnings = [];
+            if (!/\$\{focus\}/.test(val)) warnings.push('${focus}');
+            if (!/\$\{cities(\.join\([^)]*\))?\}/.test(val)) warnings.push('${cities}');
+            if (!/\$\{scOpts\}/.test(val)) warnings.push('${scOpts}');
+            try {
+                if (val === RZI_DEFAULT_PROMPT) {
+                    // Identical to default — clear any saved custom so status reverts
+                    localStorage.removeItem(RZI_PROMPT_STORAGE_KEY);
+                } else {
+                    localStorage.setItem(RZI_PROMPT_STORAGE_KEY, val);
+                }
+                rziUpdatePromptStatus();
+                if (warnings.length && msg) {
+                    msg.style.color = '#fbbf24';
+                    msg.textContent = '⚠ Saved, but these placeholders are missing and won\'t be auto-filled: ' + warnings.join(', ');
+                    // keep modal open so the user sees the warning
+                    setTimeout(rziClosePromptEditor, 2200);
+                } else {
+                    if (msg) { msg.style.color = '#34d399'; msg.textContent = '✓ Saved.'; }
+                    setTimeout(rziClosePromptEditor, 600);
+                }
+            } catch (e) {
+                if (msg) { msg.style.color = '#f87171'; msg.textContent = 'Save failed: ' + (e && e.message ? e.message : 'unknown error'); }
+            }
+        }
+
+        // Initialize status line once the DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', rziUpdatePromptStatus);
+        } else {
+            setTimeout(rziUpdatePromptStatus, 0);
+        }
+
+        // ── Gemini API call ──
+        async function rziCallGemini(apiKey, cities, tick) {
+            const focus = (document.getElementById('rzi-focus').value || '').trim() || 'hotel-to-apartment conversion potential';
+            const scOpts = '"cg" (green=booming), "cb" (blue=active), "co" (orange=surging), "cr" (red=emerging), "cp" (purple=building)';
+            const citiesStr = cities.join(', ');
+            // Load prompt template (custom if user saved one, else default) and interpolate placeholders
+            const promptTemplate = rziGetActivePrompt();
+            const prompt = promptTemplate
+                .replace(/\$\{focus\}/g, focus)
+                .replace(/\$\{cities\.join\(\s*['"],\s*['"]\s*\)\}/g, citiesStr)
+                .replace(/\$\{cities\}/g, citiesStr)
+                .replace(/\$\{scOpts\}/g, scOpts);
 
             const payload = { contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.6,maxOutputTokens:65536} };
             const modelFamilies = {
