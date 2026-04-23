@@ -82,6 +82,34 @@ US_STATE_NAME_TO_ABBR = {
 }
 
 
+# Full master list of all possible Hotel Conversion Relevance ratings, ordered best → worst.
+# These are the ONLY possible values; actual data is always a subset of this list.
+MASTER_RATING_ORDER: list[str] = [
+    'A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F'
+]
+
+# Non-linear 0–1 scores for each rating.
+# Design rationale: steeper penalties for lower tiers (F, D-, D) to reflect higher
+# execution/policy risk; small premium for top tiers (A, A+).
+# Grades not in the original 9-grade set (A-, B-, C+, D+) are interpolated
+# to maintain consistent rank-order spacing within the full 13-grade scale.
+MASTER_RATING_SCORES: dict[str, float] = {
+    'A+': 1.00,
+    'A':  0.90,
+    'A-': 0.84,
+    'B+': 0.78,
+    'B':  0.66,
+    'B-': 0.61,
+    'C+': 0.57,
+    'C':  0.52,
+    'C-': 0.40,
+    'D+': 0.33,
+    'D':  0.25,
+    'D-': 0.12,
+    'F':  0.00,
+}
+
+
 def base_url(year: int, code: str) -> str:
     if code.startswith("S"):
         return f"https://api.census.gov/data/{year}/acs/acs1/subject"
@@ -260,23 +288,36 @@ def build_payload() -> dict:
 
 
     df_Conversion_Category = pd.read_excel(cap_file, sheet_name="Regulatory Environment", usecols="A:C", header=3, nrows=50)
-    # define a mapping from Conversion Category to a numerical score representing Hotel_Conversion_Relevance
-    rating_to_score = {
-    'A+': 1.00,
-    'A': 0.90,
-    'B+': 0.78,
-    'B': 0.66,
-    'C': 0.52,
-    'C-': 0.40,
-    'D': 0.25,
-    'D-': 0.12,
-    'F': 0.00
-    }
+    rating_col = 'Conversion Category'  # the rating column is the third column in the "Regulatory Environment" sheet
+    df_Conversion_Category[rating_col] = df_Conversion_Category[rating_col].astype(str).str.strip()
+    # Keep the letter grade as Hotel_Conversion_Relevance (string, e.g. "A+", "B-")
+    df_Conversion_Category["Hotel_Conversion_Relevance"] = df_Conversion_Category[rating_col]
 
-    # map Conversion Category to Hotel_Conversion_Relevance
-    df_Conversion_Category['Hotel_Conversion_Relevance'] = df_Conversion_Category['Conversion Category'].map(rating_to_score)
-    msa_features=pd.merge(msa_features,
-        df_Conversion_Category[['State', 'Hotel_Conversion_Relevance']], on='State', how='left')
+    # Detect which ratings actually appear in this dataset (must be a subset of MASTER_RATING_ORDER)
+    actual_ratings = (
+        df_Conversion_Category[rating_col]
+        .dropna()
+        .astype(str)
+        .str.strip()
+        .unique()
+        .tolist()
+    )
+    unrecognised = [r for r in actual_ratings if r and r.lower() != "nan" and r not in MASTER_RATING_SCORES]
+    if unrecognised:
+        print(f"WARN: Unrecognised rating(s) found – will map to NaN: {unrecognised}")
+
+    # Non-linear 0–1 scores are drawn directly from the full master mapping,
+    # so adding new grades (B-, C+, D+, etc.) never breaks existing assignments.
+    df_Conversion_Category["Hotel_Conversion_Relevance_Score"] = (
+        df_Conversion_Category[rating_col].map(MASTER_RATING_SCORES)
+    )
+
+    msa_features = pd.merge(
+        msa_features,
+        df_Conversion_Category[["State", "Hotel_Conversion_Relevance", "Hotel_Conversion_Relevance_Score"]],
+        on="State",
+        how="left",
+    )
 
 
 
@@ -339,19 +380,21 @@ def build_payload() -> dict:
 
 
     # ── 6. construct Regulatory Environment factors ─────────────────────────────────────
-    # Value Potential (legacy, kept for backward compatibility) --- IGNORE ---
-    factor_df['Hotel_Conversion_Relevance'] = np.where(factor_df['Hotel_Conversion_Relevance'] >= 0, factor_df['Hotel_Conversion_Relevance'], np.nan)
+    factor_df["Hotel_Conversion_Relevance"] = factor_df["Hotel_Conversion_Relevance"].astype(str).str.strip()
+    factor_df["Hotel_Conversion_Relevance_Score"] = pd.to_numeric(
+        factor_df["Hotel_Conversion_Relevance_Score"], errors="coerce"
+    )
 
-    factor_cols = ['Employment_Rate', 
-             'Employment_Growth', 
-             'Pop_Growth', 
+    factor_cols = ['Employment_Rate',
+             'Employment_Growth',
+             'Pop_Growth',
              'Income_Growth',
-             'Rent_to_Income_Ratio', 
-             'Vacancy_Rate', 
-             'New_Multi_Units', 
-             'Rent_Growth',  
+             'Rent_to_Income_Ratio',
+             'Vacancy_Rate',
+             'New_Multi_Units',
+             'Rent_Growth',
              'Value_Creation',
-             'Hotel_Conversion_Relevance']
+             'Hotel_Conversion_Relevance_Score']  # numeric 0-1; letter grade kept separately in Hotel_Conversion_Relevance
 
     earliest_year = int(factor_df["year"].min())
     factor_df = factor_df[factor_df["year"] > earliest_year].copy()
@@ -368,6 +411,7 @@ def build_payload() -> dict:
         "MF Cap Rate",
         "Hotel Effective Rate",
         "Multifamily Effective Rate",
+        "Hotel_Conversion_Relevance",
     ] + factor_cols
 
     factor_df = factor_df[
@@ -384,6 +428,7 @@ def build_payload() -> dict:
             "MF Cap Rate",
             "Hotel Effective Rate",
             "Multifamily Effective Rate",
+            "Hotel_Conversion_Relevance",
             "Average_HERS_Index_Score",
         ]
         + factor_cols
@@ -405,7 +450,7 @@ def build_payload() -> dict:
     scored["Supply_Index"] = scored["New_Multi_Units"]
     scored["Pricing_Index"] = scored["Rent_Growth"]
     scored["Valuation_Index"] = scored["Value_Creation"]
-    scored["Regulatory_Index"] = scored[["Hotel_Conversion_Relevance"]].mean(axis=1)
+    scored["Regulatory_Index"] = scored["Hotel_Conversion_Relevance_Score"]
 
     scored["Index_Score_Raw"] = (
         0.20 * scored["Economic_Index"]
@@ -479,7 +524,7 @@ def build_payload() -> dict:
             "New_Multi_Units": int(round(float(row["New_Multi_Units"]))),
             "Rent_Growth": float(row["Rent_Growth"]),
             "Value_Creation": float(row["Value_Creation"]),
-            "Hotel_Conversion_Relevance": float(row["Hotel_Conversion_Relevance"]),
+            "Hotel_Conversion_Relevance": str(row["Hotel_Conversion_Relevance"]),
             "Average_HERS_Index_Score": int(round(float(row["Average_HERS_Index_Score"])))
             if pd.notna(row.get("Average_HERS_Index_Score", np.nan))
             else hers_map.get(msa_code, 0),
