@@ -14,3 +14,6 @@ env/
 
 # Local IDE
 .vscode/
+
+# Archives
+*.rar

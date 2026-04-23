@@ -561,19 +561,82 @@
         }
 
         .detail-label {
-            color: #888;
-            font-size: 0.8em;
+            color: #b8c0cc;
+            font-size: 0.82em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .detail-value {
-            font-size: 1.3em;
-            font-weight: 600;
+            font-size: 1.65em;
+            font-weight: 700;
             color: #FFD700;
             letter-spacing: -0.5px;
+            line-height: 1.2;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.22);
+        }
+
+        #detailedView .section-subtitle {
+            color: #ced7e3;
+            font-size: 1.02em;
+            margin-bottom: 18px;
+        }
+
+        .detailed-radar-container {
+            height: 520px;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(212, 175, 55, 0.09), transparent 45%),
+                linear-gradient(145deg, #1b2128, #171c22);
+            border: 1px solid #4a535f;
+            box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.1);
+        }
+
+        .radar-score-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .radar-score-card {
+            background: linear-gradient(145deg, #252d37, #1d242d);
+            border: 1px solid #4b5563;
+            border-left: 4px solid #D4AF37;
+            padding: 12px 14px;
+        }
+
+        .radar-score-name {
+            color: #e7edf7;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .radar-score-meta {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .radar-score-value {
+            font-size: 1.55em;
+            font-weight: 700;
+            color: #FFD700;
+            letter-spacing: -0.4px;
+            line-height: 1;
+        }
+
+        .radar-score-rank {
+            font-size: 0.85em;
+            color: #f0f4ff;
+            font-weight: 700;
+            letter-spacing: 0.02em;
         }
 
         /* =====================
@@ -1105,6 +1168,13 @@
             border-top: 2px solid #D4AF37;
         }
 
+        .build-version-label {
+            margin-left: 8px;
+            color: #f2d37a;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
         /* =====================
            Info Box
            ===================== */
@@ -1203,6 +1273,15 @@
         @media (max-width: 480px) {
             .container {
                 padding: 10px;
+            }
+
+            .detailed-radar-container {
+                height: 440px;
+                padding: 14px;
+            }
+
+            .radar-score-value {
+                font-size: 1.35em;
             }
 
             .header {
@@ -1983,8 +2062,9 @@
             
             <h2 style="margin-top: 50px;">6-Dimensional Market Comparison</h2>
             <p class="section-subtitle">Compare markets across 6 key investment dimensions</p>
+            <div id="radarScoreLegend" class="radar-score-legend"></div>
             
-            <div class="chart-container">
+            <div class="chart-container detailed-radar-container">
                 <canvas id="radarChart" height="80"></canvas>
             </div>
         </section>
@@ -2173,7 +2253,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>📊 MSA Investment Analyzer | Data sourced from US Census Bureau ACS1 & Market Analysis | Last Updated: 2024</p>
+            <p>📊 MSA Investment Analyzer | Data sourced from US Census Bureau ACS1 & Market Analysis | Last Updated: 2024 <span id="buildVersionLabel" class="build-version-label"></span></p>
         </footer>
     </div>
 
@@ -2204,6 +2284,9 @@
                 // Stability Index
                 rentIncome: 50, vacancy: 50
             };
+
+        // Cache-busting version for GitHub Pages and local JSON fetch.
+        const BUILD_VERSION = '9e314ae';
 
         const US_STATE_ABBR_TO_FIPS = {
             AL: '01', AZ: '04', AR: '05', CA: '06', CO: '08', CT: '09', DE: '10', FL: '12',
@@ -2283,8 +2366,35 @@
         // Initialize Application
         // ========================================
 
+        function withBuildVersion(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}v=${encodeURIComponent(BUILD_VERSION)}`;
+        }
+
+        function ensureVersionQueryParam() {
+            const currentUrl = new URL(window.location.href);
+            if (currentUrl.searchParams.has('v')) return false;
+
+            currentUrl.searchParams.set('v', BUILD_VERSION);
+            window.location.replace(currentUrl.toString());
+            return true;
+        }
+
+        function showBuildVersionLabel() {
+            const label = document.getElementById('buildVersionLabel');
+            if (label) {
+                label.textContent = `Build ${BUILD_VERSION}`;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             console.log('🚀 MSA Investment Analyzer Initializing...');
+
+            if (ensureVersionQueryParam()) {
+                return;
+            }
+
+            showBuildVersionLabel();
             launchApp();
         });
 
@@ -2323,7 +2433,7 @@
                 // index.html 位于 /docs，所以这里请按你的 JSON 实际位置选择：
                 // 如果文件在 /docs/data/sample_data.json，用 './data/sample_data.json'
                 // 如果文件在 /data/sample_data.json，用 '../data/sample_data.json'
-                const res = await fetch('./data/sample_data.json', { cache: 'no-store' });
+                const res = await fetch(withBuildVersion('./data/sample_data.json'), { cache: 'no-store' });
 
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}`);
@@ -2597,7 +2707,28 @@
                 if (!best || found.population > best.population) best = found;
             });
 
-            return best;
+            if (best) {
+                return { ...best, isFallback: false };
+            }
+
+            // Fallback: if principal city is not in top-1k lookup, use largest city in the same state.
+            let largestCity = null;
+            stateMap.forEach(city => {
+                if (!largestCity || (city.population || 0) > (largestCity.population || 0)) {
+                    largestCity = city;
+                }
+            });
+
+            if (!largestCity) return null;
+            return { ...largestCity, isFallback: true };
+        }
+
+        function getDeterministicJitter(msaCode, axis) {
+            // Small deterministic offset to reduce exact overlap for fallback points.
+            const base = Number(msaCode || 0) + (axis === 'lat' ? 13 : 29);
+            const raw = Math.sin(base * 12.9898) * 43758.5453;
+            const fractional = raw - Math.floor(raw);
+            return (fractional - 0.5) * 0.6;
         }
 
         function buildMSACityPoints(cityLookupByState) {
@@ -2615,6 +2746,7 @@
 
             const points = [];
             let missingCoords = 0;
+            let fallbackCoords = 0;
 
             dedupMSA.forEach(msa => {
                 const cityLocation = resolveMSACityLocation(msa, cityLookupByState);
@@ -2623,6 +2755,12 @@
                     return;
                 }
 
+                const isFallback = !!cityLocation.isFallback;
+                if (isFallback) fallbackCoords += 1;
+
+                const lat = cityLocation.lat + (isFallback ? getDeterministicJitter(msa.msa_code, 'lat') : 0);
+                const lon = cityLocation.lon + (isFallback ? getDeterministicJitter(msa.msa_code, 'lon') : 0);
+
                 points.push({
                     msa_code: msa.msa_code,
                     msa_name: msa.msa_name,
@@ -2630,16 +2768,18 @@
                     msaPopulation: Number(msa.Total_Population) || 0,
                     cityName: cityLocation.city,
                     stateAbbr: cityLocation.state,
-                    lat: cityLocation.lat,
-                    lon: cityLocation.lon,
-                    cityPopulation: cityLocation.population || 0
+                    lat,
+                    lon,
+                    cityPopulation: cityLocation.population || 0,
+                    isFallback
                 });
             });
 
             return {
                 points,
                 totalMSAs,
-                missingCoords
+                missingCoords,
+                fallbackCoords
             };
         }
 
@@ -2699,7 +2839,7 @@
             });
 
             const cityLookupByState = await loadUSCityLookup();
-            const { points, totalMSAs, missingCoords } = buildMSACityPoints(cityLookupByState);
+            const { points, totalMSAs, missingCoords, fallbackCoords } = buildMSACityPoints(cityLookupByState);
             const scores = points.map(point => point.score).filter(Number.isFinite);
             const minScore = scores.length ? Math.min(...scores) : 0;
             const maxScore = scores.length ? Math.max(...scores) : 1;
@@ -2791,7 +2931,7 @@
                 </div>
                 <div class="heatmap-legend-labels" style="margin-top: 8px; opacity: 0.85;">
                     <span>Plotted ${projectedPoints.length}/${totalMSAs} MSAs</span>
-                    <span>Missing ${missingCoords}</span>
+                    <span>Fallback ${fallbackCoords} | Missing ${missingCoords}</span>
                 </div>
             `;
 
@@ -3453,7 +3593,7 @@
         function renderComparisonView() {
             console.log('📈 Rendering 6D Analysis View...');
 
-            const sorted = [...allMSAs].sort((a, b) => (b.Investment_Score || 0) - (a.Investment_Score || 0));
+            const sorted = getSortedMSAsByCurrentScore();
             const top3 = sorted.slice(0, 3);
             selectedMSAsForComparison = top3.map(m => m.msa_code);
             
@@ -3484,7 +3624,7 @@
                     const isSelected = selectedMSAsForComparison.includes(msa.msa_code);
                     div.style.background = isSelected ? '#667eea' : '#f0f0f0';
                     div.style.color = isSelected ? 'white' : '#333';
-                    div.innerHTML = `<strong>${msa.msa_name}</strong> (Score: ${(msa.Investment_Score || 0).toFixed(1)})`;
+                    div.innerHTML = `<strong>${msa.msa_name}</strong> (Score: ${getCurrentDisplayScore(msa).toFixed(1)})`;
                     div.style.cursor = 'pointer';
                     div.style.padding = '10px';
                     div.style.marginBottom = '5px';
@@ -3536,6 +3676,23 @@
             const categoryLabels = ['Economic', 'Stability', 'Supply', 'Pricing', 'Valuation', 'Regulatory'];
             
             const selectedMSAs = allMSAs.filter(m => selectedMSAsForComparison.includes(m.msa_code));
+            const legendEl = document.getElementById('radarScoreLegend');
+
+            if (legendEl) {
+                const rankedSelected = [...selectedMSAs].sort((a, b) => getCurrentDisplayScore(b) - getCurrentDisplayScore(a));
+                legendEl.innerHTML = rankedSelected.map((msa, idx) => {
+                    const rank = getCurrentMSARanking(msa.msa_code);
+                    return `
+                        <div class="radar-score-card" style="border-left-color:${getColorForIndex(idx)};">
+                            <div class="radar-score-name">${msa.msa_name}</div>
+                            <div class="radar-score-meta">
+                                <span class="radar-score-value">${getCurrentDisplayScore(msa).toFixed(2)}</span>
+                                <span class="radar-score-rank">Rank #${rank}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
             
             const datasets = selectedMSAs.map((msa, idx) => ({
                 label: msa.msa_name,
@@ -3544,10 +3701,13 @@
                     return (val * 50);
                 }),
                 borderColor: getColorForIndex(idx),
-                backgroundColor: getColorForIndex(idx, 0.15),
-                borderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
+                backgroundColor: getColorForIndex(idx, 0.2),
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: getColorForIndex(idx),
+                pointBorderColor: '#0f1216',
+                pointBorderWidth: 1.5
             }));
 
             const ctx = document.getElementById('radarChart');
@@ -3567,8 +3727,13 @@
                             display: true,
                             position: 'bottom',
                             labels: {
-                                font: { size: 12 },
-                                boxWidth: 10
+                                color: '#eef3fb',
+                                font: { size: 14, weight: '700' },
+                                boxWidth: 14,
+                                boxHeight: 14,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 16
                             }
                         }
                     },
@@ -3576,12 +3741,30 @@
                         r: {
                             beginAtZero: true,
                             max: 100,
-                            ticks: {
-                                color: '#999',
-                                stepSize: 20
+                            angleLines: {
+                                color: 'rgba(214, 223, 236, 0.25)'
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
+                                color: 'rgba(212, 175, 55, 0.3)',
+                                lineWidth: 1.2
+                            },
+                            pointLabels: {
+                                color: '#f4f8ff',
+                                font: {
+                                    size: 14,
+                                    weight: '700'
+                                }
+                            },
+                            ticks: {
+                                color: '#ffffff',
+                                stepSize: 20,
+                                font: {
+                                    size: 13,
+                                    weight: '700'
+                                },
+                                showLabelBackdrop: true,
+                                backdropColor: 'rgba(16, 20, 26, 0.82)',
+                                backdropPadding: 4
                             }
                         }
                     }
@@ -3591,11 +3774,11 @@
 
         function getColorForIndex(idx, opacity = 1) {
             const colors = [
-                `rgba(102, 126, 234, ${opacity})`,
-                `rgba(118, 75, 162, ${opacity})`,
-                `rgba(200, 120, 170, ${opacity})`,
-                `rgba(240, 150, 160, ${opacity})`,
-                `rgba(200, 160, 200, ${opacity})`
+                `rgba(255, 214, 102, ${opacity})`,
+                `rgba(72, 199, 193, ${opacity})`,
+                `rgba(255, 127, 80, ${opacity})`,
+                `rgba(114, 159, 255, ${opacity})`,
+                `rgba(154, 224, 110, ${opacity})`
             ];
             return colors[idx % colors.length];
         }
@@ -3694,7 +3877,7 @@
         function renderDetailedView() {
             console.log('📈 Rendering Detailed View with 6D Analysis...');
 
-            const sorted = [...allMSAs].sort((a, b) => (b.Investment_Score || 0) - (a.Investment_Score || 0));
+            const sorted = getSortedMSAsByCurrentScore();
             const top3 = sorted.slice(0, 3);
             selectedMSAsForComparison = top3.map(m => m.msa_code);
             
