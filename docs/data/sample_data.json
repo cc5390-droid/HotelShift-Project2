@@ -27,7 +27,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.088297,
       "Value_Creation": 65673.701053,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 64.270481
     },
@@ -53,7 +53,7 @@
       "New_Multi_Units": 1876,
       "Rent_Growth": 0.115751,
       "Value_Creation": 48017.785263,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 64.214195
     },
@@ -79,7 +79,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.189632,
       "Value_Creation": 70398.535469,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 62.357315
     },
@@ -105,7 +105,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.132207,
       "Value_Creation": 41542.514071,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 60.91905
     },
@@ -131,7 +131,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.043357,
       "Value_Creation": 59178.846316,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 59.770258
     },
@@ -157,7 +157,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.106592,
       "Value_Creation": 69432.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 59.263185
     },
@@ -183,7 +183,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.132806,
       "Value_Creation": 52265.515947,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 58.239149
     },
@@ -209,7 +209,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.04118,
       "Value_Creation": 58989.675789,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 58.09067
     },
@@ -235,7 +235,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.108652,
       "Value_Creation": 48488.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 57.424319
     },
@@ -261,7 +261,7 @@
       "New_Multi_Units": 5043,
       "Rent_Growth": 0.077432,
       "Value_Creation": 66408.087912,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 56.996099
     },
@@ -287,7 +287,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.064644,
       "Value_Creation": 50886.871579,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 56.819559
     },
@@ -313,7 +313,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.02561,
       "Value_Creation": 54291.941053,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 56.815626
     },
@@ -339,7 +339,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.128974,
       "Value_Creation": 50292.386341,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 56.801068
     },
@@ -365,7 +365,7 @@
       "New_Multi_Units": 800,
       "Rent_Growth": 0.132099,
       "Value_Creation": 36313.2,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 56.767379
     },
@@ -391,7 +391,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.12221,
       "Value_Creation": 34100.730897,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 56.734742
     },
@@ -417,7 +417,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.035347,
       "Value_Creation": 81379.745819,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 56.689079
     },
@@ -443,7 +443,7 @@
       "New_Multi_Units": 6032,
       "Rent_Growth": 0.059136,
       "Value_Creation": 70136.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 56.473442
     },
@@ -469,7 +469,7 @@
       "New_Multi_Units": 6131,
       "Rent_Growth": 0.042991,
       "Value_Creation": 73656.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 56.186397
     },
@@ -495,7 +495,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.057733,
       "Value_Creation": 46788.176842,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 56.169459
     },
@@ -521,7 +521,7 @@
       "New_Multi_Units": 1533,
       "Rent_Growth": 0.110314,
       "Value_Creation": 39996.923077,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 56.137102
     },
@@ -547,7 +547,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.035599,
       "Value_Creation": 60534.568421,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 55.844502
     },
@@ -573,7 +573,7 @@
       "New_Multi_Units": 2088,
       "Rent_Growth": 0.045558,
       "Value_Creation": 43414.635789,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 55.647294
     },
@@ -599,7 +599,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.145291,
       "Value_Creation": 46246.337561,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 55.364105
     },
@@ -625,7 +625,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.090293,
       "Value_Creation": 51870.393996,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 55.343205
     },
@@ -651,7 +651,7 @@
       "New_Multi_Units": 2479,
       "Rent_Growth": 0.114593,
       "Value_Creation": 40948.504983,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 64,
       "Investment_Score": 55.32791
     },
@@ -677,7 +677,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.120825,
       "Value_Creation": 36986.181818,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 55.319725
     },
@@ -703,7 +703,7 @@
       "New_Multi_Units": 2773,
       "Rent_Growth": 0.108333,
       "Value_Creation": 52668.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 55.256627
     },
@@ -729,7 +729,7 @@
       "New_Multi_Units": 1350,
       "Rent_Growth": 0.0722,
       "Value_Creation": 64291.715122,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 55.207164
     },
@@ -755,7 +755,7 @@
       "New_Multi_Units": 503,
       "Rent_Growth": 0.044485,
       "Value_Creation": 62514.371482,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 54.975933
     },
@@ -781,7 +781,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.050479,
       "Value_Creation": 38995.384615,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 54.794133
     },
@@ -807,7 +807,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.085537,
       "Value_Creation": 61424.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 54.660552
     },
@@ -833,7 +833,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.094303,
       "Value_Creation": 35416.519481,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 54.608781
     },
@@ -859,7 +859,7 @@
       "New_Multi_Units": 8532,
       "Rent_Growth": 0.051391,
       "Value_Creation": 77586.153846,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 48,
       "Investment_Score": 54.545256
     },
@@ -885,7 +885,7 @@
       "New_Multi_Units": 2109,
       "Rent_Growth": 0.107287,
       "Value_Creation": 34094.747826,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 48,
       "Investment_Score": 54.480358
     },
@@ -911,7 +911,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.094536,
       "Value_Creation": 40908.467532,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 54.345395
     },
@@ -937,7 +937,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.019473,
       "Value_Creation": 143920.0,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 54.25438
     },
@@ -963,7 +963,7 @@
       "New_Multi_Units": 2172,
       "Rent_Growth": 0.06165,
       "Value_Creation": 51524.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 53.897417
     },
@@ -989,7 +989,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.082405,
       "Value_Creation": 52192.570356,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 53.784572
     },
@@ -1015,7 +1015,7 @@
       "New_Multi_Units": 2824,
       "Rent_Growth": 0.059613,
       "Value_Creation": 45941.538462,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 53.690721
     },
@@ -1041,7 +1041,7 @@
       "New_Multi_Units": 484,
       "Rent_Growth": 0.058219,
       "Value_Creation": 45080.375235,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 53.536588
     },
@@ -1067,7 +1067,7 @@
       "New_Multi_Units": 5136,
       "Rent_Growth": 0.076404,
       "Value_Creation": 49429.829457,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 53.18262
     },
@@ -1093,7 +1093,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.074313,
       "Value_Creation": 41932.8,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 52.848812
     },
@@ -1119,7 +1119,7 @@
       "New_Multi_Units": 3126,
       "Rent_Growth": 0.083732,
       "Value_Creation": 41447.242525,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 52.774684
     },
@@ -1145,7 +1145,7 @@
       "New_Multi_Units": 5724,
       "Rent_Growth": 0.073953,
       "Value_Creation": 82895.197324,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 52.717569
     },
@@ -1171,7 +1171,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.108317,
       "Value_Creation": 32051.032258,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 60,
       "Investment_Score": 52.693064
     },
@@ -1197,7 +1197,7 @@
       "New_Multi_Units": 2481,
       "Rent_Growth": 0.128019,
       "Value_Creation": 41096.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 52.688963
     },
@@ -1223,7 +1223,7 @@
       "New_Multi_Units": 6371,
       "Rent_Growth": 0.040248,
       "Value_Creation": 74953.846154,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 48,
       "Investment_Score": 52.653908
     },
@@ -1249,7 +1249,7 @@
       "New_Multi_Units": 1057,
       "Rent_Growth": 0.04201,
       "Value_Creation": 50094.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 52.534407
     },
@@ -1275,7 +1275,7 @@
       "New_Multi_Units": 2344,
       "Rent_Growth": 0.092916,
       "Value_Creation": 55943.277592,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 62,
       "Investment_Score": 52.525432
     },
@@ -1301,7 +1301,7 @@
       "New_Multi_Units": 345,
       "Rent_Growth": 0.097052,
       "Value_Creation": 70398.535469,
-      "Hotel_Conversion_Relevance": 0.12,
+      "Hotel_Conversion_Relevance": "D-",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 52.482312
     },
@@ -1327,7 +1327,7 @@
       "New_Multi_Units": 93,
       "Rent_Growth": 0.084324,
       "Value_Creation": 102123.636364,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 52.47325
     },
@@ -1353,7 +1353,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.150078,
       "Value_Creation": 75294.545455,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 52.351758
     },
@@ -1379,7 +1379,7 @@
       "New_Multi_Units": 2434,
       "Rent_Growth": 0.076236,
       "Value_Creation": 56094.484053,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 52.318185
     },
@@ -1405,7 +1405,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.092643,
       "Value_Creation": 36689.501661,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 52.215979
     },
@@ -1431,7 +1431,7 @@
       "New_Multi_Units": 2398,
       "Rent_Growth": 0.070986,
       "Value_Creation": 45596.990596,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 52.10419
     },
@@ -1457,7 +1457,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.034677,
       "Value_Creation": 41589.194805,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 52.089643
     },
@@ -1483,7 +1483,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.060484,
       "Value_Creation": 46973.023256,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 52.063818
     },
@@ -1509,7 +1509,7 @@
       "New_Multi_Units": 3927,
       "Rent_Growth": 0.098514,
       "Value_Creation": 70836.855037,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 52.061862
     },
@@ -1535,7 +1535,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.023709,
       "Value_Creation": 70306.707692,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 52.0338
     },
@@ -1561,7 +1561,7 @@
       "New_Multi_Units": 2492,
       "Rent_Growth": 0.026632,
       "Value_Creation": 71138.953846,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 51.923042
     },
@@ -1587,7 +1587,7 @@
       "New_Multi_Units": 10009,
       "Rent_Growth": 0.027183,
       "Value_Creation": 55994.475789,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 51.850778
     },
@@ -1613,7 +1613,7 @@
       "New_Multi_Units": 2987,
       "Rent_Growth": 0.075278,
       "Value_Creation": 45846.30394,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 51.837805
     },
@@ -1639,7 +1639,7 @@
       "New_Multi_Units": 6429,
       "Rent_Growth": 0.043081,
       "Value_Creation": 70312.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 51.834907
     },
@@ -1665,7 +1665,7 @@
       "New_Multi_Units": 8085,
       "Rent_Growth": 0.012203,
       "Value_Creation": 83804.468227,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 51.774091
     },
@@ -1691,7 +1691,7 @@
       "New_Multi_Units": 1992,
       "Rent_Growth": 0.081514,
       "Value_Creation": 113476.363636,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 51.719086
     },
@@ -1717,7 +1717,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.089581,
       "Value_Creation": 34127.641196,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 51.691947
     },
@@ -1743,7 +1743,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.060362,
       "Value_Creation": 107316.363636,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 51.678707
     },
@@ -1769,7 +1769,7 @@
       "New_Multi_Units": 83,
       "Rent_Growth": 0.07965,
       "Value_Creation": 113170.909091,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 51.56626
     },
@@ -1795,7 +1795,7 @@
       "New_Multi_Units": 10531,
       "Rent_Growth": 0.039003,
       "Value_Creation": 51233.684211,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 51.44757
     },
@@ -1821,7 +1821,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.062116,
       "Value_Creation": 73272.508361,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 62,
       "Investment_Score": 51.333789
     },
@@ -1847,7 +1847,7 @@
       "New_Multi_Units": 2385,
       "Rent_Growth": 0.006373,
       "Value_Creation": 57135.507692,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 51.209706
     },
@@ -1873,7 +1873,7 @@
       "New_Multi_Units": 1742,
       "Rent_Growth": 0.052932,
       "Value_Creation": 41773.846154,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 51.198596
     },
@@ -1899,7 +1899,7 @@
       "New_Multi_Units": 3038,
       "Rent_Growth": 0.030606,
       "Value_Creation": 63359.261538,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 51.016927
     },
@@ -1925,7 +1925,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.082192,
       "Value_Creation": 35851.636364,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 50.871554
     },
@@ -1951,7 +1951,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.037393,
       "Value_Creation": 31370.769231,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 50.846669
     },
@@ -1977,7 +1977,7 @@
       "New_Multi_Units": 933,
       "Rent_Growth": 0.021643,
       "Value_Creation": 117752.727273,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 50.732222
     },
@@ -2003,7 +2003,7 @@
       "New_Multi_Units": 14046,
       "Rent_Growth": 0.040564,
       "Value_Creation": 71615.063415,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 50.658275
     },
@@ -2029,7 +2029,7 @@
       "New_Multi_Units": 185,
       "Rent_Growth": 0.060136,
       "Value_Creation": 33455.304348,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 70,
       "Investment_Score": 50.650957
     },
@@ -2055,7 +2055,7 @@
       "New_Multi_Units": 2490,
       "Rent_Growth": 0.029295,
       "Value_Creation": 56000.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 50,
       "Investment_Score": 50.645643
     },
@@ -2081,7 +2081,7 @@
       "New_Multi_Units": 1349,
       "Rent_Growth": 0.068584,
       "Value_Creation": 31209.230769,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 50.609284
     },
@@ -2107,7 +2107,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.077875,
       "Value_Creation": 46693.591579,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 50.593829
     },
@@ -2133,7 +2133,7 @@
       "New_Multi_Units": 473,
       "Rent_Growth": 0.140086,
       "Value_Creation": 31043.510972,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 50.540886
     },
@@ -2159,7 +2159,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.080363,
       "Value_Creation": 91025.454545,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 50.36102
     },
@@ -2185,7 +2185,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.09906,
       "Value_Creation": 89243.636364,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 50.328129
     },
@@ -2211,7 +2211,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.037209,
       "Value_Creation": 32715.987461,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 50.280564
     },
@@ -2237,7 +2237,7 @@
       "New_Multi_Units": 7305,
       "Rent_Growth": 0.060712,
       "Value_Creation": 107621.818182,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 50.151944
     },
@@ -2263,7 +2263,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.049372,
       "Value_Creation": 44889.906191,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 50.129486
     },
@@ -2289,7 +2289,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.057778,
       "Value_Creation": 96930.909091,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 50.114004
     },
@@ -2315,7 +2315,7 @@
       "New_Multi_Units": 5634,
       "Rent_Growth": 0.04188,
       "Value_Creation": 48272.4,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 50.078455
     },
@@ -2341,7 +2341,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": -0.008655,
       "Value_Creation": 49896.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 50.03982
     },
@@ -2367,7 +2367,7 @@
       "New_Multi_Units": 18906,
       "Rent_Growth": 0.033523,
       "Value_Creation": 78356.923077,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 50,
       "Investment_Score": 49.857451
     },
@@ -2393,7 +2393,7 @@
       "New_Multi_Units": 3215,
       "Rent_Growth": 0.052632,
       "Value_Creation": 37495.016611,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 64,
       "Investment_Score": 49.834379
     },
@@ -2419,7 +2419,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.048812,
       "Value_Creation": 72644.210526,
-      "Hotel_Conversion_Relevance": 0.4,
+      "Hotel_Conversion_Relevance": "C-",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 49.702094
     },
@@ -2445,7 +2445,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.115684,
       "Value_Creation": 30567.619048,
-      "Hotel_Conversion_Relevance": 0.4,
+      "Hotel_Conversion_Relevance": "C-",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 49.539382
     },
@@ -2471,7 +2471,7 @@
       "New_Multi_Units": 4657,
       "Rent_Growth": 0.054681,
       "Value_Creation": 41108.172757,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 49.47627
     },
@@ -2497,7 +2497,7 @@
       "New_Multi_Units": 723,
       "Rent_Growth": 0.035569,
       "Value_Creation": 36399.627907,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 49.384015
     },
@@ -2523,7 +2523,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.03606,
       "Value_Creation": 36742.767816,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 60,
       "Investment_Score": 49.311863
     },
@@ -2549,7 +2549,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.027578,
       "Value_Creation": 55500.952381,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 49.268183
     },
@@ -2575,7 +2575,7 @@
       "New_Multi_Units": 931,
       "Rent_Growth": 0.066219,
       "Value_Creation": 32598.62069,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 49.224533
     },
@@ -2601,7 +2601,7 @@
       "New_Multi_Units": 81,
       "Rent_Growth": 0.093443,
       "Value_Creation": 58696.0,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 49.216856
     },
@@ -2627,7 +2627,7 @@
       "New_Multi_Units": 2816,
       "Rent_Growth": 0.075269,
       "Value_Creation": 30764.516129,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 60,
       "Investment_Score": 48.955159
     },
@@ -2653,7 +2653,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.070648,
       "Value_Creation": 67815.102975,
-      "Hotel_Conversion_Relevance": 0.12,
+      "Hotel_Conversion_Relevance": "D-",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 48.933356
     },
@@ -2679,7 +2679,7 @@
       "New_Multi_Units": 4842,
       "Rent_Growth": 0.020024,
       "Value_Creation": 52999.275789,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 48.776955
     },
@@ -2705,7 +2705,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.001497,
       "Value_Creation": 102174.545455,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 48.769187
     },
@@ -2731,7 +2731,7 @@
       "New_Multi_Units": 70,
       "Rent_Growth": 0.049624,
       "Value_Creation": 53271.36,
-      "Hotel_Conversion_Relevance": 0.52,
+      "Hotel_Conversion_Relevance": "C",
       "Average_HERS_Index_Score": 55,
       "Investment_Score": 48.765548
     },
@@ -2757,7 +2757,7 @@
       "New_Multi_Units": 1061,
       "Rent_Growth": 0.047766,
       "Value_Creation": 68568.058968,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 48.662882
     },
@@ -2783,7 +2783,7 @@
       "New_Multi_Units": 20787,
       "Rent_Growth": 0.04884,
       "Value_Creation": 55504.615385,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 48.639365
     },
@@ -2809,7 +2809,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.09988,
       "Value_Creation": 27639.36,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 55,
       "Investment_Score": 48.58593
     },
@@ -2835,7 +2835,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.029842,
       "Value_Creation": 92213.955774,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 48.568902
     },
@@ -2861,7 +2861,7 @@
       "New_Multi_Units": 5242,
       "Rent_Growth": 0.015853,
       "Value_Creation": 123963.636364,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 48.502045
     },
@@ -2887,7 +2887,7 @@
       "New_Multi_Units": 8116,
       "Rent_Growth": 0.0465,
       "Value_Creation": 101821.621622,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 48,
       "Investment_Score": 48.497621
     },
@@ -2913,7 +2913,7 @@
       "New_Multi_Units": 3501,
       "Rent_Growth": 0.067937,
       "Value_Creation": 37821.442006,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 48.405959
     },
@@ -2939,7 +2939,7 @@
       "New_Multi_Units": 1244,
       "Rent_Growth": 0.053295,
       "Value_Creation": 33151.694352,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 48.343816
     },
@@ -2965,7 +2965,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.042056,
       "Value_Creation": 56246.703158,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 48.328396
     },
@@ -2991,7 +2991,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.019298,
       "Value_Creation": 34095.047022,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 48.312265
     },
@@ -3017,7 +3017,7 @@
       "New_Multi_Units": 505,
       "Rent_Growth": -0.003433,
       "Value_Creation": 64065.751579,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 48.23479
     },
@@ -3043,7 +3043,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.032239,
       "Value_Creation": 63721.107692,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 48.190786
     },
@@ -3069,7 +3069,7 @@
       "New_Multi_Units": 3440,
       "Rent_Growth": 0.017422,
       "Value_Creation": 118923.636364,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 48.190309
     },
@@ -3095,7 +3095,7 @@
       "New_Multi_Units": 2252,
       "Rent_Growth": 0.078675,
       "Value_Creation": 76037.837838,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 48,
       "Investment_Score": 48.08537
     },
@@ -3121,7 +3121,7 @@
       "New_Multi_Units": 9045,
       "Rent_Growth": 0.036888,
       "Value_Creation": 72801.605351,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 62,
       "Investment_Score": 47.93263
     },
@@ -3147,7 +3147,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.046997,
       "Value_Creation": 43064.24015,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 47.87788
     },
@@ -3173,7 +3173,7 @@
       "New_Multi_Units": 781,
       "Rent_Growth": 0.014191,
       "Value_Creation": 38374.78424,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 47.549913
     },
@@ -3199,7 +3199,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.030909,
       "Value_Creation": 36636.923077,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 47.533214
     },
@@ -3225,7 +3225,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.047187,
       "Value_Creation": 41221.953488,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 47.51794
     },
@@ -3251,7 +3251,7 @@
       "New_Multi_Units": 825,
       "Rent_Growth": 0.063452,
       "Value_Creation": 25557.607973,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 47.256182
     },
@@ -3277,7 +3277,7 @@
       "New_Multi_Units": 2610,
       "Rent_Growth": 0.054945,
       "Value_Creation": 36618.432602,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 47.185215
     },
@@ -3303,7 +3303,7 @@
       "New_Multi_Units": 6205,
       "Rent_Growth": 0.08887,
       "Value_Creation": 33468.714734,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 47.131956
     },
@@ -3329,7 +3329,7 @@
       "New_Multi_Units": 7519,
       "Rent_Growth": 0.087695,
       "Value_Creation": 59904.0,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 51,
       "Investment_Score": 47.127284
     },
@@ -3355,7 +3355,7 @@
       "New_Multi_Units": 2682,
       "Rent_Growth": 0.046632,
       "Value_Creation": 31502.712644,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 67,
       "Investment_Score": 47.125289
     },
@@ -3381,7 +3381,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.017723,
       "Value_Creation": 70948.8,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 51,
       "Investment_Score": 47.123588
     },
@@ -3407,7 +3407,7 @@
       "New_Multi_Units": 4813,
       "Rent_Growth": 0.053082,
       "Value_Creation": 39104.415584,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 57,
       "Investment_Score": 47.110187
     },
@@ -3433,7 +3433,7 @@
       "New_Multi_Units": 4208,
       "Rent_Growth": 0.066996,
       "Value_Creation": 77025.454545,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 46.975218
     },
@@ -3459,7 +3459,7 @@
       "New_Multi_Units": 3206,
       "Rent_Growth": 0.083975,
       "Value_Creation": 52678.08,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 51,
       "Investment_Score": 46.76201
     },
@@ -3485,7 +3485,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.048478,
       "Value_Creation": 28363.45515,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 46.642723
     },
@@ -3511,7 +3511,7 @@
       "New_Multi_Units": 21950,
       "Rent_Growth": 0.038953,
       "Value_Creation": 64429.2,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 59,
       "Investment_Score": 46.452036
     },
@@ -3537,7 +3537,7 @@
       "New_Multi_Units": 957,
       "Rent_Growth": 0.014131,
       "Value_Creation": 40206.712644,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 46.285002
     },
@@ -3563,7 +3563,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.044687,
       "Value_Creation": 36186.625323,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 46.222841
     },
@@ -3589,7 +3589,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.034545,
       "Value_Creation": 30180.188088,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 45.863232
     },
@@ -3615,7 +3615,7 @@
       "New_Multi_Units": 3465,
       "Rent_Growth": 0.04902,
       "Value_Creation": 40486.366925,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 45.809582
     },
@@ -3641,7 +3641,7 @@
       "New_Multi_Units": 2253,
       "Rent_Growth": 0.08379,
       "Value_Creation": 70458.181818,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 14,
       "Investment_Score": 45.717126
     },
@@ -3667,7 +3667,7 @@
       "New_Multi_Units": 518,
       "Rent_Growth": 0.029155,
       "Value_Creation": 32297.740864,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 45.593334
     },
@@ -3693,7 +3693,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.043665,
       "Value_Creation": 54587.52,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 51,
       "Investment_Score": 45.471895
     },
@@ -3719,7 +3719,7 @@
       "New_Multi_Units": 8296,
       "Rent_Growth": -0.000818,
       "Value_Creation": 37403.826087,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 70,
       "Investment_Score": 45.32498
     },
@@ -3745,7 +3745,7 @@
       "New_Multi_Units": 1872,
       "Rent_Growth": 0.056583,
       "Value_Creation": 30286.271264,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 60,
       "Investment_Score": 45.305889
     },
@@ -3771,7 +3771,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.023732,
       "Value_Creation": 28942.923588,
-      "Hotel_Conversion_Relevance": 0.78,
+      "Hotel_Conversion_Relevance": "B+",
       "Average_HERS_Index_Score": 61,
       "Investment_Score": 45.134397
     },
@@ -3797,7 +3797,7 @@
       "New_Multi_Units": 25269,
       "Rent_Growth": 0.018265,
       "Value_Creation": 57636.923077,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 44.555117
     },
@@ -3823,7 +3823,7 @@
       "New_Multi_Units": 3214,
       "Rent_Growth": 0.040643,
       "Value_Creation": 35553.887043,
-      "Hotel_Conversion_Relevance": 0.9,
+      "Hotel_Conversion_Relevance": "A",
       "Average_HERS_Index_Score": 63,
       "Investment_Score": 44.330486
     },
@@ -3849,7 +3849,7 @@
       "New_Multi_Units": 14279,
       "Rent_Growth": 0.058084,
       "Value_Creation": 81516.521739,
-      "Hotel_Conversion_Relevance": 0.12,
+      "Hotel_Conversion_Relevance": "D-",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 43.221774
     },
@@ -3875,7 +3875,7 @@
       "New_Multi_Units": 1710,
       "Rent_Growth": -0.013836,
       "Value_Creation": 41450.769231,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 43.19405
     },
@@ -3901,7 +3901,7 @@
       "New_Multi_Units": 5356,
       "Rent_Growth": 0.037356,
       "Value_Creation": 38768.555347,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 43.154152
     },
@@ -3927,7 +3927,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": -0.034423,
       "Value_Creation": 49912.311213,
-      "Hotel_Conversion_Relevance": 0.4,
+      "Hotel_Conversion_Relevance": "C-",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 43.099953
     },
@@ -3953,7 +3953,7 @@
       "New_Multi_Units": 1287,
       "Rent_Growth": 0.037123,
       "Value_Creation": 52551.652174,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 49,
       "Investment_Score": 42.896631
     },
@@ -3979,7 +3979,7 @@
       "New_Multi_Units": 3026,
       "Rent_Growth": -0.019688,
       "Value_Creation": 42777.861163,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 58,
       "Investment_Score": 42.651005
     },
@@ -4005,7 +4005,7 @@
       "New_Multi_Units": 2459,
       "Rent_Growth": 0.110522,
       "Value_Creation": 59217.116705,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 52,
       "Investment_Score": 42.498039
     },
@@ -4031,7 +4031,7 @@
       "New_Multi_Units": 3009,
       "Rent_Growth": 0.025145,
       "Value_Creation": 51344.850498,
-      "Hotel_Conversion_Relevance": 0.52,
+      "Hotel_Conversion_Relevance": "C",
       "Average_HERS_Index_Score": 37,
       "Investment_Score": 42.360009
     },
@@ -4057,7 +4057,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.023256,
       "Value_Creation": 25671.724138,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 42.27354
     },
@@ -4083,7 +4083,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.023209,
       "Value_Creation": 30902.857143,
-      "Hotel_Conversion_Relevance": 0.4,
+      "Hotel_Conversion_Relevance": "C-",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 42.124396
     },
@@ -4109,7 +4109,7 @@
       "New_Multi_Units": 0,
       "Rent_Growth": 0.019366,
       "Value_Creation": 56335.135135,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 48,
       "Investment_Score": 41.969182
     },
@@ -4135,7 +4135,7 @@
       "New_Multi_Units": 4363,
       "Rent_Growth": -0.040816,
       "Value_Creation": 34924.615385,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 41.308056
     },
@@ -4161,7 +4161,7 @@
       "New_Multi_Units": 5502,
       "Rent_Growth": 0.048447,
       "Value_Creation": 66150.028986,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 49,
       "Investment_Score": 41.037618
     },
@@ -4187,7 +4187,7 @@
       "New_Multi_Units": 31523,
       "Rent_Growth": 0.025122,
       "Value_Creation": 47460.0,
-      "Hotel_Conversion_Relevance": 1.0,
+      "Hotel_Conversion_Relevance": "A+",
       "Average_HERS_Index_Score": 53,
       "Investment_Score": 40.776699
     },
@@ -4213,7 +4213,7 @@
       "New_Multi_Units": 3357,
       "Rent_Growth": 0.056926,
       "Value_Creation": 43655.884058,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 49,
       "Investment_Score": 40.097417
     },
@@ -4239,7 +4239,7 @@
       "New_Multi_Units": 32641,
       "Rent_Growth": 0.043257,
       "Value_Creation": 103356.265356,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 54,
       "Investment_Score": 39.685947
     },
@@ -4265,7 +4265,7 @@
       "New_Multi_Units": 374,
       "Rent_Growth": 0.044049,
       "Value_Creation": 43655.884058,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 49,
       "Investment_Score": 38.82844
     },
@@ -4291,7 +4291,7 @@
       "New_Multi_Units": 20869,
       "Rent_Growth": 0.056835,
       "Value_Creation": 44769.52381,
-      "Hotel_Conversion_Relevance": 0.4,
+      "Hotel_Conversion_Relevance": "C-",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 38.531078
     },
@@ -4317,7 +4317,7 @@
       "New_Multi_Units": 7267,
       "Rent_Growth": 0.029877,
       "Value_Creation": 45928.811594,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 49,
       "Investment_Score": 38.065454
     },
@@ -4343,7 +4343,7 @@
       "New_Multi_Units": 1041,
       "Rent_Growth": -0.037901,
       "Value_Creation": 26255.172414,
-      "Hotel_Conversion_Relevance": 0.66,
+      "Hotel_Conversion_Relevance": "B",
       "Average_HERS_Index_Score": 56,
       "Investment_Score": 37.364534
     },
@@ -4369,7 +4369,7 @@
       "New_Multi_Units": 12778,
       "Rent_Growth": 0.011913,
       "Value_Creation": 48591.746032,
-      "Hotel_Conversion_Relevance": 0.25,
+      "Hotel_Conversion_Relevance": "D",
       "Average_HERS_Index_Score": 47,
       "Investment_Score": 36.910865
     },
@@ -4395,7 +4395,7 @@
       "New_Multi_Units": 37607,
       "Rent_Growth": 0.04932,
       "Value_Creation": 72537.73913,
-      "Hotel_Conversion_Relevance": 0.0,
+      "Hotel_Conversion_Relevance": "F",
       "Average_HERS_Index_Score": 49,
       "Investment_Score": 31.916952
     }

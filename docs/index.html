@@ -993,6 +993,62 @@
             transform: none;
         }
 
+        .normalize-button {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+            color: #1a1a1a;
+            border: 2px solid #D4AF37;
+            border-radius: 4px;
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .normalize-button:hover {
+            background: linear-gradient(135deg, #FFC700 0%, #FFD700 100%);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .normalize-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .normalize-validation-message {
+            display: none;
+            padding: 0;
+            margin: 8px 0;
+            border-radius: 0;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-align: center;
+            animation: slideDown 0.3s ease;
+        }
+
+        .normalize-validation-message.error {
+            color: #ff6b6b;
+            display: block;
+            background: none;
+            border: none;
+        }
+
+        .normalize-validation-message.success {
+            color: #4ade80;
+            display: block;
+            background: none;
+            border: none;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .scoring-results {
             background: #333333;
             padding: 22px;
@@ -1550,12 +1606,12 @@
         <!-- Index Scoring Section -->
         <section id="scoringView" class="view-section active">
             <h2>Investment Score: Interactive Weighting System</h2>
-            <p class="section-subtitle">Adjust the weights below to recalculate investment scores in real-time</p>
+            <p class="section-subtitle">Adjust the weights below, then click Update Index Weights to apply ranking changes</p>
             
             <div class="info-box">
                 <strong>ℹ️ Two-level weighting system:</strong>
                 <strong>Step 1 (sub-factors):</strong> For indices with multiple factors (Economic, Stability), use the sub-factor sliders to control how each raw field is weighted within its index. Values are min-max normalized across all MSAs before weighting (<strong>↓</strong> = lower raw value is better; <strong>↑</strong> = higher is better).
-                <br><strong>Step 2 (index-level):</strong> Adjust the six index weights below to set your cross-index investment priorities. Weights are automatically normalized to sum to 100%.
+                <br><strong>Step 2 (index-level):</strong> Adjust the six index weights below to set your cross-index investment priorities. The total must equal 100%, then click Update Index Weights to apply.
                 <br><strong>Formula:</strong> raw sub-factor → min-max [0,1] → sub-factor weighted sum → index value → index weighted sum → min-max scaled to 0–100.
             </div>
             
@@ -1644,7 +1700,7 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>📦 Supply Index (New Multifamily Unit Supply)</label>
+                            <label>🏗️ Supply Index (New Multifamily Unit Supply ↓)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightSupply" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
                                 <span id="valueSupply" class="weight-value">15%</span>
@@ -1652,7 +1708,7 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>💰 Pricing Index (Rent Growth)</label>
+                            <label>💰 Pricing Index (Rent Growth ↑)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightPricing" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
                                 <span id="valuePricing" class="weight-value">15%</span>
@@ -1660,7 +1716,7 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>📊 Valuation Index (Value Creation)</label>
+                            <label>📊 Valuation Index (Value Creation ↑)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightValuation" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
                                 <span id="valueValuation" class="weight-value">15%</span>
@@ -1668,7 +1724,7 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>🏛️ Regulatory Index (Hotel Conversion Relevance)</label>
+                            <label>🏛️ Regulatory Index (Hotel Conversion Relevance ↑)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightRegulatory" min="0" max="100" value="20" class="weight-slider" oninput="updateWeights()">
                                 <span id="valueRegulatory" class="weight-value">20%</span>
@@ -1679,7 +1735,8 @@
                             <strong>Total Weight:</strong>
                             <span id="totalWeight" class="total-value">100%</span>
                         </div>
-                        <div id="overallWeightWarning" class="weight-warning">Please ensure index weights sum to 100%.</div>
+                        <button class="normalize-button" onclick="normalizeIndexWeights()">⚙️ Update Index Weights</button>
+                        <div id="normalizeValidationMessage" class="normalize-validation-message"></div>
                         <button class="reset-button" onclick="resetWeights()">↻ Reset to Default Weights</button>
                     </div>
                 </div>
@@ -1762,7 +1819,7 @@
                 
                 <!-- Supply Pressure Index -->
                 <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">📦 Supply Pressure Index</h4>
+                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏗️ Supply Pressure Index</h4>
                     <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates level of new multifamily housing supply.</p>
                     <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
                         <strong style="color: #FFD700; font-size: 0.9em;">New Multi Units</strong>
@@ -1798,7 +1855,7 @@
                 
                 <!-- Regulatory Market Index -->
                 <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏦 Regulatory Market Index</h4>
+                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏛️ Regulatory Market Index</h4>
                     <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Captures policy and execution feasibility for hotel-to-multifamily conversion at the state level.</p>
                     <div style="background: #2a2a2a; padding: 14px; border-left: 2px solid #D4AF37;">
                         <strong style="color: #FFD700; font-size: 0.9em;">Hotel Conversion Relevance</strong>
@@ -1816,10 +1873,14 @@
                                 <tbody>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">A+</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">1.00</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">A</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.90</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">A-</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.84</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">B+</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.78</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">B</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.66</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">B-</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.61</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">C+</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.57</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">C</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.52</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">C-</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.40</td></tr>
+                                    <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">D+</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.33</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">D</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.25</td></tr>
                                     <tr><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">D-</td><td style="padding: 8px 12px; border-bottom: 1px solid #3d3d3d;">0.12</td></tr>
                                     <tr><td style="padding: 8px 12px;">F</td><td style="padding: 8px 12px;">0.00</td></tr>
@@ -1856,7 +1917,7 @@
 
             <div class="factor-legend">
                 <div class="legend-group">
-                    <h4>💼 Economic Factors</h4>
+                    <h4>📈 Economic Factors</h4>
                     <ul>
                         <li><strong>Employment Rate</strong> - Employed / Labor Force (%)</li>
                         <li><strong>Employment Growth</strong> - Year-over-year employment change (%)</li>
@@ -1866,7 +1927,7 @@
                 </div>
                 
                 <div class="legend-group">
-                    <h4>🏠 Housing Stability Factors</h4>
+                    <h4>🛡️ Housing Stability Factors</h4>
                     <ul>
                         <li><strong>Rent/Income</strong> - Monthly rent / monthly income (%)</li>
                         <li><strong>Vacancy Rate</strong> - Vacant units / total housing units (%)</li>
@@ -1881,16 +1942,16 @@
                 </div>
                 
                 <div class="legend-group">
-                    <h4>📈 Pricing Power Factors</h4>
+                    <h4>💰 Pricing Power Factors</h4>
                     <ul>
                         <li><strong>Rent Growth</strong> - Year-over-year rent change (%)</li>
                     </ul>
                 </div>
                 
                 <div class="legend-group">
-                    <h4>💰 Valuation Factors</h4>
+                    <h4>📊 Valuation Factors</h4>
                     <ul>
-                        <li><strong>Implied Value</strong> - (Annual Rent × (1 - OPEX%))*(1 / MF Cap Rate - 1 / Hotel Cap Rate) ($)</li>
+                        <li><strong>Value Creation</strong> - (Annual Rent × (1 - OPEX%))*(1 / MF Cap Rate - 1 / Hotel Cap Rate) ($)</li>
                     </ul>
                 </div>
                 
@@ -1959,6 +2020,23 @@
                         <strong style="color: #FFD700;">Data Sources:</strong> Industry Reports, Market Data
                     </p>
                 </div>
+            </div>
+
+            <div style="margin-top: 16px; background: #2a2a2a; padding: 18px;">
+                <h4 style="color: #FFD700; margin-bottom: 10px; font-size: 1em;">🌿 Average HERS Index Score:</h4>
+                <p style="color: #b0b0b0; margin: 0 0 10px 0; font-size: 0.88em; line-height: 1.6;">
+                    The Home Energy Rating System (HERS) Index is the industry standard by which a home's energy efficiency is measured. It's also the nationally recognized system for inspecting and calculating a home's energy performance.
+                    <span style="display: block; margin-top: 4px;"><a href="https://www.hersindex.com/hers-index/understanding-hers-index/" target="_blank" style="color: #FFD700; white-space: nowrap;">https://www.hersindex.com/hers-index/understanding-hers-index/</a></span>
+                </p>
+                <p style="color: #b0b0b0; margin: 0 0 10px 0; font-size: 0.88em; line-height: 1.6;">
+                    A certified RESNET Home Energy Rater assesses the energy efficiency of a home, assigning it a relative performance score (the HERS® Index Score). <strong style="color: #e0e0e0;">The lower the number, the more energy efficient the home.</strong> A home built to 2006 energy efficiency standards scores 100.
+                </p>
+                <p style="color: #b0b0b0; margin: 0 0 10px 0; font-size: 0.88em; line-height: 1.6;">
+                    A home with a HERS® Index Score of 70 is 30% more energy efficient than the RESNET Reference Home. A home with a HERS® Index Score of 130 is 30% less energy efficient than the RESNET Reference Home.
+                </p>
+                <p style="color: #b0b0b0; margin: 0; font-size: 0.88em; line-height: 1.6;">
+                    Due to inconsistency in HERS score availability and comparability across markets, this metric is not included in the 6-dimensional MSA ranking system. It is retained in the raw dataset for users' reference.
+                </p>
             </div>
             
             <div class="table-container" style="margin-top: 30px;">
@@ -3045,9 +3123,8 @@
             updateStats();
 
             const afterScores = allMSAs.map(msa => msa.customScore || 0);
-            const impact = getScoreImpactStats(beforeScores, afterScores);
 
-            if (econStatus) econStatus.textContent = `Economic index updated. ${impact.changedCount} MSAs changed (max Δ ${impact.maxDiff.toFixed(2)}).`;
+            if (econStatus) econStatus.textContent = 'Economic index updated.';
         }
 
         function applyStabilitySubFactors() {
@@ -3074,14 +3151,17 @@
             updateStats();
 
             const afterScores = allMSAs.map(msa => msa.customScore || 0);
-            const impact = getScoreImpactStats(beforeScores, afterScores);
 
-            if (stabilityStatus) stabilityStatus.textContent = `Stability index updated. ${impact.changedCount} MSAs changed (max Δ ${impact.maxDiff.toFixed(2)}).`;
+            if (stabilityStatus) stabilityStatus.textContent = 'Stability index updated.';
         }
 
         function updateOverallWeightWarning(total) {
             const overallWarning = document.getElementById('overallWeightWarning');
             if (overallWarning) overallWarning.style.display = (total === 100) ? 'none' : 'block';
+        }
+
+        function normalizeIndexWeights() {
+            updateWeights(true);
         }
 
         function resetWeights() {
@@ -3105,16 +3185,17 @@
             updateFactorTotalBars();
             updateSubFactorWeightWarnings();
             clearSubFactorUpdateStatus();
-            updateWeights();
+            updateWeights(true, false);
         }
 
-        function updateWeights() {
+        function updateWeights(applyChanges = false, showStatusMessage = true) {
             const economic = parseInt(document.getElementById('weightEconomic').value);
             const stability = parseInt(document.getElementById('weightStability').value);
             const supply = parseInt(document.getElementById('weightSupply').value);
             const pricing = parseInt(document.getElementById('weightPricing').value);
             const valuation = parseInt(document.getElementById('weightValuation').value);
             const regulatory = parseInt(document.getElementById('weightRegulatory').value);
+            const messageEl = document.getElementById('normalizeValidationMessage');
             
             document.getElementById('valueEconomic').textContent = economic + '%';
             document.getElementById('valueStability').textContent = stability + '%';
@@ -3125,19 +3206,41 @@
             
             const total = economic + stability + supply + pricing + valuation + regulatory;
             document.getElementById('totalWeight').textContent = total + '%';
-            
-            if (total > 0) {
-                currentWeights = {
-                    economic: economic / total,
-                    stability: stability / total,
-                    supply: supply / total,
-                    pricing: pricing / total,
-                    valuation: valuation / total,
-                    regulatory: regulatory / total
-                };
+
+            if (!applyChanges) {
+                if (messageEl) {
+                    messageEl.style.display = 'none';
+                }
+                return;
             }
 
-            updateOverallWeightWarning(total);
+            if (total !== 100) {
+                if (messageEl && showStatusMessage) {
+                    messageEl.textContent = 'Please ensure index weights sum to 100%.';
+                    messageEl.className = 'normalize-validation-message error';
+                    messageEl.style.display = 'block';
+                } else if (messageEl) {
+                    messageEl.style.display = 'none';
+                }
+                return;
+            }
+
+            currentWeights = {
+                economic: economic / 100,
+                stability: stability / 100,
+                supply: supply / 100,
+                pricing: pricing / 100,
+                valuation: valuation / 100,
+                regulatory: regulatory / 100
+            };
+
+            if (messageEl && showStatusMessage) {
+                messageEl.textContent = 'MSA Investment Ranking Updated.';
+                messageEl.className = 'normalize-validation-message success';
+                messageEl.style.display = 'block';
+            } else if (messageEl) {
+                messageEl.style.display = 'none';
+            }
             
             calculateScores();
             renderScoringTable();
@@ -3163,6 +3266,15 @@
                 });
             }
 
+            // Master rating → numeric score mapping (mirrors MASTER_RATING_SCORES in update_sample_data.py)
+            const MASTER_RATING_SCORES = {
+                'A+': 1.00, 'A': 0.90, 'A-': 0.84,
+                'B+': 0.78, 'B': 0.66, 'B-': 0.61,
+                'C+': 0.57, 'C': 0.52, 'C-': 0.40,
+                'D+': 0.33, 'D': 0.25, 'D-': 0.12,
+                'F':  0.00
+            };
+
             // Extract raw values (fallback to 0 for missing data)
             const empRateRaw    = allMSAs.map(m => m.Employment_Rate            || 0);
             const empGrowthRaw  = allMSAs.map(m => m.Employment_Growth          || 0);
@@ -3173,7 +3285,8 @@
             const supplyRaw     = allMSAs.map(m => m.New_Multi_Units            || 0);
             const rentGrowthRaw = allMSAs.map(m => m.Rent_Growth                || 0);
             const valuationRaw  = allMSAs.map(m => m.Value_Creation             || 0);
-            const hotelConvRaw  = allMSAs.map(m => m.Hotel_Conversion_Relevance || 0);
+            // Hotel_Conversion_Relevance is stored as a letter grade; convert via MASTER_RATING_SCORES
+            const hotelConvRaw  = allMSAs.map(m => MASTER_RATING_SCORES[m.Hotel_Conversion_Relevance] ?? 0);
 
             // Normalize: ↑ positive = false, ↓ lower-is-better = true (inverted)
             const empRateN    = mmNorm(empRateRaw,    false);
@@ -3297,18 +3410,10 @@
             return msa.Value_Creation ?? msa['Value Creation'] ?? 0;
         }
 
-        function getHotelConversionGrade(score) {
-            // Map [0, 1] score back to letter grades based on reference table
-            // A+: 1.00, A: 0.90, B+: 0.78, B: 0.66, C: 0.52, C-: 0.40, D: 0.25, D-: 0.12, F: 0.00
-            if (score >= 0.95) return 'A+';
-            if (score >= 0.84) return 'A';
-            if (score >= 0.72) return 'B+';
-            if (score >= 0.59) return 'B';
-            if (score >= 0.46) return 'C';
-            if (score >= 0.325) return 'C-';
-            if (score >= 0.185) return 'D';
-            if (score >= 0.06) return 'D-';
-            return 'F';
+        function getHotelConversionGrade(grade) {
+            // Hotel_Conversion_Relevance is now stored as a letter grade string directly.
+            // Return it as-is; fallback to '—' if missing.
+            return (grade && typeof grade === 'string') ? grade : '—';
         }
 
         function renderRawDataTable() {
@@ -3404,7 +3509,7 @@
                     <td>${formatNumber(Math.round(msa.New_Multi_Units || 0))}</td>
                     <td>${((msa.Rent_Growth || 0) * 100).toFixed(2)}</td>
                     <td>$${formatNumber(Math.round(getValueCreationValue(msa) || 0))}</td>
-                    <td>${getHotelConversionGrade(msa.Hotel_Conversion_Relevance || 0)}</td>
+                    <td>${getHotelConversionGrade(msa.Hotel_Conversion_Relevance)}</td>
                     <td>${getAverageHersIndexScore(msa).toFixed(0)}</td>
                     <td><strong style="color: #667eea;">${getCurrentDisplayScore(msa).toFixed(2)}</strong></td>
                 `;
@@ -3453,7 +3558,7 @@
             let csv = 'Rank,MSA Name,Population,Pop Growth %,Median Income,Income Growth %,Employment Rate %,Employment Growth %,Median Rent,Rent Growth %,Rent/Income %,Vacancy Rate %,New Multi-Units,Value Creation,Hotel Conversion Relevance,Average HERS Index Score,Investment Score\n';
             
             sorted.forEach((msa, index) => {
-                csv += `${index + 1},"${msa.msa_name}",${msa.Total_Population},${((msa.Pop_Growth || 0) * 100).toFixed(2)},${msa.Median_Income},${((msa.Income_Growth || 0) * 100).toFixed(2)},${((msa.Employment_Rate || 0) * 100).toFixed(1)},${((msa.Employment_Growth || 0) * 100).toFixed(2)},${msa.Median_Rent},${((msa.Rent_Growth || 0) * 100).toFixed(2)},${((msa.Rent_to_Income_Ratio || 0) * 100).toFixed(1)},${((msa.Vacancy_Rate || 0) * 100).toFixed(1)},${Math.round(msa.New_Multi_Units || 0)},${Math.round(getValueCreationValue(msa) || 0)},${getHotelConversionGrade(msa.Hotel_Conversion_Relevance || 0)},${Math.round(getAverageHersIndexScore(msa) || 0)},${getCurrentDisplayScore(msa).toFixed(2)}\n`;
+                csv += `${index + 1},"${msa.msa_name}",${msa.Total_Population},${((msa.Pop_Growth || 0) * 100).toFixed(2)},${msa.Median_Income},${((msa.Income_Growth || 0) * 100).toFixed(2)},${((msa.Employment_Rate || 0) * 100).toFixed(1)},${((msa.Employment_Growth || 0) * 100).toFixed(2)},${msa.Median_Rent},${((msa.Rent_Growth || 0) * 100).toFixed(2)},${((msa.Rent_to_Income_Ratio || 0) * 100).toFixed(1)},${((msa.Vacancy_Rate || 0) * 100).toFixed(1)},${Math.round(msa.New_Multi_Units || 0)},${Math.round(getValueCreationValue(msa) || 0)},${getHotelConversionGrade(msa.Hotel_Conversion_Relevance)},${Math.round(getAverageHersIndexScore(msa) || 0)},${getCurrentDisplayScore(msa).toFixed(2)}\n`;
             });
             
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -3736,7 +3841,7 @@
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Hotel Conversion Relevance</div>
-                            <div class="detail-value">${getHotelConversionGrade(msa.Hotel_Conversion_Relevance || 0)}</div>
+                            <div class="detail-value">${getHotelConversionGrade(msa.Hotel_Conversion_Relevance)}</div>
                         </div>
                     </div>
 
