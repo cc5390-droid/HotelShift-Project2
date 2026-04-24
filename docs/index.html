@@ -1610,7 +1610,7 @@
             
             <div class="info-box">
                 <strong>ℹ️ Two-level weighting system:</strong>
-                <strong>Step 1 (sub-factors):</strong> For indices with multiple factors (Economic, Stability), use the sub-factor sliders to control how each raw field is weighted within its index. Values are min-max normalized across all MSAs before weighting (<strong>↓</strong> = lower raw value is better; <strong>↑</strong> = higher is better).
+                <strong>Step 1 (sub-factors):</strong> For indices with multiple factors (Economic, Supply), use the sub-factor sliders to control how each raw field is weighted within its index. Values are min-max normalized across all MSAs before weighting (<strong>↓</strong> = lower raw value is better; <strong>↑</strong> = higher is better).
                 <br><strong>Step 2 (index-level):</strong> Adjust the six index weights below to set your cross-index investment priorities. The total must equal 100%, then click Update Index Weights to apply.
                 <br><strong>Formula:</strong> raw sub-factor → min-max [0,1] → sub-factor weighted sum → index value → index weighted sum → min-max scaled to 0–100.
             </div>
@@ -1665,17 +1665,25 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>🛡️ Stability Index (Rent-to-Income Ratio & Vacancy Rate)</label>
+                            <label>🛡️ Housing Affordability Index (Rent-to-Income Ratio ↑)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightStability" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
                                 <span id="valueStability" class="weight-value">15%</span>
                             </div>
+                        </div>
+                        
+                        <div class="weight-item">
+                            <label>🏗️ Supply Demand Index (New Multifamily Unit & Vacancy Rate)</label>
+                            <div class="weight-input-group">
+                                <input type="range" id="weightSupply" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
+                                <span id="valueSupply" class="weight-value">15%</span>
+                            </div>
                             <div class="sub-factors">
                                 <div class="sub-factors-title">⚙ Sub-Factor Weights (auto-normalized within index)</div>
                                 <div class="sub-factor-row">
-                                    <span class="sub-factor-label">Rent-to-Income Ratio ↑</span>
-                                    <input type="range" id="intraRentIncome" min="0" max="100" step="1" value="50" class="sub-factor-slider" oninput="updateIntraWeights()">
-                                    <span id="intraRentIncomeVal" class="sub-factor-value">50%</span>
+                                    <span class="sub-factor-label">New Multifamily Unit ↓</span>
+                                    <input type="range" id="intraSupply" min="0" max="100" step="1" value="50" class="sub-factor-slider" oninput="updateIntraWeights()">
+                                    <span id="intraSupplyVal" class="sub-factor-value">50%</span>
                                 </div>
                                 <div class="sub-factor-row">
                                     <span class="sub-factor-label">Vacancy Rate ↓</span>
@@ -1685,25 +1693,17 @@
                                 <div class="factor-total-wrap">
                                     <div class="factor-total-head">
                                         <span>Factor Total Weight</span>
-                                        <span id="stabilityTotalValue">100%</span>
+                                        <span id="supplyTotalValue">100%</span>
                                     </div>
                                     <div class="factor-total-bar">
-                                        <div id="stabilityTotalFill" class="factor-total-fill"></div>
+                                        <div id="supplyTotalFill" class="factor-total-fill"></div>
                                     </div>
                                 </div>
                                 <div class="factor-actions">
-                                    <button class="factor-update-btn" onclick="applyStabilitySubFactors()">Update Stability Index</button>
-                                    <span id="stabilityUpdateStatus" class="factor-update-status"></span>
+                                    <button class="factor-update-btn" onclick="applySupplySubFactors()">Update Supply Demand Index</button>
+                                    <span id="supplyUpdateStatus" class="factor-update-status"></span>
                                 </div>
-                                <div id="stabilityWeightWarning" class="weight-warning">Please ensure factor weights sum to 100%.</div>
-                            </div>
-                        </div>
-                        
-                        <div class="weight-item">
-                            <label>🏗️ Supply Index (New Multifamily Unit Supply ↓)</label>
-                            <div class="weight-input-group">
-                                <input type="range" id="weightSupply" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
-                                <span id="valueSupply" class="weight-value">15%</span>
+                                <div id="supplyWeightWarning" class="weight-warning">Please ensure factor weights sum to 100%.</div>
                             </div>
                         </div>
                         
@@ -1797,15 +1797,29 @@
                     </div>
                 </div>
                 
-                <!-- Housing Stability Index -->
+                <!-- Housing Affordability Index -->
                 <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🛡️ Housing Stability Index</h4>
-                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates balance between housing affordability and market tightness.</p>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🛡️ Housing Affordability Index</h4>
+                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates local housing affordability pressure relative to income.</p>
+                    <div style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px;">
                         <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
                             <strong style="color: #FFD700; font-size: 0.9em;">Rent-to-Income Ratio</strong>
                             <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
                                 \[ \text{Rent-to-Income} = \frac{\text{Median Rent}}{\text{Median Income}} \]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Supply Demand Index -->
+                <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
+                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏗️ Supply Demand Index</h4>
+                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates local supply-demand balance through multifamily pipeline growth and vacancy tightness.</p>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
+                            <strong style="color: #FFD700; font-size: 0.9em;">New Multi Units</strong>
+                            <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
+                                \[ \text{New Multi Units} = \text{Total Multi Units}_{t} - \text{Total Multi Units}_{t-1} \]
                             </div>
                         </div>
                         <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
@@ -1813,18 +1827,6 @@
                             <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
                                 \[ \text{Vacancy Rate} = \frac{\text{Vacant Units}}{\text{Total Units}} \]
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Supply Pressure Index -->
-                <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏗️ Supply Pressure Index</h4>
-                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates level of new multifamily housing supply.</p>
-                    <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
-                        <strong style="color: #FFD700; font-size: 0.9em;">New Multi Units</strong>
-                        <div style="color: #e0e0e0; font-size: 0.95em; margin-top: 8px;">
-                            \[ \text{New Multi Units} = \text{Total Multi Units}_{t} - \text{Total Multi Units}_{t-1} \]
                         </div>
                     </div>
                 </div>
@@ -1927,36 +1929,36 @@
                 </div>
                 
                 <div class="legend-group">
-                    <h4>🛡️ Housing Stability Factors</h4>
+                    <h4>🛡️ Housing Affordability Factor</h4>
                     <ul>
                         <li><strong>Rent/Income</strong> - Monthly rent / monthly income (%)</li>
+                    </ul>
+                </div>
+                
+                <div class="legend-group">
+                    <h4>🏗️ Supply Demand Factors</h4>
+                    <ul>
+                        <li><strong>New Multi-Units</strong> - Year-over-year increase in multi-family units</li>
                         <li><strong>Vacancy Rate</strong> - Vacant units / total housing units (%)</li>
                     </ul>
                 </div>
                 
                 <div class="legend-group">
-                    <h4>🏗️ Supply Factors</h4>
-                    <ul>
-                        <li><strong>New Multi-Units</strong> - Year-over-year increase in multi-family units</li>
-                    </ul>
-                </div>
-                
-                <div class="legend-group">
-                    <h4>💰 Pricing Power Factors</h4>
+                    <h4>💰 Pricing Power Factor</h4>
                     <ul>
                         <li><strong>Rent Growth</strong> - Year-over-year rent change (%)</li>
                     </ul>
                 </div>
                 
                 <div class="legend-group">
-                    <h4>📊 Valuation Factors</h4>
+                    <h4>📊 Valuation Factor</h4>
                     <ul>
                         <li><strong>Value Creation</strong> - (Annual Rent × (1 - OPEX%))*(1 / MF Cap Rate - 1 / Hotel Cap Rate) ($)</li>
                     </ul>
                 </div>
                 
                 <div class="legend-group">
-                    <h4>🏛️ Regulatory Market Factors</h4>
+                    <h4>🏛️ Regulatory Market Factor</h4>
                     <ul>
                         <li><strong>Hotel Conversion Relevance</strong> - Mapped score from Conversion Category</li>
                     </ul>
@@ -2318,8 +2320,8 @@
         let intraWeights = {
                 // Economic Index
                 empRate: 25, empGrowth: 25, popGrowth: 25, incGrowth: 25,
-                // Stability Index
-                rentIncome: 50, vacancy: 50
+            // Supply Index
+            supplyUnits: 50, vacancy: 50
             };
 
         // Cache-busting version for GitHub Pages and local JSON fetch.
@@ -3037,7 +3039,7 @@
             document.getElementById('intraEmpGrowth').value  = intraWeights.empGrowth;
             document.getElementById('intraPopGrowth').value  = intraWeights.popGrowth;
             document.getElementById('intraIncGrowth').value  = intraWeights.incGrowth;
-            document.getElementById('intraRentIncome').value = intraWeights.rentIncome;
+            document.getElementById('intraSupply').value     = intraWeights.supplyUnits;
             document.getElementById('intraVacancy').value    = intraWeights.vacancy;
 
             updateSubFactorWeightLabels();
@@ -3063,10 +3065,10 @@
             document.getElementById('intraPopGrowthVal').textContent = formatWeightPercentage(popGrowth);
             document.getElementById('intraIncGrowthVal').textContent = formatWeightPercentage(incGrowth);
 
-            // Stability group: show raw slider percentages (absolute values)
-            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            // Supply group: show raw slider percentages (absolute values)
+            const supplyUnits = parseInt(document.getElementById('intraSupply').value) || 0;
             const vacancy    = parseInt(document.getElementById('intraVacancy').value)    || 0;
-            document.getElementById('intraRentIncomeVal').textContent = formatWeightPercentage(rentIncome);
+            document.getElementById('intraSupplyVal').textContent     = formatWeightPercentage(supplyUnits);
             document.getElementById('intraVacancyVal').textContent    = formatWeightPercentage(vacancy);
         }
 
@@ -3077,52 +3079,52 @@
             const incGrowth = parseInt(document.getElementById('intraIncGrowth').value) || 0;
             const econTotal = empRate + empGrowth + popGrowth + incGrowth;
 
-            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            const supplyUnits = parseInt(document.getElementById('intraSupply').value) || 0;
             const vacancy = parseInt(document.getElementById('intraVacancy').value) || 0;
-            const stabilityTotal = rentIncome + vacancy;
+            const supplyTotal = supplyUnits + vacancy;
 
             const econTotalValue = document.getElementById('econTotalValue');
             const econTotalFill = document.getElementById('econTotalFill');
-            const stabilityTotalValue = document.getElementById('stabilityTotalValue');
-            const stabilityTotalFill = document.getElementById('stabilityTotalFill');
+            const supplyTotalValue = document.getElementById('supplyTotalValue');
+            const supplyTotalFill = document.getElementById('supplyTotalFill');
 
             if (econTotalValue) econTotalValue.textContent = `${econTotal}%`;
-            if (stabilityTotalValue) stabilityTotalValue.textContent = `${stabilityTotal}%`;
+            if (supplyTotalValue) supplyTotalValue.textContent = `${supplyTotal}%`;
 
             if (econTotalFill) {
                 econTotalFill.style.width = `${Math.min(econTotal, 100)}%`;
                 econTotalFill.style.background = (econTotal === 100) ? '#32B576' : '#ffb84d';
             }
 
-            if (stabilityTotalFill) {
-                stabilityTotalFill.style.width = `${Math.min(stabilityTotal, 100)}%`;
-                stabilityTotalFill.style.background = (stabilityTotal === 100) ? '#32B576' : '#ffb84d';
+            if (supplyTotalFill) {
+                supplyTotalFill.style.width = `${Math.min(supplyTotal, 100)}%`;
+                supplyTotalFill.style.background = (supplyTotal === 100) ? '#32B576' : '#ffb84d';
             }
         }
 
-        function updateSubFactorWeightWarnings(showEcon = false, showStability = false) {
+        function updateSubFactorWeightWarnings(showEcon = false, showSupply = false) {
             const empRate   = parseInt(document.getElementById('intraEmpRate').value) || 0;
             const empGrowth = parseInt(document.getElementById('intraEmpGrowth').value) || 0;
             const popGrowth = parseInt(document.getElementById('intraPopGrowth').value) || 0;
             const incGrowth = parseInt(document.getElementById('intraIncGrowth').value) || 0;
             const econTotal = empRate + empGrowth + popGrowth + incGrowth;
 
-            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+            const supplyUnits = parseInt(document.getElementById('intraSupply').value) || 0;
             const vacancy = parseInt(document.getElementById('intraVacancy').value) || 0;
-            const stabilityTotal = rentIncome + vacancy;
+            const supplyTotal = supplyUnits + vacancy;
 
             const econWarning = document.getElementById('econWeightWarning');
-            const stabilityWarning = document.getElementById('stabilityWeightWarning');
+            const supplyWarning = document.getElementById('supplyWeightWarning');
 
             if (econWarning) econWarning.style.display = (showEcon && econTotal !== 100) ? 'block' : 'none';
-            if (stabilityWarning) stabilityWarning.style.display = (showStability && stabilityTotal !== 100) ? 'block' : 'none';
+            if (supplyWarning) supplyWarning.style.display = (showSupply && supplyTotal !== 100) ? 'block' : 'none';
         }
 
         function clearSubFactorUpdateStatus() {
             const econStatus = document.getElementById('econUpdateStatus');
-            const stabilityStatus = document.getElementById('stabilityUpdateStatus');
+            const supplyStatus = document.getElementById('supplyUpdateStatus');
             if (econStatus) econStatus.textContent = '';
-            if (stabilityStatus) stabilityStatus.textContent = '';
+            if (supplyStatus) supplyStatus.textContent = '';
         }
 
         function getScoreImpactStats(beforeScores, afterScores) {
@@ -3164,22 +3166,22 @@
             if (econStatus) econStatus.textContent = 'Economic index updated.';
         }
 
-        function applyStabilitySubFactors() {
-            const rentIncome = parseInt(document.getElementById('intraRentIncome').value) || 0;
+        function applySupplySubFactors() {
+            const supplyUnits = parseInt(document.getElementById('intraSupply').value) || 0;
             const vacancy = parseInt(document.getElementById('intraVacancy').value) || 0;
-            const stabilityTotal = rentIncome + vacancy;
+            const supplyTotal = supplyUnits + vacancy;
 
-            const stabilityStatus = document.getElementById('stabilityUpdateStatus');
+            const supplyStatus = document.getElementById('supplyUpdateStatus');
 
-            if (stabilityTotal !== 100) {
+            if (supplyTotal !== 100) {
                 updateSubFactorWeightWarnings(false, true);
-                if (stabilityStatus) stabilityStatus.textContent = '';
+                if (supplyStatus) supplyStatus.textContent = '';
                 return;
             }
 
             updateSubFactorWeightWarnings(false, false);
             const beforeScores = allMSAs.map(msa => msa.customScore || 0);
-            intraWeights.rentIncome = rentIncome;
+            intraWeights.supplyUnits = supplyUnits;
             intraWeights.vacancy = vacancy;
 
             calculateScores();
@@ -3189,7 +3191,7 @@
 
             const afterScores = allMSAs.map(msa => msa.customScore || 0);
 
-            if (stabilityStatus) stabilityStatus.textContent = 'Stability index updated.';
+            if (supplyStatus) supplyStatus.textContent = 'Supply index updated.';
         }
 
         function updateOverallWeightWarning(total) {
@@ -3214,10 +3216,10 @@
             document.getElementById('intraEmpGrowth').value  = 25;
             document.getElementById('intraPopGrowth').value  = 25;
             document.getElementById('intraIncGrowth').value  = 25;
-            document.getElementById('intraRentIncome').value = 50;
+            document.getElementById('intraSupply').value     = 50;
             document.getElementById('intraVacancy').value    = 50;
             intraWeights = { empRate:25, empGrowth:25, popGrowth:25, incGrowth:25,
-                             rentIncome:50, vacancy:50 };
+                             supplyUnits:50, vacancy:50 };
             updateSubFactorWeightLabels();
             updateFactorTotalBars();
             updateSubFactorWeightWarnings();
@@ -3344,15 +3346,15 @@
             const wPG = intraWeights.popGrowth  / totEcon;
             const wIG = intraWeights.incGrowth  / totEcon;
 
-            const totStab = intraWeights.rentIncome + intraWeights.vacancy || 1;
-            const wRI = intraWeights.rentIncome / totStab;
-            const wVR = intraWeights.vacancy    / totStab;
+            const totSupply = intraWeights.supplyUnits + intraWeights.vacancy || 1;
+            const wSU = intraWeights.supplyUnits / totSupply;
+            const wVR = intraWeights.vacancy     / totSupply;
 
             // Assign computed index values [0, 1] to each MSA
             allMSAs.forEach((msa, i) => {
                 msa.Economic_Index   = empRateN[i] * wER + empGrowthN[i] * wEG + popGrowthN[i] * wPG + incGrowthN[i] * wIG;
-                msa.Stability_Index  = rentIncomeN[i] * wRI + vacancyN[i] * wVR;
-                msa.Supply_Index     = supplyN[i];
+                msa.Stability_Index  = rentIncomeN[i];
+                msa.Supply_Index     = supplyN[i] * wSU + vacancyN[i] * wVR;
                 msa.Pricing_Index    = pricingN[i];
                 msa.Valuation_Index  = valuationN[i];
                 msa.Regulatory_Index = hotelConvN[i];
@@ -3710,7 +3712,7 @@
                 'Pricing_Index', 'Valuation_Index', 'Regulatory_Index'
             ];
             
-            const categoryLabels = ['Economic', 'Stability', 'Supply', 'Pricing', 'Valuation', 'Regulatory'];
+            const categoryLabels = ['Economic', 'Affordability', 'Supply', 'Pricing', 'Valuation', 'Regulatory'];
             
             const selectedMSAs = allMSAs.filter(m => selectedMSAsForComparison.includes(m.msa_code));
             const legendEl = document.getElementById('radarScoreLegend');
