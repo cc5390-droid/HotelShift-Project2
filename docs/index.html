@@ -1673,7 +1673,7 @@
                         </div>
                         
                         <div class="weight-item">
-                            <label>🏗️ Supply Index (New Multifamily Unit & Vacancy Rate)</label>
+                            <label>🏗️ Supply Demand Index (New Multifamily Unit & Vacancy Rate)</label>
                             <div class="weight-input-group">
                                 <input type="range" id="weightSupply" min="0" max="100" value="15" class="weight-slider" oninput="updateWeights()">
                                 <span id="valueSupply" class="weight-value">15%</span>
@@ -1700,7 +1700,7 @@
                                     </div>
                                 </div>
                                 <div class="factor-actions">
-                                    <button class="factor-update-btn" onclick="applySupplySubFactors()">Update Supply Index</button>
+                                    <button class="factor-update-btn" onclick="applySupplySubFactors()">Update Supply Demand Index</button>
                                     <span id="supplyUpdateStatus" class="factor-update-status"></span>
                                 </div>
                                 <div id="supplyWeightWarning" class="weight-warning">Please ensure factor weights sum to 100%.</div>
@@ -1811,10 +1811,10 @@
                     </div>
                 </div>
                 
-                <!-- Supply Pressure Index -->
+                <!-- Supply Demand Index -->
                 <div style="background: #333333; padding: 20px; border-radius: 0; border-left: 4px solid #D4AF37; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏗️ Supply Pressure Index</h4>
-                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates market supply pressure through construction pipeline and vacancy conditions.</p>
+                    <h4 style="color: #FFD700; margin-bottom: 12px; font-size: 1em;">🏗️ Supply Demand Index</h4>
+                    <p style="color: #b0b0b0; margin-bottom: 12px; font-size: 0.9em;">Evaluates local supply-demand balance through multifamily pipeline growth and vacancy tightness.</p>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                         <div style="background: #2a2a2a; padding: 12px; border-left: 2px solid #D4AF37;">
                             <strong style="color: #FFD700; font-size: 0.9em;">New Multi Units</strong>
@@ -1936,7 +1936,7 @@
                 </div>
                 
                 <div class="legend-group">
-                    <h4>🏗️ Supply Factors</h4>
+                    <h4>🏗️ Supply Demand Factors</h4>
                     <ul>
                         <li><strong>New Multi-Units</strong> - Year-over-year increase in multi-family units</li>
                         <li><strong>Vacancy Rate</strong> - Vacant units / total housing units (%)</li>
