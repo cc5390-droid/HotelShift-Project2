@@ -362,13 +362,14 @@ def build_payload() -> dict:
 
     # Rent-to-Income Ratio: guard zero denominator
     factor_df['Rent_to_Income_Ratio'] = np.where(factor_df['Median_Household_Income'] > 0,12*factor_df['Median_Gross_Rent'] / factor_df['Median_Household_Income'],np.nan)
-    # Vacancy Rate (Formula from Factor_Description: Vacant / Total_Housing_Units)
-    factor_df['Vacancy_Rate'] = np.where(factor_df['Total_Housing_Units'] > 0,factor_df['House_Vacant'] / factor_df['Total_Housing_Units'],np.nan)
 
 
-    # ── 3. construct Supply Pressure factors ─────────────────────────────────────
+
+    # ── 3. construct Supply Demand factors ─────────────────────────────────────
     # New Multi Units: clip negatives to 0 (MSA rezoning artefact)
     factor_df['New_Multi_Units'] = (factor_df.groupby('msa_code')['Total_Multi_Units'].diff().clip(lower=0))  # BUG FIX: was 15-20% negative
+        # Vacancy Rate (Formula from Factor_Description: Vacant / Total_Housing_Units)
+    factor_df['Vacancy_Rate'] = np.where(factor_df['Total_Housing_Units'] > 0,factor_df['House_Vacant'] / factor_df['Total_Housing_Units'],np.nan)
 
 
     # ── 4. construct Pricing Power factors ─────────────────────────────────────
@@ -390,8 +391,8 @@ def build_payload() -> dict:
              'Pop_Growth',
              'Income_Growth',
              'Rent_to_Income_Ratio',
-             'Vacancy_Rate',
              'New_Multi_Units',
+             'Vacancy_Rate',
              'Rent_Growth',
              'Value_Creation',
              'Hotel_Conversion_Relevance_Score']  # numeric 0-1; letter grade kept separately in Hotel_Conversion_Relevance
@@ -446,15 +447,15 @@ def build_payload() -> dict:
     scored["New_Multi_Units"] = -scored["New_Multi_Units"]
 
     scored["Economic_Index"] = scored[["Employment_Rate", "Employment_Growth", "Pop_Growth", "Income_Growth"]].mean(axis=1)
-    scored["Stability_Index"] = scored[["Rent_to_Income_Ratio", "Vacancy_Rate"]].mean(axis=1)
-    scored["Supply_Index"] = scored["New_Multi_Units"]
+    scored["Affordability_Index"] = scored["Rent_to_Income_Ratio"]
+    scored["Supply_Index"] = scored[["New_Multi_Units", "Vacancy_Rate"]].mean(axis=1)
     scored["Pricing_Index"] = scored["Rent_Growth"]
     scored["Valuation_Index"] = scored["Value_Creation"]
     scored["Regulatory_Index"] = scored["Hotel_Conversion_Relevance_Score"]
 
     scored["Index_Score_Raw"] = (
         0.20 * scored["Economic_Index"]
-        + 0.15 * scored["Stability_Index"]
+        + 0.15 * scored["Affordability_Index"]
         + 0.15 * scored["Supply_Index"]
         + 0.15 * scored["Pricing_Index"]
         + 0.15 * scored["Valuation_Index"]
@@ -469,7 +470,7 @@ def build_payload() -> dict:
 
     for col in [
         "Economic_Index",
-        "Stability_Index",
+        "Affordability_Index",
         "Supply_Index",
         "Pricing_Index",
         "Valuation_Index",
@@ -484,7 +485,7 @@ def build_payload() -> dict:
             [
                 "msa_code",
                 "Economic_Index",
-                "Stability_Index",
+                "Affordability_Index",
                 "Supply_Index",
                 "Pricing_Index",
                 "Valuation_Index",
@@ -520,20 +521,14 @@ def build_payload() -> dict:
             "Pop_Growth": float(row["Pop_Growth"]),
             "Income_Growth": float(row["Income_Growth"]),
             "Rent_to_Income_Ratio": float(row["Rent_to_Income_Ratio"]),
-            "Vacancy_Rate": float(row["Vacancy_Rate"]),
             "New_Multi_Units": int(round(float(row["New_Multi_Units"]))),
+            "Vacancy_Rate": float(row["Vacancy_Rate"]),
             "Rent_Growth": float(row["Rent_Growth"]),
             "Value_Creation": float(row["Value_Creation"]),
             "Hotel_Conversion_Relevance": str(row["Hotel_Conversion_Relevance"]),
             "Average_HERS_Index_Score": int(round(float(row["Average_HERS_Index_Score"])))
             if pd.notna(row.get("Average_HERS_Index_Score", np.nan))
             else hers_map.get(msa_code, 0),
-            # "Economic_Index": float(row["Economic_Index"]),
-            # "Stability_Index": float(row["Stability_Index"]),
-            # "Supply_Index": float(row["Supply_Index"]),
-            # "Pricing_Index": float(row["Pricing_Index"]),
-            # "Valuation_Index": float(row["Valuation_Index"]),
-            # "Regulatory_Index": float(row["Regulatory_Index"]),
             "Investment_Score": float(row["Investment_Score"])
             
         }
